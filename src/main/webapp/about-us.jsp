@@ -50,8 +50,7 @@
                 <span>EN <i class="fa fa-angle-down"></i></span>
                 <div class="flag-dropdown">
                     <ul>
-                        <li><a href="#">Zi</a></li>
-                        <li><a href="#">Fr</a></li>
+                        <li><a href="#">VI</a></li>
                     </ul>
                 </div>
             </div>
@@ -113,8 +112,7 @@
                                 <span>EN <i class="fa fa-angle-down"></i></span>
                                 <div class="flag-dropdown">
                                     <ul>
-                                        <li><a href="#">Zi</a></li>
-                                        <li><a href="#">Fr</a></li>
+                                        <li><a href="#">VI</a></li>
                                     </ul>
                                 </div>
                             </div>
