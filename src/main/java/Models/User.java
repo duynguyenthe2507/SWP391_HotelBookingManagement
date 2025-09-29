@@ -1,16 +1,21 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Models;
 
+import java.time.LocalDateTime;
+import lombok.*;
 
-
-/**
- *
- * @author ADMIN
- */
-
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
- 
+
+    private Integer userId;
+    private String mobilePhone;
+    private String fullName;
+    private String email;
+    private String password;
+    private String role;
+    private Boolean isBlacklist;
+    private Boolean isActive;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
