@@ -1,5 +1,6 @@
 # Maven
 target/
+**/target/**
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
@@ -20,6 +21,7 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
+nb-configuration.xml
 
 # IntelliJ IDEA
 .idea/
@@ -41,6 +43,13 @@ nbdist/
 *.nar
 *.tar.gz
 *.zip
+
+# Additional build outputs seen in screenshots
+**/WEB-INF/classes/
+**/maven-status/**
+**/generated-sources/**
+**/generated-test-sources/**
+*.lst
 
 # OS / editor junk
 .DS_Store
