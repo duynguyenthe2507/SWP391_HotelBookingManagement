@@ -7,14 +7,15 @@
     <packaging>war</packaging>
     <name>HotelAManagement-1.0</name>
     
-    <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <failOnMissingWebXml>false</failOnMissingWebXml>
-        <jakartaee>10.0.0</jakartaee>
-    </properties>
+   <properties>
+       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+       <failOnMissingWebXml>false</failOnMissingWebXml>
+       <jakartaee>10.0.0</jakartaee>
+       <!-- Default to Java 11; profiles will override when building with JDK 17 -->
+       <maven.compiler.release>11</maven.compiler.release>
+      <!-- SQL Server JDBC driver version (use suffix jre11, works on JDK 17) -->
+      <mssql.driver.version>12.8.1.jre11</mssql.driver.version>
+   </properties>
     
     <dependencies>
         <dependency>
@@ -29,22 +30,25 @@
             <artifactId>lombok</artifactId>
             <version>1.18.42</version>
         </dependency>
+       <!-- Microsoft SQL Server JDBC driver; version changes per JDK via profiles -->
+       <dependency>
+           <groupId>com.microsoft.sqlserver</groupId>
+           <artifactId>mssql-jdbc</artifactId>
+           <version>${mssql.driver.version}</version>
+       </dependency>
     </dependencies>
     
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <source>11</source>
-                    <target>11</target>
-                    <compilerArguments>
-                        <endorseddirs>${endorsed.dir}</endorseddirs>
-                    </compilerArguments>
-                </configuration>
-            </plugin>
+       <plugins>
+           <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-compiler-plugin</artifactId>
+               <version>3.11.0</version>
+               <configuration>
+                   <!-- Use the 'release' flag; value controlled by profiles (11 or 17) -->
+                   <release>${maven.compiler.release}</release>
+               </configuration>
+           </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
@@ -53,31 +57,31 @@
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.6</version>
-                <executions>
-                    <execution>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${endorsed.dir}</outputDirectory>
-                            <silent>true</silent>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>jakarta.platform</groupId>
-                                    <artifactId>jakarta.jakartaee-api</artifactId>
-                                    <version>${jakartaee}</version>
-                                    <type>jar</type>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
+
+   <!-- Profiles to auto-switch Java release and JDBC driver version by JDK -->
+   <profiles>
+       <profile>
+           <id>java11</id>
+           <activation>
+               <jdk>11</jdk>
+           </activation>
+           <properties>
+               <maven.compiler.release>11</maven.compiler.release>
+              <mssql.driver.version>12.8.1.jre11</mssql.driver.version>
+           </properties>
+       </profile>
+
+       <profile>
+           <id>java17</id>
+           <activation>
+               <jdk>[17,)</jdk>
+           </activation>
+           <properties>
+               <maven.compiler.release>17</maven.compiler.release>
+              <mssql.driver.version>12.8.1.jre11</mssql.driver.version>
+           </properties>
+       </profile>
+   </profiles>
 </project>
