@@ -1,19 +1,16 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Models;
 
+import java.time.LocalDateTime;
 import lombok.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ServiceRequest {
-
-    private int serviceId;
+    private int requestId;
     private int bookingId;
     private int serviceTypeId;
     private double price;
-    private String status;
+    private String status; // requested / completed / cancelled
+    private LocalDateTime updatedAt;
 }

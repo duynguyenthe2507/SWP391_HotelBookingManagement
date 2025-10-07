@@ -1,17 +1,18 @@
 package Models;
 
+import java.time.LocalDateTime;
 import lombok.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Room {
-
     private int roomId;
     private String name;
-    private String type;
+    private int categoryId;
     private double price;
     private int capacity;
-    private String status;
+    private String status; // available / booked / maintenance
     private String description;
+    private LocalDateTime updatedAt;
 }

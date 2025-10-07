@@ -1,21 +1,25 @@
 package Models;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
-
-    private Integer userId;
+public class Users {
+    private int userId;
     private String mobilePhone;
-    private String fullName;
+    private String firstName;
+    private String middleName;
+    private String lastName;
+    private LocalDate birthday;
     private String email;
     private String password;
     private String role;
-    private Boolean isBlacklist;
-    private Boolean isActive;
+    private Integer rankId;
+    private boolean isBlackList;
+    private boolean isActive;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

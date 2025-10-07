@@ -6,10 +6,9 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Cart {
-    private int cartId;
-    private int userId;
-    private int roomId;
-    private int quantity;
+public class Category {
+    private int categoryId;
+    private String name;
+    private String description;
     private LocalDateTime updatedAt;
 }

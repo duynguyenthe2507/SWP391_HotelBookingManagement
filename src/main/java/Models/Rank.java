@@ -6,12 +6,12 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Feedback {
-    private int feedbackId;
-    private int userId;
-    private int bookingId;
-    private String content;
-    private int rating;
+public class Rank {
+    private int rankId;
+    private String name;
+    private String description;
+    private int minBookings;
+    private double discountPercentage;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

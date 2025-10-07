@@ -6,12 +6,13 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Feedback {
-    private int feedbackId;
-    private int userId;
+public class BookingDetail {
+    private int bookingDetailId;
     private int bookingId;
-    private String content;
-    private int rating;
+    private int roomId;
+    private double priceAtBooking;
+    private int guestCount;
+    private String specialRequest;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

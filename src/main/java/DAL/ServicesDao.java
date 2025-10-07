@@ -1,42 +1,43 @@
-package DAO;
+package DAL;
 
 import Models.Services;
+import Utils.DBContext;
 import java.sql.*;
 import java.util.*;
 
 public class ServicesDao extends DBContext {
 
-    private Services mapResultSetToServices(ResultSet rs) throws SQLException {
+    private Services map(ResultSet rs) throws SQLException {
         return new Services(
                 rs.getInt("serviceId"),
                 rs.getString("name"),
                 rs.getDouble("price"),
-                rs.getString("description")
+                rs.getString("description"),
+                rs.getTimestamp("updatedAt").toLocalDateTime()
         );
     }
 
-    public List<Services> getAllServices() {
+    public List<Services> getAll() {
         List<Services> list = new ArrayList<>();
         String sql = "SELECT * FROM Services";
         try (PreparedStatement ps = connection.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) list.add(mapResultSetToServices(rs));
+            while (rs.next()) list.add(map(rs));
         } catch (SQLException e) { e.printStackTrace(); }
         return list;
     }
 
-    public Services getServiceById(int id) {
+    public Services getById(int id) {
         String sql = "SELECT * FROM Services WHERE serviceId=?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return mapResultSetToServices(rs);
-            }
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return map(rs);
         } catch (SQLException e) { e.printStackTrace(); }
         return null;
     }
 
-    public boolean addService(Services s) {
+    public boolean insert(Services s) {
         String sql = "INSERT INTO Services(name, price, description) VALUES (?,?,?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, s.getName());
@@ -47,7 +48,7 @@ public class ServicesDao extends DBContext {
         return false;
     }
 
-    public boolean updateService(Services s) {
+    public boolean update(Services s) {
         String sql = "UPDATE Services SET name=?, price=?, description=? WHERE serviceId=?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, s.getName());
@@ -59,7 +60,7 @@ public class ServicesDao extends DBContext {
         return false;
     }
 
-    public boolean deleteService(int id) {
+    public boolean delete(int id) {
         String sql = "DELETE FROM Services WHERE serviceId=?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, id);
