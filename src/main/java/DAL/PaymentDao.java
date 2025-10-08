@@ -14,7 +14,8 @@ public class PaymentDao extends DBContext {
                 rs.getDouble("amount"),
                 rs.getString("method"),
                 rs.getString("status"),
-                rs.getTimestamp("transactionTime").toLocalDateTime()
+                rs.getTimestamp("transactionTime").toLocalDateTime(),
+                rs.getTimestamp("updatedAt").toLocalDateTime()
         );
     }
 

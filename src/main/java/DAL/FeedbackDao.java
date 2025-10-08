@@ -12,9 +12,10 @@ public class FeedbackDao extends DBContext {
                 rs.getInt("feedbackId"),
                 rs.getInt("userId"),
                 rs.getInt("bookingId"),
+                rs.getString("content"),
                 rs.getInt("rating"),
-                rs.getString("comment"),
-                rs.getTimestamp("createdAt").toLocalDateTime()
+                rs.getTimestamp("createdAt").toLocalDateTime(),
+                rs.getTimestamp("updatedAt").toLocalDateTime()
         );
     }
 
@@ -45,7 +46,7 @@ public class FeedbackDao extends DBContext {
             ps.setInt(1, f.getUserId());
             ps.setInt(2, f.getBookingId());
             ps.setInt(3, f.getRating());
-            ps.setString(4, f.getComment());
+            ps.setString(4, f.getContent());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) { e.printStackTrace(); }
         return false;
@@ -55,7 +56,7 @@ public class FeedbackDao extends DBContext {
         String sql = "UPDATE Feedback SET rating=?, comment=? WHERE feedbackId=?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, f.getRating());
-            ps.setString(2, f.getComment());
+            ps.setString(2, f.getContent());
             ps.setInt(3, f.getFeedbackId());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) { e.printStackTrace(); }

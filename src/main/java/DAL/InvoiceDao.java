@@ -11,10 +11,12 @@ public class InvoiceDao extends DBContext {
         return new Invoice(
                 rs.getInt("invoiceId"),
                 rs.getInt("bookingId"),
+                rs.getDouble("totalRoomCost"),
+                rs.getDouble("totalServiceCost"),
+                rs.getDouble("taxAmount"),
                 rs.getDouble("totalAmount"),
-                rs.getString("paymentMethod"),
-                rs.getString("status"),
-                rs.getTimestamp("issuedAt").toLocalDateTime()
+                rs.getTimestamp("issuedAt").toLocalDateTime(),
+                rs.getTimestamp("updatedAt").toLocalDateTime()
         );
     }
 
@@ -39,24 +41,26 @@ public class InvoiceDao extends DBContext {
     }
 
     public boolean insert(Invoice i) {
-        String sql = "INSERT INTO Invoice(bookingId, totalAmount, paymentMethod, status) VALUES (?,?,?,?)";
+        String sql = "INSERT INTO Invoice(bookingId, totalRoomCost, totalServiceCost, taxAmount, totalAmount,) VALUES (?,?,?,?,?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, i.getBookingId());
-            ps.setDouble(2, i.getTotalAmount());
-            ps.setString(3, i.getPaymentMethod());
-            ps.setString(4, i.getStatus());
+            ps.setDouble(2, i.getTotalRoomCost());
+            ps.setDouble(3, i.getTotalServiceCost());
+            ps.setDouble(4, i.getTaxAmount());
+            ps.setDouble(5, i.getTotalAmount());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) { e.printStackTrace(); }
         return false;
     }
 
     public boolean update(Invoice i) {
-        String sql = "UPDATE Invoice SET totalAmount=?, paymentMethod=?, status=? WHERE invoiceId=?";
+        String sql = "UPDATE Invoice SET totalAmount=?, totalRoomCost=?, totalServiceCost=?, taxAmount=? WHERE invoiceId=?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setDouble(1, i.getTotalAmount());
-            ps.setString(2, i.getPaymentMethod());
-            ps.setString(3, i.getStatus());
-            ps.setInt(4, i.getInvoiceId());
+            ps.setDouble(2, i.getTotalRoomCost());
+            ps.setDouble(3, i.getTotalServiceCost());
+            ps.setDouble(4, i.getTaxAmount());
+            ps.setInt(5, i.getInvoiceId());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) { e.printStackTrace(); }
         return false;
