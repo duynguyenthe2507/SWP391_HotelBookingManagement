@@ -1,4 +1,4 @@
-package Controller;
+package Controller.Auth;
 
 import DAL.UsersDao;
 import Models.Users;
@@ -18,7 +18,7 @@ public class ForgotPasswordController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("general/forgot-password.jsp").forward(request, response);
+        request.getRequestDispatcher("/pages/auth/forgot-password.jsp").forward(request, response);
     }
 
     @Override
@@ -28,14 +28,14 @@ public class ForgotPasswordController extends HttpServlet {
 
         if (email == null || email.trim().isEmpty()) {
             request.setAttribute("error", "Please enter your email!");
-            request.getRequestDispatcher("general/forgot-password.jsp").forward(request, response);
+            request.getRequestDispatcher("/pages/auth/forgot-password.jsp").forward(request, response);
             return;
         }
 
         // Validate email format
         if (!isValidEmail(email)) {
             request.setAttribute("error", "Invalid email format!");
-            request.getRequestDispatcher("general/forgot-password.jsp").forward(request, response);
+            request.getRequestDispatcher("/pages/auth/forgot-password.jsp").forward(request, response);
             return;
         }
 
@@ -45,7 +45,7 @@ public class ForgotPasswordController extends HttpServlet {
 
         if (user == null) {
             request.setAttribute("error", "Email does not exist in the system!");
-            request.getRequestDispatcher("general/forgot-password.jsp").forward(request, response);
+            request.getRequestDispatcher("/pages/auth/forgot-password.jsp").forward(request, response);
             return;
         }
 
@@ -68,12 +68,12 @@ public class ForgotPasswordController extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/otp-confirm");
             } else {
                 request.setAttribute("error", "Unable to send email. Please try again later!");
-                request.getRequestDispatcher("general/forgot-password.jsp").forward(request, response);
+                request.getRequestDispatcher("/pages/auth/forgot-password.jsp").forward(request, response);
             }
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", "An error occurred. Please try again later!");
-            request.getRequestDispatcher("general/forgot-password.jsp").forward(request, response);
+            request.getRequestDispatcher("/pages/auth/forgot-password.jsp").forward(request, response);
         }
     }
 

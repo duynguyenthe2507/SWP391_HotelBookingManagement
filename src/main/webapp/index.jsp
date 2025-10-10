@@ -55,21 +55,21 @@
                     </ul>
                 </div>
             </div>
-            <a href="booking" class="bk-btn">Booking Now</a>
+            <a href="./booking" class="bk-btn">Booking Now</a>
         </div>
         <nav class="mainmenu mobile-menu">
             <ul>
-                <li class="active"><a href="home">Home</a></li>
-                <li><a href="rooms">Rooms</a></li>
-                <li><a href="about-us">About Us</a></li>
+                <li class="active"><a href="./home">Home</a></li>
+                <li><a href="./rooms">Rooms</a></li>
+                <li><a href="./about-us">About Us</a></li>
                 <li><a href="#">Pages</a>
                     <ul class="dropdown">
-                        <li><a href="room-details">Room Details</a></li>
-                        <li><a href="blog-details">Blog Details</a></li>
+                        <li><a href="./room-details">Room Details</a></li>
+                        <li><a href="./blog-details">Blog Details</a></li>
                     </ul>
                 </li>
-                <li><a href="blog">News</a></li>
-                <li><a href="contact">Contact</a></li>
+                <li><a href="./blog">News</a></li>
+                <li><a href="./contact">Contact</a></li>
             </ul>
         </nav>
         <div id="mobile-menu-wrap"></div>
@@ -105,7 +105,7 @@
                                 <a href="https://only-fans.me/highaileri"><i class="fa fa-tripadvisor"></i></a>
                                 <a href="https://only-fans.me/highaileri"><i class="fa fa-instagram"></i></a>
                             </div>
-                            <a href="/booking" class="bk-btn">Booking Now</a>
+                            <a href="./booking" class="bk-btn">Booking Now</a>
                             <div class="language-option">
                                 <img src="img/flag.jpg" alt="">
                                 <span>EN <i class="fa fa-angle-down"></i></span>
@@ -126,7 +126,7 @@
                 <div class="row">
                     <div class="col-lg-2">
                         <div class="logo">
-                            <a href="home">
+                            <a href="./home">
                                 <img src="img/logo.png" alt="">
                             </a>
                         </div>
@@ -135,17 +135,17 @@
                         <div class="nav-menu">
                             <nav class="mainmenu">
                                 <ul>
-                                    <li class="active"><a href="home">Home</a></li>
-                                    <li><a href="rooms">Rooms</a></li>
-                                    <li><a href="about-us">About Us</a></li>
+                                    <li class="active"><a href="./home">Home</a></li>
+                                    <li><a href="./rooms">Rooms</a></li>
+                                    <li><a href="./about-us">About Us</a></li>
                                     <li><a href="#">Pages</a>
                                         <ul class="dropdown">
-                                            <li><a href="room-details">Room Details</a></li>
-                                            <li><a href="blog-details">Blog Details</a></li>
+                                            <li><a href="./room-details">Room Details</a></li>
+                                            <li><a href="./blog-details">Blog Details</a></li>
                                         </ul>
                                     </li>
-                                    <li><a href="blog">News</a></li>
-                                    <li><a href="contact">Contact</a></li>
+                                    <li><a href="./blog">News</a></li>
+                                    <li><a href="./contact">Contact</a></li>
                                 </ul>
                             </nav>
                             <div class="nav-right search-switch">
@@ -188,8 +188,11 @@
                             <div class="select-option">
                                 <label for="guest">Guests:</label>
                                 <select id="guest">
+                                    <option value="">1 Adults</option>
                                     <option value="">2 Adults</option>
                                     <option value="">3 Adults</option>
+                                    <option value="">4 Adults</option>
+                                    <option value="">5 Adults</option>
                                 </select>
                             </div>
                             <div class="select-option">
@@ -197,6 +200,8 @@
                                 <select id="room">
                                     <option value="">1 Room</option>
                                     <option value="">2 Room</option>
+                                    <option value="">3 Room</option>
+                                    <option value="">4 Room</option>
                                 </select>
                             </div>
                             <button type="submit">Check Availability</button>

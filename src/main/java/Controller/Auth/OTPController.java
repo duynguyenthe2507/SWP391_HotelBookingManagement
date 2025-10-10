@@ -1,4 +1,4 @@
-package Controller;
+package Controller.Auth;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -22,7 +22,7 @@ public class OTPController extends HttpServlet {
             return;
         }
 
-        request.getRequestDispatcher("general/otp-confirm.jsp").forward(request, response);
+        request.getRequestDispatcher("/pages/auth/otp-confirm.jsp").forward(request, response);
     }
 
     @Override
@@ -41,13 +41,13 @@ public class OTPController extends HttpServlet {
 
         if (enteredOTP == null || enteredOTP.trim().isEmpty()) {
             request.setAttribute("error", "Please enter the OTP code!");
-            request.getRequestDispatcher("general/otp-confirm.jsp").forward(request, response);
+            request.getRequestDispatcher("/pages/auth/otp-confirm.jsp").forward(request, response);
             return;
         }
 
         if (!enteredOTP.equals(resetOTP)) {
             request.setAttribute("error", "Invalid OTP code!");
-            request.getRequestDispatcher("general/otp-confirm.jsp").forward(request, response);
+            request.getRequestDispatcher("/pages/auth/otp-confirm.jsp").forward(request, response);
             return;
         }
 

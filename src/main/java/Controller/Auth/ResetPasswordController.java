@@ -1,4 +1,4 @@
-package Controller;
+package Controller.Auth;
 
 import DAL.UsersDao;
 import Models.Users;
@@ -25,7 +25,7 @@ public class ResetPasswordController extends HttpServlet {
             return;
         }
 
-        request.getRequestDispatcher("general/reset-password.jsp").forward(request, response);
+        request.getRequestDispatcher("/pages/auth/reset-password.jsp").forward(request, response);
     }
 
     @Override
@@ -46,19 +46,19 @@ public class ResetPasswordController extends HttpServlet {
         if (newPassword == null || newPassword.trim().isEmpty()
                 || confirmPassword == null || confirmPassword.trim().isEmpty()) {
             request.setAttribute("error", "Please enter both password fields!");
-            request.getRequestDispatcher("general/reset-password.jsp").forward(request, response);
+            request.getRequestDispatcher("/pages/auth/reset-password.jsp").forward(request, response);
             return;
         }
 
         if (!newPassword.equals(confirmPassword)) {
             request.setAttribute("error", "Passwords do not match!");
-            request.getRequestDispatcher("general/reset-password.jsp").forward(request, response);
+            request.getRequestDispatcher("/pages/auth/reset-password.jsp").forward(request, response);
             return;
         }
 
         if (newPassword.length() < 8) {
             request.setAttribute("error", "Password must be at least 8 characters long!");
-            request.getRequestDispatcher("general/reset-password.jsp").forward(request, response);
+            request.getRequestDispatcher("/pages/auth/reset-password.jsp").forward(request, response);
             return;
         }
 
@@ -68,7 +68,7 @@ public class ResetPasswordController extends HttpServlet {
 
         if (user == null) {
             request.setAttribute("error", "User does not exist!");
-            request.getRequestDispatcher("general/reset-password.jsp").forward(request, response);
+            request.getRequestDispatcher("/pages/auth/reset-password.jsp").forward(request, response);
             return;
         }
 
@@ -84,10 +84,10 @@ public class ResetPasswordController extends HttpServlet {
 
             request.setAttribute("success",
                     "Password reset successfully! You can now login with your new password.");
-            request.getRequestDispatcher("general/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/pages/auth/login.jsp").forward(request, response);
         } else {
             request.setAttribute("error", "An error occurred while resetting password. Please try again!");
-            request.getRequestDispatcher("general/reset-password.jsp").forward(request, response);
+            request.getRequestDispatcher("/pages/auth/reset-password.jsp").forward(request, response);
         }
     }
 }

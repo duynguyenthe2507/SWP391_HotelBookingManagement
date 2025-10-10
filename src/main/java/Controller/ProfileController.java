@@ -37,7 +37,7 @@ public class ProfileController extends HttpServlet {
 
         request.setAttribute("user", loggedInUser);
         request.setAttribute("rankName", userRank != null ? userRank.getName() : "Chưa có hạng");
-        request.getRequestDispatcher("general/profile.jsp").forward(request, response);
+        request.getRequestDispatcher("/pages/user/profile.jsp").forward(request, response);
     }
 
     @Override
@@ -77,7 +77,7 @@ public class ProfileController extends HttpServlet {
                     || dobString == null || dobString.trim().isEmpty()) {
                 request.setAttribute("error", "Please fill all the information fields!");
                 request.setAttribute("user", loggedInUser);
-                request.getRequestDispatcher("general/profile.jsp").forward(request, response);
+                request.getRequestDispatcher("/pages/user/profile.jsp").forward(request, response);
                 return;
             }
 
@@ -87,7 +87,7 @@ public class ProfileController extends HttpServlet {
             } catch (DateTimeParseException e) {
                 request.setAttribute("error", "Invalid birthdate!");
                 request.setAttribute("user", loggedInUser);
-                request.getRequestDispatcher("general/profile.jsp").forward(request, response);
+                request.getRequestDispatcher("/pages/user/profile.jsp").forward(request, response);
                 return;
             }
 
@@ -98,7 +98,7 @@ public class ProfileController extends HttpServlet {
             if (existingUserByPhone != null && existingUserByPhone.getUserId() != loggedInUser.getUserId()) {
                 request.setAttribute("error", "Phone number existed!");
                 request.setAttribute("user", loggedInUser);
-                request.getRequestDispatcher("general/profile.jsp").forward(request, response);
+                request.getRequestDispatcher("/pages/user/profile.jsp").forward(request, response);
                 return;
             }
 
@@ -128,6 +128,6 @@ public class ProfileController extends HttpServlet {
 
         request.setAttribute("user", loggedInUser);
         request.setAttribute("rankName", userRank != null ? userRank.getName() : "Unranked");
-        request.getRequestDispatcher("general/profile.jsp").forward(request, response);
+        request.getRequestDispatcher("/pages/user/profile.jsp").forward(request, response);
     }
 }

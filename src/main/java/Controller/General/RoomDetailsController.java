@@ -1,4 +1,4 @@
-package Controller;
+package Controller.General;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -12,6 +12,6 @@ public class RoomDetailsController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("/general/room-details.jsp").forward(request, response);
+        request.getRequestDispatcher("/pages/general/room-details.jsp").forward(request, response);
     }
 }
