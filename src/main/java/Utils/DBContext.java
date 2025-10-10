@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 
 public class DBContext {
 
-    protected Connection connection;
+    public Connection connection;
 
     public DBContext() {
 

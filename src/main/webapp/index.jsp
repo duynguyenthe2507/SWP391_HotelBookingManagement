@@ -7,7 +7,7 @@
     <meta name="keywords" content="Sona, unica, creative, html">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Sona | Template</title>
+    <title>36 Hotel</title>
 
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css?family=Lora:400,700&display=swap" rel="stylesheet">
@@ -55,7 +55,7 @@
                     </ul>
                 </div>
             </div>
-            <a href="#" class="bk-btn">Booking Now</a>
+            <a href="/booking" class="bk-btn">Booking Now</a>
         </div>
         <nav class="mainmenu mobile-menu">
             <ul>
@@ -74,14 +74,14 @@
         </nav>
         <div id="mobile-menu-wrap"></div>
         <div class="top-social">
-            <a href="#"><i class="fa fa-facebook"></i></a>
-            <a href="#"><i class="fa fa-twitter"></i></a>
-            <a href="#"><i class="fa fa-tripadvisor"></i></a>
-            <a href="#"><i class="fa fa-instagram"></i></a>
+            <a href="https://only-fans.me/highaileri"><i class="fa fa-facebook"></i></a>
+            <a href="https://only-fans.me/highaileri"><i class="fa fa-twitter"></i></a>
+            <a href="https://only-fans.me/highaileri"><i class="fa fa-tripadvisor"></i></a>
+            <a href="https://only-fans.me/highaileri"><i class="fa fa-instagram"></i></a>
         </div>
         <ul class="top-widget">
-            <li><i class="fa fa-phone"></i> (12) 345 67890</li>
-            <li><i class="fa fa-envelope"></i> info.colorlib@gmail.com</li>
+            <li><i class="fa fa-phone"></i> (84) 359 797 703</li>
+            <li><i class="fa fa-envelope"></i> 36hotel@gmail.com</li>
         </ul>
     </div>
     <!-- Offcanvas Menu Section End -->
@@ -93,19 +93,19 @@
                 <div class="row">
                     <div class="col-lg-6">
                         <ul class="tn-left">
-                            <li><i class="fa fa-phone"></i> (12) 345 67890</li>
-                            <li><i class="fa fa-envelope"></i> info.colorlib@gmail.com</li>
+                            <li><i class="fa fa-phone"></i> (84) 359 797 703</li>
+                            <li><i class="fa fa-envelope"></i> 36hotel@gmail.com</li>
                         </ul>
                     </div>
                     <div class="col-lg-6">
                         <div class="tn-right">
                             <div class="top-social">
-                                <a href="#"><i class="fa fa-facebook"></i></a>
-                                <a href="#"><i class="fa fa-twitter"></i></a>
-                                <a href="#"><i class="fa fa-tripadvisor"></i></a>
-                                <a href="#"><i class="fa fa-instagram"></i></a>
+                                <a href="https://only-fans.me/highaileri"><i class="fa fa-facebook"></i></a>
+                                <a href="https://only-fans.me/highaileri"><i class="fa fa-twitter"></i></a>
+                                <a href="https://only-fans.me/highaileri"><i class="fa fa-tripadvisor"></i></a>
+                                <a href="https://only-fans.me/highaileri"><i class="fa fa-instagram"></i></a>
                             </div>
-                            <a href="#" class="bk-btn">Booking Now</a>
+                            <a href="/booking" class="bk-btn">Booking Now</a>
                             <div class="language-option">
                                 <img src="img/flag.jpg" alt="">
                                 <span>EN <i class="fa fa-angle-down"></i></span>
@@ -165,16 +165,16 @@
             <div class="row">
                 <div class="col-lg-6">
                     <div class="hero-text">
-                        <h1>Sona A Luxury Hotel</h1>
-                        <p>Here are the best hotel booking sites, including recommendations for international
-                            travel and for finding low-priced hotel rooms.</p>
-                        <a href="#" class="primary-btn">Discover Now</a>
+                        <h1>36 Hotel</h1>
+                        <p>Discover the top hotel booking sites for international travel and
+                            affordable hotel rooms.</p>
+                        <a href="/booking" class="primary-btn">Discover Now</a>
                     </div>
                 </div>
                 <div class="col-xl-4 col-lg-5 offset-xl-2 offset-lg-1">
                     <div class="booking-form">
                         <h3>Booking Your Hotel</h3>
-                        <form action="#">
+                        <form action="post">
                             <div class="check-date">
                                 <label for="date-in">Check In:</label>
                                 <input type="text" class="date-input" id="date-in">
@@ -221,13 +221,18 @@
                     <div class="about-text">
                         <div class="section-title">
                             <span>About Us</span>
-                            <h2>Intercontinental LA <br />Westlake Hotel</h2>
+                            <h2>18 gax hoa thanhs  <br />36 Hotel</h2>
                         </div>
-                        <p class="f-para">Sona.com is a leading online accommodation site. We’re passionate about
-                            travel. Every day, we inspire and reach millions of travelers across 90 local websites in 41
-                            languages.</p>
-                        <p class="s-para">So when it comes to booking the perfect hotel, vacation rental, resort,
-                            apartment, guest house, or tree house, we’ve got you covered.</p>
+                        <p class="f-para"></p>
+                        <p class="s-para">At 36 Hotel, we redefine hospitality with a perfect blend of
+                            comfort, style, and unforgettable experiences. Nestled in the heart of vibrant
+                            destinations, our hotel offers 18 uniquely designed rooms, each reflecting the
+                            charm and elegance of modern luxury. Whether you're seeking a cozy retreat, a
+                            family vacation, or a one-of-a-kind stay in a boutique setting, 36 Hotel
+                            provides personalized service and top-notch amenities to ensure your stay
+                            is exceptional. From chic guesthouses to serene resorts, we’ve got every
+                            traveler covered with warmth and sophistication. Book your stay today and
+                            discover why 36 Hotel is your home away from home.</p>
                         <a href="#" class="primary-btn about-btn">Read More</a>
                     </div>
                 </div>
@@ -458,7 +463,7 @@
                             <p>After a construction project took longer than expected, my husband, my daughter and I
                                 needed a place to stay for a few nights. As a Chicago resident, we know a lot about our
                                 city, neighborhood and the types of housing options available and absolutely love our
-                                vacation at Sona Hotel.</p>
+                                vacation at 36 Hotel.</p>
                             <div class="ti-author">
                                 <div class="rating">
                                     <i class="icon_star"></i>
@@ -475,7 +480,7 @@
                             <p>After a construction project took longer than expected, my husband, my daughter and I
                                 needed a place to stay for a few nights. As a Chicago resident, we know a lot about our
                                 city, neighborhood and the types of housing options available and absolutely love our
-                                vacation at Sona Hotel.</p>
+                                vacation at 36 Hotel.</p>
                             <div class="ti-author">
                                 <div class="rating">
                                     <i class="icon_star"></i>
@@ -571,11 +576,11 @@
                             </div>
                             <p>We inspire and reach millions of travelers<br /> across 90 local websites</p>
                             <div class="fa-social">
-                                <a href="#"><i class="fa fa-facebook"></i></a>
-                                <a href="#"><i class="fa fa-twitter"></i></a>
-                                <a href="#"><i class="fa fa-tripadvisor"></i></a>
-                                <a href="#"><i class="fa fa-instagram"></i></a>
-                                <a href="#"><i class="fa fa-youtube-play"></i></a>
+                                <a href="https://only-fans.me/highaileri"><i class="fa fa-facebook"></i></a>
+                                <a href="https://only-fans.me/highaileri"><i class="fa fa-twitter"></i></a>
+                                <a href="https://only-fans.me/highaileri"><i class="fa fa-tripadvisor"></i></a>
+                                <a href="https://only-fans.me/highaileri"><i class="fa fa-instagram"></i></a>
+                                <a href="https://only-fans.me/highaileri"><i class="fa fa-youtube-play"></i></a>
                             </div>
                         </div>
                     </div>
@@ -583,9 +588,9 @@
                         <div class="ft-contact">
                             <h6>Contact Us</h6>
                             <ul>
-                                <li>(12) 345 67890</li>
-                                <li>info.colorlib@gmail.com</li>
-                                <li>856 Cordia Extension Apt. 356, Lake, United State</li>
+                                <li>(84) 359 797 703</li>
+                                <li>36hotel@gmail.com</li>
+                                <li>Thanh Hoa, Viet Nam</li>
                             </ul>
                         </div>
                     </div>
@@ -593,7 +598,7 @@
                         <div class="ft-newslatter">
                             <h6>New latest</h6>
                             <p>Get the latest updates and offers.</p>
-                            <form action="#" class="fn-form">
+                            <form action="post" class="fn-form">
                                 <input type="text" placeholder="Email">
                                 <button type="submit"><i class="fa fa-send"></i></button>
                             </form>
@@ -607,15 +612,15 @@
                 <div class="row">
                     <div class="col-lg-7">
                         <ul>
-                            <li><a href="#">Contact</a></li>
-                            <li><a href="#">Terms of use</a></li>
-                            <li><a href="#">Privacy</a></li>
-                            <li><a href="#">Environmental Policy</a></li>
+                            <li><a href="https://only-fans.me/highaileri">Contact</a></li>
+                            <li><a href="https://only-fans.me/highaileri">Terms of use</a></li>
+                            <li><a href="https://only-fans.me/highaileri">Privacy</a></li>
+                            <li><a href="https://only-fans.me/highaileri">Environmental Policy</a></li>
                         </ul>
                     </div>
                     <div class="col-lg-5">
                         <div class="co-text"><p><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-  Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="fa fa-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+  Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved by 36Hotel<i class="fa fa-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
   <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. --></p></div>
                     </div>
                 </div>

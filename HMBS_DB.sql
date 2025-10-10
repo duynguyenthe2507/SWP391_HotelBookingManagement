@@ -550,3 +550,22 @@ VALUES
     (12, 2, 150000.00, 'completed', GETDATE()); -- Bữa tối
 
 
+UPDATE [dbo].[Category]
+   SET name = 'Family'
+      ,[description] = N'Phòng gia đình đẳng cấp'
+      ,[updatedAt] = GETDATE()
+ WHERE categoryId = 1
+GO
+
+
+UPDATE [dbo].[Category]
+   SET name = 'Deluxe'
+      ,[description] = N'Phòng sang trọng đấy'
+      ,[updatedAt] = GETDATE()
+ WHERE categoryId = 2
+GO
+
+
+Insert into Category (name, description, updatedAt) values 
+('Double', N'Phòng 2 giường', GETDATE()),
+('Premium King', N'Phòng này xịn đấy', GETDATE())
