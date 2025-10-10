@@ -23,17 +23,19 @@ public class UsersDao extends DBContext {
                 rs.getBoolean("isBlackList"),
                 rs.getBoolean("isActive"),
                 rs.getTimestamp("createdAt").toLocalDateTime(),
-                rs.getTimestamp("updatedAt").toLocalDateTime()
-        );
+                rs.getTimestamp("updatedAt").toLocalDateTime());
     }
 
     public List<Users> getAll() {
         List<Users> list = new ArrayList<>();
         String sql = "SELECT * FROM Users";
         try (PreparedStatement ps = connection.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) list.add(map(rs));
-        } catch (SQLException e) { e.printStackTrace(); }
+                ResultSet rs = ps.executeQuery()) {
+            while (rs.next())
+                list.add(map(rs));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return list;
     }
 
@@ -42,8 +44,37 @@ public class UsersDao extends DBContext {
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
-            if (rs.next()) return map(rs);
-        } catch (SQLException e) { e.printStackTrace(); }
+            if (rs.next())
+                return map(rs);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Users getByMobilePhone(String mobilePhone) {
+        String sql = "SELECT * FROM Users WHERE mobilePhone=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, mobilePhone);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next())
+                return map(rs);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Users getByEmail(String email) {
+        String sql = "SELECT * FROM Users WHERE email=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next())
+                return map(rs);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -52,7 +83,7 @@ public class UsersDao extends DBContext {
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, u.getMobilePhone());
             ps.setString(2, u.getFirstName());
-            ps.setString(3, u.getMiddleName());
+            ps.setString(3, u.getMiddleName() == null ? "" : u.getMiddleName());
             ps.setString(4, u.getLastName());
             if (u.getBirthday() != null)
                 ps.setDate(5, Date.valueOf(u.getBirthday()));
@@ -61,13 +92,28 @@ public class UsersDao extends DBContext {
             ps.setString(6, u.getEmail());
             ps.setString(7, u.getPassword());
             ps.setString(8, u.getRole());
-            if (u.getRankId() != 0)
+            if (u.getRankId() != null)
                 ps.setInt(9, u.getRankId());
             else
                 ps.setNull(9, Types.INTEGER);
             return ps.executeUpdate() > 0;
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return false;
+    }
+
+    public Integer getDefaultRankId() {
+        String sql = "SELECT TOP 1 rankId FROM Rank WHERE minBookings = 0 ORDER BY rankId";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public boolean update(Users u) {
@@ -92,7 +138,9 @@ public class UsersDao extends DBContext {
             ps.setBoolean(11, u.isActive());
             ps.setInt(12, u.getUserId());
             return ps.executeUpdate() > 0;
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return false;
     }
 
@@ -101,7 +149,9 @@ public class UsersDao extends DBContext {
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return false;
     }
 }
