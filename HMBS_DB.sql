@@ -538,3 +538,10 @@ GO
 UPDATE Services SET name = 'Lunch', description = 'Lunch with a diverse menu', updatedAt = GETDATE() WHERE serviceId = 1;
 UPDATE Services SET name = 'Dinner', description = 'Luxury dinner with specialties', updatedAt = GETDATE() WHERE serviceId = 2;
 
+ALTER TABLE Category
+ADD imgUrl NVARCHAR(255) NULL;
+GO
+
+ALTER TABLE Room
+ADD imgUrl NVARCHAR(255) NULL;
+GO

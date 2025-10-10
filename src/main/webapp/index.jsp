@@ -168,7 +168,7 @@
                         <h1>36 Hotel</h1>
                         <p>Discover the top hotel booking sites for international travel and
                             affordable hotel rooms.</p>
-                        <a href="/booking" class="primary-btn">Discover Now</a>
+                        <a href="./booking" class="primary-btn">Discover Now</a>
                     </div>
                 </div>
                 <div class="col-xl-4 col-lg-5 offset-xl-2 offset-lg-1">
