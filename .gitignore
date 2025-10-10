@@ -30,10 +30,6 @@ nb-configuration.xml
 # VS Code
 .vscode/
 
-# Eclipse
-.project
-.classpath
-.settings/
 
 # Java / build artifacts
 *.class
@@ -57,4 +53,11 @@ Thumbs.db
 *.swp
 *.swo
 
+
+# Maven
+target/
+# Eclipse / IDE files
+.classpath
+.project
+.settings/
 
