@@ -80,7 +80,7 @@
         </div>
         <ul class="top-widget">
             <li><i class="fa fa-phone"></i> (84) 359 797 703</li>
-            <li><i class="fa fa-envelope"></i> info.colorlib@gmail.com</li>
+            <li><i class="fa fa-envelope"></i> 36hotel@gmail.com</li>
         </ul>
     </div>
     <!-- Offcanvas Menu Section End -->
@@ -104,7 +104,7 @@
                                 <a href="https://only-fans.me/highaileri"><i class="fa fa-tripadvisor"></i></a>
                                 <a href="https://only-fans.me/highaileri"><i class="fa fa-instagram"></i></a>
                             </div>
-                            <a href="/booking" class="bk-btn">Booking Now</a>
+                            <a href="booking" class="bk-btn">Booking Now</a>
                             <div class="language-option">
                                 <img src="img/flag.jpg" alt="">
                                 <span>EN <i class="fa fa-angle-down"></i></span>
@@ -165,7 +165,7 @@
                     <div class="breadcrumb-text">
                         <h2>About Us</h2>
                         <div class="bt-option">
-                            <a href="./index.html">Home</a>
+                            <a href="home">Home</a>
                             <span>About Us</span>
                         </div>
                     </div>
@@ -182,10 +182,10 @@
                 <div class="row">
                     <div class="col-lg-6">
                         <div class="ap-title">
-                            <h2>Welcome To Sona.</h2>
-                            <p>Built in 1910 during the Belle Epoque period, this hotel is located in the center of
-                                Paris, with easy access to the city’s tourist attractions. It offers tastefully
-                                decorated rooms.</p>
+                            <h2>Welcome To 36 Hotel.</h2>
+                            <p>Located in the heart of Thanh Hoa city, **36 Hotel** is built in a modern style,
+                                providing a comfortable resort experience, with easy access to famous attractions
+                                such as Sam Son Beach and Thanh Nha Ho. The hotel has elegantly decorated rooms.</p>
                         </div>
                     </div>
                     <div class="col-lg-5 offset-lg-1">

@@ -153,41 +153,6 @@ AS
 BEGIN
     UPDATE Booking
     SET durationHours = DATEDIFF(HOUR, inserted.checkinTime, inserted.checkoutTime),
-        totalPrice = (
-            SELECT SUM(bd.priceAtBooking) * (DATEDIFF(HOUR, inserted.checkinTime, inserted.checkoutTime) / 24.0)
-            FROM BookingDetail bd
-            WHERE bd.bookingId = inserted.bookingId
-        ) * 
-        COALESCE((
-            SELECT (1 - r.discountPercentage / 100)
-            FROM Rank r
-            INNER JOIN Users u ON u.rankId = r.rankId
-            WHERE u.userId = inserted.userId
-        ), 1),
-        updatedAt = GETDATE()
-    FROM Booking
-    INNER JOIN inserted ON Booking.bookingId = inserted.bookingId;
-
-    IF EXISTS (SELECT 1 FROM inserted WHERE status = 'confirmed')
-    BEGIN
-        INSERT INTO BookingHistory (userId, bookingId, completedAt)
-        SELECT i.userId, i.bookingId, GETDATE()
-        FROM inserted i
-        WHERE i.status = 'confirmed'
-        AND NOT EXISTS (
-            SELECT 1 FROM BookingHistory bh WHERE bh.bookingId = i.bookingId
-        );
-    END;
-END;
-GO
-
-CREATE TRIGGER trg_update_booking
-ON Booking
-AFTER INSERT, UPDATE
-AS
-BEGIN
-    UPDATE Booking
-    SET durationHours = DATEDIFF(HOUR, inserted.checkinTime, inserted.checkoutTime),
         totalPrice = COALESCE((
             SELECT SUM(bd.priceAtBooking) * (DATEDIFF(HOUR, inserted.checkinTime, inserted.checkoutTime) / 24.0)
             FROM BookingDetail bd
@@ -453,10 +418,10 @@ GO
 -- Insert Rank
 INSERT INTO Rank (name, description, minBookings, discountPercentage, createdAt, updatedAt)
 VALUES 
-    (N'Đồng', N'Cấp cơ bản cho khách hàng mới', 0, 0.00, GETDATE(), GETDATE()),
-    (N'Bạc', N'Cấp bạc cho khách hàng trung thành', 5, 5.00, GETDATE(), GETDATE()),
-    (N'Vàng', N'Cấp vàng cho khách hàng VIP', 10, 10.00, GETDATE(), GETDATE()),
-    (N'Kim cương', N'Cấp cao nhất với ưu đãi đặc biệt', 20, 15.00, GETDATE(), GETDATE());
+    (N'Bronze', N'Cấp cơ bản cho khách hàng mới', 0, 0.00, GETDATE(), GETDATE()),
+    (N'Silver', N'Cấp bạc cho khách hàng trung thành', 5, 5.00, GETDATE(), GETDATE()),
+    (N'Gold', N'Cấp vàng cho khách hàng VIP', 10, 10.00, GETDATE(), GETDATE()),
+    (N'Diamond', N'Cấp cao nhất với ưu đãi đặc biệt', 20, 15.00, GETDATE(), GETDATE());
 
 -- Insert Category
 INSERT INTO Category (name, description, updatedAt)
@@ -486,68 +451,6 @@ VALUES
     (N'Phòng VIP 202', 2, 2000000.00, 4, 'available', N'Phòng VIP với view biển', GETDATE());
 
 
--- Insert Booking (tính durationHours và totalPrice thủ công)
-INSERT INTO Booking (userId, checkinTime, checkoutTime, durationHours, status, totalPrice, createdAt, updatedAt)
-VALUES 
-    (1, '2025-10-10 14:00:00', '2025-10-11 12:00:00', 0, 'confirmed', 0, GETDATE(), GETDATE()),
-    (2, '2025-10-15 15:00:00', '2025-10-17 11:00:00', 0, 'confirmed', 0, GETDATE(), GETDATE()),
-    (1, '2025-10-05 12:00:00', '2025-10-06 12:00:00', 0, 'confirmed', 0, GETDATE(), GETDATE());
-
--- Insert BookingDetail
-INSERT INTO BookingDetail (bookingId, roomId, priceAtBooking, guestCount, specialRequest, createdAt, updatedAt)
-VALUES 
-    (10, 1, 800000.00, 2, N'Giường phụ', GETDATE(), GETDATE()),
-    (11, 3, 2000000.00, 3, N'View biển', GETDATE(), GETDATE()),
-    (12, 4, 2000000.00, 4, NULL, GETDATE(), GETDATE());
-
--- Insert BookingHistory
-INSERT INTO BookingHistory (userId, bookingId, completedAt)
-VALUES 
-    (1, 10, GETDATE()),
-    (1, 12, GETDATE());
-
-
--- Insert Payment
-INSERT INTO Payment (bookingId, amount, method, status, transactionTime, updatedAt)
-VALUES 
-    (10, 800000.00, 'Chuyển khoản', 'completed', GETDATE(), GETDATE()), -- 800000 * 1 ngày, không giảm giá (Đồng)
-    (11, 3800000.00, 'Chuyển khoản', 'pending', GETDATE(), GETDATE()), -- (2000000 + 2000000) * 2 ngày * 95% (Bạc)
-    (12, 2000000.00, 'Tiền mặt', 'completed', GETDATE(), GETDATE()); -- 2000000 * 1 ngày, không giảm giá (Đồng)
-
--- Insert Invoice
-INSERT INTO Invoice (bookingId, totalRoomCost, totalServiceCost, taxAmount, totalAmount, issuedDate, updatedAt)
-VALUES 
-    (10, 800000.00, 100000.00, 90000.00, 990000.00, GETDATE(), GETDATE()), -- 800000 (phòng) + 100000 (bữa trưa) + 10% thuế
-    (11, 3800000.00, 150000.00, 395000.00, 4345000.00, GETDATE(), GETDATE()), -- 3800000 (phòng) + 150000 (bữa tối) + 10% thuế
-    (12, 2000000.00, 150000.00, 215000.00, 2365000.00, GETDATE(), GETDATE()); -- 2000000 (phòng) + 150000 (bữa tối) + 10% thuế
-
--- Insert Wishlist
-INSERT INTO Wishlist (userId, roomId, updatedAt)
-VALUES 
-    (1, 1, GETDATE()),
-    (1, 3, GETDATE()),
-    (2, 4, GETDATE());
-
--- Insert Cart
-INSERT INTO Cart (userId, roomId, quantity, updatedAt)
-VALUES 
-    (1, 1, 1, GETDATE()),
-    (1, 3, 1, GETDATE()),
-    (2, 4, 1, GETDATE());
-
--- Insert Feedback
-INSERT INTO Feedback (userId, bookingId, content, rating, created_at, updatedAt)
-VALUES 
-    (1, 10, N'Phòng sạch sẽ, nhân viên thân thiện!', 5, GETDATE(), GETDATE()),
-    (2, 11, N'Dịch vụ tốt, nhưng check-in hơi chậm.', 4, GETDATE(), GETDATE()),
-    (1, 12, N'Phòng VIP đẹp nhưng giá cao.', 3, GETDATE(), GETDATE());
-
--- Insert ServiceRequest
-INSERT INTO ServiceRequest (bookingId, serviceTypeId, price, status, updatedAt)
-VALUES 
-    (10, 1, 100000.00, 'completed', GETDATE()), -- Bữa trưa
-    (11, 2, 150000.00, 'requested', GETDATE()), -- Bữa tối
-    (12, 2, 150000.00, 'completed', GETDATE()); -- Bữa tối
 
 
 UPDATE [dbo].[Category]
@@ -569,3 +472,69 @@ GO
 Insert into Category (name, description, updatedAt) values 
 ('Double', N'Phòng 2 giường', GETDATE()),
 ('Premium King', N'Phòng này xịn đấy', GETDATE())
+
+
+UPDATE Rank SET name = 'Bronze', description = 'Basic tier for new customers', updatedAt = GETDATE() WHERE rankId = 1;
+UPDATE Rank SET name = 'Silver', description = 'Silver tier for loyal customers', updatedAt = GETDATE() WHERE rankId = 2;
+UPDATE Rank SET name = 'Gold', description = 'Gold tier for VIP customers', updatedAt = GETDATE() WHERE rankId = 3;
+UPDATE Rank SET name = 'Diamond', description = 'Highest tier with special privileges', updatedAt = GETDATE() WHERE rankId = 4;
+
+
+-- Cập nhật bản ghi CategoryId = 1 (trước đó là Family)
+UPDATE Category SET name = 'Family', description = 'Premium family room', updatedAt = GETDATE() WHERE categoryId = 1;
+
+-- Cập nhật bản ghi CategoryId = 2 (trước đó là Deluxe)
+UPDATE Category SET name = 'Deluxe', description = 'Luxurious room', updatedAt = GETDATE() WHERE categoryId = 2;
+
+-- Cập nhật bản ghi mới chèn (Double, Premium King)
+-- Giả sử CategoryId = 3 là 'Double'
+UPDATE Category SET name = 'Double', description = 'Room with two beds', updatedAt = GETDATE() WHERE name = 'Double';
+
+-- Bước 1: Xóa Category 4 ('Premium King')
+DELETE FROM Category 
+WHERE categoryId = 4;
+GO
+
+-- Bước 2: Cập nhật tên Room cho Category Family (ID 1)
+UPDATE Room 
+SET 
+    name = N'Family 101', 
+    description = N'Family room 101 with city view', -- Cập nhật mô tả để đồng bộ
+    updatedAt = GETDATE() 
+WHERE roomId = 1;
+
+UPDATE Room 
+SET 
+    name = N'Family 102', 
+    description = N'Family room 102 with basic amenities', -- Cập nhật mô tả để đồng bộ
+    updatedAt = GETDATE() 
+WHERE roomId = 2;
+
+-- Cập nhật tên Room cho Category Deluxe (ID 2)
+UPDATE Room 
+SET 
+    name = N'Deluxe 201', 
+    description = N'Deluxe room 201 with balcony and premium amenities (Booked)', -- Cập nhật mô tả
+    updatedAt = GETDATE() 
+WHERE roomId = 3;
+
+UPDATE Room 
+SET 
+    name = N'Deluxe 202', 
+    description = N'Deluxe room 202 with sea view', -- Cập nhật mô tả
+    updatedAt = GETDATE() 
+WHERE roomId = 4;
+GO
+
+-- Bước 3: Thêm Room cho Category Double (ID 3)
+-- Giả sử Category 'Double' có categoryId là 3 (theo thứ tự insert của bạn)
+INSERT INTO Room (name, categoryId, price, capacity, status, description, updatedAt)
+VALUES 
+    (N'Double 301', 3, 950000.00, 2, 'available', N'Spacious double room with basic amenities', GETDATE()),
+    (N'Double 302', 3, 950000.00, 2, 'available', N'Double room with a nice view', GETDATE());
+GO
+
+
+UPDATE Services SET name = 'Lunch', description = 'Lunch with a diverse menu', updatedAt = GETDATE() WHERE serviceId = 1;
+UPDATE Services SET name = 'Dinner', description = 'Luxury dinner with specialties', updatedAt = GETDATE() WHERE serviceId = 2;
+

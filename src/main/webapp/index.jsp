@@ -55,7 +55,7 @@
                     </ul>
                 </div>
             </div>
-            <a href="/booking" class="bk-btn">Booking Now</a>
+            <a href="booking" class="bk-btn">Booking Now</a>
         </div>
         <nav class="mainmenu mobile-menu">
             <ul>
@@ -619,9 +619,12 @@
                         </ul>
                     </div>
                     <div class="col-lg-5">
-                        <div class="co-text"><p><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-  Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved by 36Hotel<i class="fa fa-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
-  <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. --></p></div>
+                        <div class="co-text">
+                            <p>
+                                Copyright &copy;<script>document.write(new Date().getFullYear());</script>
+                                All rights reserved by 36 Hotel
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>

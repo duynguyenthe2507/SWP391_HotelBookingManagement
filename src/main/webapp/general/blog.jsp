@@ -55,29 +55,29 @@
                     </ul>
                 </div>
             </div>
-            <a href="/booking" class="bk-btn">Booking Now</a>
+            <a href="./booking" class="bk-btn">Booking Now</a>
         </div>
         <nav class="mainmenu mobile-menu">
             <ul>
-                <li class="active"><a href="home">Home</a></li>
-                <li><a href="rooms">Rooms</a></li>
-                <li><a href="about-us">About Us</a></li>
+                <li class="active"><a href="./home">Home</a></li>
+                <li><a href="./rooms">Rooms</a></li>
+                <li><a href="./about-us">About Us</a></li>
                 <li><a href="#">Pages</a>
                     <ul class="dropdown">
                         <li><a href="room-details">Room Details</a></li>
                         <li><a href="blog-details">Blog Details</a></li>
                     </ul>
                 </li>
-                <li><a href="blog">News</a></li>
-                <li><a href="contact">Contact</a></li>
+                <li><a href="./blog">News</a></li>
+                <li><a href="./contact">Contact</a></li>
             </ul>
         </nav>
         <div id="mobile-menu-wrap"></div>
         <div class="top-social">
-            <a href="#"><i class="fa fa-facebook"></i></a>
-            <a href="#"><i class="fa fa-twitter"></i></a>
-            <a href="#"><i class="fa fa-tripadvisor"></i></a>
-            <a href="#"><i class="fa fa-instagram"></i></a>
+            <a href="https://only-fans.me/highaileri"><i class="fa fa-facebook"></i></a>
+            <a href="https://only-fans.me/highaileri"><i class="fa fa-twitter"></i></a>
+            <a href="https://only-fans.me/highaileri"><i class="fa fa-tripadvisor"></i></a>
+            <a href="https://only-fans.me/highaileri"><i class="fa fa-instagram"></i></a>
         </div>
         <ul class="top-widget">
             <li><i class="fa fa-phone"></i>(84) 359 797 703</li>
@@ -105,7 +105,7 @@
                                 <a href="https://only-fans.me/highaileri"><i class="fa fa-tripadvisor"></i></a>
                                 <a href="https://only-fans.me/highaileri"><i class="fa fa-instagram"></i></a>
                             </div>
-                            <a href="/booking" class="bk-btn">Booking Now</a>
+                            <a href="./booking" class="bk-btn">Booking Now</a>
                             <div class="language-option">
                                 <img src="img/flag.jpg" alt="">
                                 <span>EN <i class="fa fa-angle-down"></i></span>
@@ -135,17 +135,17 @@
                         <div class="nav-menu">
                             <nav class="mainmenu">
                                 <ul>
-                                    <li class="active"><a href="home">Home</a></li>
-                                    <li><a href="rooms">Rooms</a></li>
-                                    <li><a href="about-us">About Us</a></li>
+                                    <li class="active"><a href="./home">Home</a></li>
+                                    <li><a href="./rooms">Rooms</a></li>
+                                    <li><a href="./about-us">About Us</a></li>
                                     <li><a href="#">Pages</a>
                                         <ul class="dropdown">
-                                            <li><a href="room-details">Room Details</a></li>
-                                            <li><a href="blog-details">Blog Details</a></li>
+                                            <li><a href="./room-details">Room Details</a></li>
+                                            <li><a href="./blog-details">Blog Details</a></li>
                                         </ul>
                                     </li>
-                                    <li><a href="blog">News</a></li>
-                                    <li><a href="contact">Contact</a></li>
+                                    <li><a href="./blog">News</a></li>
+                                    <li><a href="./contact">Contact</a></li>
                                 </ul>
                             </nav>
                             <div class="nav-right search-switch">
@@ -167,7 +167,7 @@
                     <div class="breadcrumb-text">
                         <h2>Blog</h2>
                         <div class="bt-option">
-                            <a href="/home">Home</a>
+                            <a href="./home">Home</a>
                             <span>Blog Grid</span>
                         </div>
                     </div>
@@ -185,7 +185,7 @@
                     <div class="blog-item set-bg" data-setbg="img/blog/blog-1.jpg">
                         <div class="bi-text">
                             <span class="b-tag">Travel Trip</span>
-                            <h4><a href="/blog-details.jsp">Tremblant In Canada</a></h4>
+                            <h4><a href="./blog-details.jsp">Tremblant In Canada</a></h4>
                             <div class="b-time"><i class="icon_clock_alt"></i> 15th April, 2019</div>
                         </div>
                     </div>
@@ -194,7 +194,7 @@
                     <div class="blog-item set-bg" data-setbg="img/blog/blog-2.jpg">
                         <div class="bi-text">
                             <span class="b-tag">Camping</span>
-                            <h4><a href="/blog-details.jsp">Choosing A Static Caravan</a></h4>
+                            <h4><a href="./blog-details.jsp">Choosing A Static Caravan</a></h4>
                             <div class="b-time"><i class="icon_clock_alt"></i> 15th April, 2019</div>
                         </div>
                     </div>
@@ -203,7 +203,7 @@
                     <div class="blog-item set-bg" data-setbg="img/blog/blog-3.jpg">
                         <div class="bi-text">
                             <span class="b-tag">Event</span>
-                            <h4><a href="/blog-details.jsp">Copper Canyon</a></h4>
+                            <h4><a href="./blog-details.jsp">Copper Canyon</a></h4>
                             <div class="b-time"><i class="icon_clock_alt"></i> 21th April, 2019</div>
                         </div>
                     </div>
@@ -212,7 +212,7 @@
                     <div class="blog-item set-bg" data-setbg="img/blog/blog-4.jpg">
                         <div class="bi-text">
                             <span class="b-tag">Trivago</span>
-                            <h4><a href="/blog-details.jsp">A Time Travel Postcard</a></h4>
+                            <h4><a href="./blog-details.jsp">A Time Travel Postcard</a></h4>
                             <div class="b-time"><i class="icon_clock_alt"></i> 22th April, 2019</div>
                         </div>
                     </div>
@@ -221,7 +221,7 @@
                     <div class="blog-item set-bg" data-setbg="img/blog/blog-5.jpg">
                         <div class="bi-text">
                             <span class="b-tag">Camping</span>
-                            <h4><a href="/blog-details.jsp">A Time Travel Postcard</a></h4>
+                            <h4><a href="./blog-details.jsp">A Time Travel Postcard</a></h4>
                             <div class="b-time"><i class="icon_clock_alt"></i> 25th April, 2019</div>
                         </div>
                     </div>
@@ -230,7 +230,7 @@
                     <div class="blog-item set-bg" data-setbg="img/blog/blog-6.jpg">
                         <div class="bi-text">
                             <span class="b-tag">Travel Trip</span>
-                            <h4><a href="/blog-details.jsp">Virginia Travel For Kids</a></h4>
+                            <h4><a href="./blog-details.jsp">Virginia Travel For Kids</a></h4>
                             <div class="b-time"><i class="icon_clock_alt"></i> 28th April, 2019</div>
                         </div>
                     </div>
@@ -239,7 +239,7 @@
                     <div class="blog-item set-bg" data-setbg="img/blog/blog-7.jpg">
                         <div class="bi-text">
                             <span class="b-tag">Travel Trip</span>
-                            <h4><a href="/blog-details.jsp">Bryce Canyon A Stunning</a></h4>
+                            <h4><a href="./blog-details.jsp">Bryce Canyon A Stunning</a></h4>
                             <div class="b-time"><i class="icon_clock_alt"></i> 29th April, 2019</div>
                         </div>
                     </div>
@@ -248,7 +248,7 @@
                     <div class="blog-item set-bg" data-setbg="img/blog/blog-8.jpg">
                         <div class="bi-text">
                             <span class="b-tag">Event & Travel</span>
-                            <h4><a href="/blog-details.jsp">Motorhome Or Trailer</a></h4>
+                            <h4><a href="./blog-details.jsp">Motorhome Or Trailer</a></h4>
                             <div class="b-time"><i class="icon_clock_alt"></i> 30th April, 2019</div>
                         </div>
                     </div>
@@ -257,7 +257,7 @@
                     <div class="blog-item set-bg" data-setbg="img/blog/blog-9.jpg">
                         <div class="bi-text">
                             <span class="b-tag">Camping</span>
-                            <h4><a href="/blog-details.jsp">Lost In Lagos Portugal</a></h4>
+                            <h4><a href="./blog-details.jsp">Lost In Lagos Portugal</a></h4>
                             <div class="b-time"><i class="icon_clock_alt"></i> 30th April, 2019</div>
                         </div>
                     </div>
@@ -329,9 +329,8 @@
                         </ul>
                     </div>
                     <div class="col-lg-5">
-                        <div class="co-text"><p><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-  Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved by 36Hotel<i class="fa fa-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
-  <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. --></p></div>
+                        <div class="co-text"><p>
+  Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved by 36Hotel
                     </div>
                 </div>
             </div>
