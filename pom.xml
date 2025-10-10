@@ -7,15 +7,15 @@
     <packaging>war</packaging>
     <name>HotelAManagement-1.0</name>
     
-   <properties>
-       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-       <failOnMissingWebXml>false</failOnMissingWebXml>
-       <jakartaee>10.0.0</jakartaee>
-       <!-- Default to Java 11; profiles will override when building with JDK 17 -->
-       <maven.compiler.release>11</maven.compiler.release>
-      <!-- SQL Server JDBC driver version (use suffix jre11, works on JDK 17) -->
-      <mssql.driver.version>12.8.1.jre11</mssql.driver.version>
-   </properties>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <failOnMissingWebXml>false</failOnMissingWebXml>
+        <jakartaee>10.0.0</jakartaee>
+        <!-- Default to Java 11; profiles will override when building with JDK 17 -->
+        <maven.compiler.release>11</maven.compiler.release>
+        <!-- SQL Server JDBC driver version (use suffix jre11, works on JDK 17) -->
+        <mssql.driver.version>12.8.1.jre11</mssql.driver.version>
+    </properties>
     
     <dependencies>
         <dependency>
@@ -30,25 +30,47 @@
             <artifactId>lombok</artifactId>
             <version>1.18.42</version>
         </dependency>
-       <!-- Microsoft SQL Server JDBC driver; version changes per JDK via profiles -->
-       <dependency>
-           <groupId>com.microsoft.sqlserver</groupId>
-           <artifactId>mssql-jdbc</artifactId>
-           <version>${mssql.driver.version}</version>
-       </dependency>
+        <!-- Microsoft SQL Server JDBC driver; version changes per JDK via profiles -->
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+            <version>${mssql.driver.version}</version>
+        </dependency>
+        <!-- JSTL Jakarta EE 10 (Tomcat 10+) -->
+        <dependency>
+            <groupId>org.glassfish.web</groupId>
+            <artifactId>jakarta.servlet.jsp.jstl</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.servlet.jsp.jstl</groupId>
+            <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
+        <!-- JavaMail API for sending emails -->
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>jakarta.mail</artifactId>
+            <version>2.0.1</version>
+        </dependency>
     </dependencies>
     
     <build>
-       <plugins>
-           <plugin>
-               <groupId>org.apache.maven.plugins</groupId>
-               <artifactId>maven-compiler-plugin</artifactId>
-               <version>3.11.0</version>
-               <configuration>
-                   <!-- Use the 'release' flag; value controlled by profiles (11 or 17) -->
-                   <release>${maven.compiler.release}</release>
-               </configuration>
-           </plugin>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <!-- Use the 'release' flag; value controlled by profiles (11 or 17) -->
+                    <release>${maven.compiler.release}</release>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
@@ -60,28 +82,28 @@
         </plugins>
     </build>
 
-   <!-- Profiles to auto-switch Java release and JDBC driver version by JDK -->
-   <profiles>
-       <profile>
-           <id>java11</id>
-           <activation>
-               <jdk>11</jdk>
-           </activation>
-           <properties>
-               <maven.compiler.release>11</maven.compiler.release>
-              <mssql.driver.version>12.8.1.jre11</mssql.driver.version>
-           </properties>
-       </profile>
+    <!-- Profiles to auto-switch Java release and JDBC driver version by JDK -->
+    <profiles>
+        <profile>
+            <id>java11</id>
+            <activation>
+                <jdk>11</jdk>
+            </activation>
+            <properties>
+                <maven.compiler.release>11</maven.compiler.release>
+                <mssql.driver.version>12.8.1.jre11</mssql.driver.version>
+            </properties>
+        </profile>
 
-       <profile>
-           <id>java17</id>
-           <activation>
-               <jdk>[17,)</jdk>
-           </activation>
-           <properties>
-               <maven.compiler.release>17</maven.compiler.release>
-              <mssql.driver.version>12.8.1.jre11</mssql.driver.version>
-           </properties>
-       </profile>
-   </profiles>
+        <profile>
+            <id>java17</id>
+            <activation>
+                <jdk>[17,)</jdk>
+            </activation>
+            <properties>
+                <maven.compiler.release>17</maven.compiler.release>
+                <mssql.driver.version>12.8.1.jre11</mssql.driver.version>
+            </properties>
+        </profile>
+    </profiles>
 </project>

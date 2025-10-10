@@ -2,6 +2,7 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
       <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
@@ -12,7 +13,7 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="HotelAManagement" options="-endorseddirs &quot;D:\LMAO JAVA\SWP391\SWP391_HotelBookingManagement\target/endorsed&quot;" />
+      <module name="HotelAManagement" options="" />
     </option>
   </component>
 </project>
