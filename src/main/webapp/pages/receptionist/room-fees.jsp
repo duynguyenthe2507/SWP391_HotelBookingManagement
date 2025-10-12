@@ -236,20 +236,37 @@
             background: white;
         }
 
+        /* Filter Groups */
+        .filter-group {
+            margin-bottom: 20px;
+        }
+
+        .filter-label {
+            display: block;
+            color: #19191a;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .filter-label i {
+            margin-right: 8px;
+            color: #dfa974;
+        }
+
         .filter-buttons {
-            margin-top: 20px;
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
         }
 
         .filter-btn {
-            padding: 8px 16px;
+            padding: 6px 12px;
             border: 2px solid #e5e5e5;
             background: white;
             color: #6b6b6b;
-            border-radius: 20px;
-            font-size: 14px;
+            border-radius: 15px;
+            font-size: 12px;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -262,6 +279,158 @@
             border-color: #dfa974;
             background: #dfa974;
             color: white;
+        }
+
+        /* Price Range Filter */
+        .price-range-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .price-input {
+            flex: 1;
+            min-width: 80px;
+            padding: 8px 12px;
+            border: 2px solid #e5e5e5;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #19191a;
+            transition: all 0.3s ease;
+            text-align: center;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .price-input:focus {
+            outline: none;
+            border-color: #dfa974;
+            box-shadow: 0 0 0 2px rgba(223, 169, 116, 0.1);
+        }
+
+        .price-input::placeholder {
+            color: #6b6b6b;
+            text-align: center;
+        }
+
+        .price-separator {
+            color: #6b6b6b;
+            font-weight: 600;
+        }
+
+        .price-filter-btn {
+            padding: 8px 12px;
+            background: #dfa974;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .price-filter-btn:hover {
+            background: #c8965a;
+            transform: scale(1.05);
+        }
+
+        /* Filter Select Dropdowns */
+        .filter-select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #e5e5e5;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #19191a;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #dfa974;
+            box-shadow: 0 0 0 2px rgba(223, 169, 116, 0.1);
+        }
+
+        /* Style for placeholder options */
+        .filter-select option[value="all"] {
+            color: #6b6b6b;
+            text-align: left;
+        }
+
+        .filter-select option:not([value="all"]) {
+            color: #19191a;
+            text-align: left;
+        }
+
+        /* Search Action Button */
+        .search-action-btn {
+            width: 100%;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #dfa974, #c8965a);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .search-action-btn:hover {
+            background: linear-gradient(135deg, #c8965a, #b8855a);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(223, 169, 116, 0.3);
+        }
+
+        .search-action-btn i {
+            font-size: 12px;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            padding-top: 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .action-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #dfa974, #c8965a);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover {
+            background: linear-gradient(135deg, #c8965a, #b8855a);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(223, 169, 116, 0.3);
+        }
+
+        .action-btn i {
+            font-size: 12px;
         }
 
         /* Professional Table Design */
@@ -632,6 +801,62 @@
             .filter-buttons {
                 justify-content: center;
             }
+
+            /* Enhanced responsive design for new filters */
+            .search-filter-section .row {
+                margin: 0;
+            }
+
+            .search-filter-section .col-lg-3 {
+                margin-bottom: 20px;
+            }
+
+            .price-range-wrapper {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .price-input {
+                min-width: 100%;
+            }
+
+            .quick-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .action-btn {
+                justify-content: center;
+            }
+
+            .filter-group {
+                margin-bottom: 15px;
+            }
+
+            .search-action-btn {
+                padding: 10px 15px;
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .search-filter-section {
+                padding: 20px 15px;
+            }
+
+            .filter-buttons {
+                gap: 5px;
+            }
+
+            .filter-btn {
+                padding: 5px 10px;
+                font-size: 11px;
+            }
+
+            .action-btn {
+                padding: 8px 15px;
+                font-size: 13px;
+            }
         }
 
         /* Loading Animation */
@@ -887,18 +1112,71 @@
             <!-- Enhanced Search and Filter Section -->
             <div class="search-filter-section">
                 <h5><i class="fa fa-search"></i> Search & Filter Rooms</h5>
+                
+                <!-- Search Input -->
                 <div class="search-input-wrapper">
                     <i class="fa fa-search"></i>
-                    <input type="text" id="searchInput" class="search-input" placeholder="Search rooms by name, category, or status...">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search rooms by name, category, status, or description...">
                 </div>
-                <div class="filter-buttons">
-                    <button class="filter-btn active" data-filter="all">All Rooms</button>
-                    <button class="filter-btn" data-filter="available">Available</button>
-                    <button class="filter-btn" data-filter="booked">Booked</button>
-                    <button class="filter-btn" data-filter="maintenance">Maintenance</button>
-                    <button class="filter-btn" data-filter="family">Family</button>
-                    <button class="filter-btn" data-filter="deluxe">Deluxe</button>
-                    <button class="filter-btn" data-filter="double">Double</button>
+                
+                <!-- Advanced Filters Row -->
+                <div class="row mt-4">
+                    <div class="col-lg-3 col-md-6">
+                        <div class="filter-group">
+                            <label class="filter-label"><i class="fa fa-filter"></i> Status</label>
+                            <select id="statusFilter" class="filter-select">
+                                <option value="all">All Rooms</option>
+                                <option value="available">Available</option>
+                                <option value="booked">Booked</option>
+                                <option value="maintenance">Maintenance</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6">
+                        <div class="filter-group">
+                            <label class="filter-label"><i class="fa fa-tag"></i> Category</label>
+                            <select id="categoryFilter" class="filter-select">
+                                <option value="all">All Categories</option>
+                                <option value="family">Family</option>
+                                <option value="deluxe">Deluxe</option>
+                                <option value="double">Double</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6">
+                        <div class="filter-group">
+                            <label class="filter-label"><i class="fa fa-dollar"></i> Price Range</label>
+                            <div class="price-range-wrapper">
+                                <input type="number" id="minPrice" class="price-input" placeholder="Min Price" min="0">
+                                <span class="price-separator">-</span>
+                                <input type="number" id="maxPrice" class="price-input" placeholder="Max Price" min="0">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6">
+                        <div class="filter-group">
+                            <label class="filter-label"><i class="fa fa-search"></i> Search Action</label>
+                            <button class="search-action-btn" id="applyAllFilters">
+                                <i class="fa fa-search"></i> Search & Filter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="quick-actions mt-3">
+                    <button class="action-btn" id="clearFilters">
+                        <i class="fa fa-refresh"></i> Clear All Filters
+                    </button>
+                    <button class="action-btn" id="exportData">
+                        <i class="fa fa-download"></i> Export Data
+                    </button>
+                    <button class="action-btn" id="printTable">
+                        <i class="fa fa-print"></i> Print Table
+                    </button>
                 </div>
             </div>
 
@@ -1129,62 +1407,137 @@
         // Enhanced Search and Filter functionality
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('searchInput');
-            const filterButtons = document.querySelectorAll('.filter-btn');
+            const statusFilter = document.getElementById('statusFilter');
+            const categoryFilter = document.getElementById('categoryFilter');
+            const minPriceInput = document.getElementById('minPrice');
+            const maxPriceInput = document.getElementById('maxPrice');
+            const applyAllFilters = document.getElementById('applyAllFilters');
             const tableRows = document.querySelectorAll('#roomTable tbody tr');
             const emptyState = document.getElementById('emptyState');
             const roomTable = document.getElementById('roomTable');
+            const clearFilters = document.getElementById('clearFilters');
+            const exportData = document.getElementById('exportData');
+            const printTable = document.getElementById('printTable');
 
-            let currentFilter = 'all';
-
-            // Search functionality
+            // Search functionality (real-time)
             searchInput.addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase();
-                filterAndSearch(currentFilter, searchTerm);
+                applyFilters();
             });
 
-            // Filter functionality
-            filterButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    // Update active button
-                    filterButtons.forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
+            // Apply all filters button
+            applyAllFilters.addEventListener('click', function() {
+                applyFilters();
+            });
 
-                    currentFilter = this.dataset.filter;
-                    const searchTerm = searchInput.value.toLowerCase();
-                    filterAndSearch(currentFilter, searchTerm);
+            // Clear filters
+            clearFilters.addEventListener('click', function() {
+                // Reset all inputs
+                searchInput.value = '';
+                statusFilter.value = 'all';
+                categoryFilter.value = 'all';
+                minPriceInput.value = '';
+                maxPriceInput.value = '';
+                
+                // Show all rows
+                tableRows.forEach(row => {
+                    row.style.display = '';
                 });
+                
+                updateEmptyState();
             });
 
-            function filterAndSearch(filter, searchTerm) {
-                let visibleCount = 0;
+            // Export data
+            exportData.addEventListener('click', function() {
+                exportToCSV();
+            });
+
+            // Print table
+            printTable.addEventListener('click', function() {
+                window.print();
+            });
+
+            function applyFilters() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const selectedStatus = statusFilter.value;
+                const selectedCategory = categoryFilter.value;
+                const minPrice = parseFloat(minPriceInput.value) || null;
+                const maxPrice = parseFloat(maxPriceInput.value) || null;
+                
+                // Validate price range
+                if (minPrice !== null && maxPrice !== null && minPrice > maxPrice) {
+                    alert('Minimum price cannot be greater than maximum price');
+                    return;
+                }
 
                 tableRows.forEach(row => {
                     const status = row.dataset.status;
                     const category = row.dataset.category.toLowerCase();
                     const text = row.textContent.toLowerCase();
+                    const price = parseFloat(row.querySelector('.room-price').textContent.replace(/[^\d]/g, '')) || 0;
 
-                    let matchesFilter = filter === 'all' ||
-                                      status === filter ||
-                                      category === filter;
+                    // Check status filter match
+                    let matchesStatus = selectedStatus === 'all' || status === selectedStatus;
 
+                    // Check category filter match
+                    let matchesCategory = selectedCategory === 'all' || category === selectedCategory;
+
+                    // Check search match
                     let matchesSearch = searchTerm === '' || text.includes(searchTerm);
 
-                    if (matchesFilter && matchesSearch) {
+                    // Check price range match
+                    let matchesPrice = true;
+                    if (minPrice !== null && price < minPrice) {
+                        matchesPrice = false;
+                    }
+                    if (maxPrice !== null && price > maxPrice) {
+                        matchesPrice = false;
+                    }
+
+                    if (matchesStatus && matchesCategory && matchesSearch && matchesPrice) {
                         row.style.display = '';
-                        visibleCount++;
                     } else {
                         row.style.display = 'none';
                     }
                 });
 
-                // Show/hide empty state
-                if (visibleCount === 0) {
+                updateEmptyState();
+            }
+
+
+            function updateEmptyState() {
+                const visibleRows = Array.from(tableRows).filter(row => row.style.display !== 'none');
+                
+                if (visibleRows.length === 0) {
                     roomTable.style.display = 'none';
                     emptyState.style.display = 'block';
                 } else {
                     roomTable.style.display = 'table';
                     emptyState.style.display = 'none';
                 }
+            }
+
+            function exportToCSV() {
+                const visibleRows = Array.from(tableRows).filter(row => row.style.display !== 'none');
+                let csvContent = "Room Name,Category,Price,Capacity,Status,Description\n";
+                
+                visibleRows.forEach(row => {
+                    const name = row.querySelector('.room-name').textContent.trim();
+                    const category = row.querySelector('.category-badge').textContent.trim();
+                    const price = row.querySelector('.room-price').textContent.trim();
+                    const capacity = row.querySelector('.capacity-info').textContent.trim();
+                    const status = row.querySelector('.status-badge').textContent.trim();
+                    const description = row.querySelector('.room-description').textContent.trim();
+                    
+                    csvContent += `"${name}","${category}","${price}","${capacity}","${status}","${description}"\n`;
+                });
+                
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'room-fees-export.csv';
+                a.click();
+                window.URL.revokeObjectURL(url);
             }
 
             // Animate stats cards on load
