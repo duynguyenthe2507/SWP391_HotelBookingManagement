@@ -17,7 +17,7 @@ public class LoginController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("general/login.jsp").forward(request, response);
+        request.getRequestDispatcher("pages/auth/login.jsp").forward(request, response);
     }
 
     @Override
@@ -29,7 +29,7 @@ public class LoginController extends HttpServlet {
         // Kiểm tra dữ liệu đầu vào
         if (phone == null || phone.trim().isEmpty() || password == null || password.trim().isEmpty()) {
             request.setAttribute("error", "Please fill both of your phone number and password!");
-            request.getRequestDispatcher("general/login.jsp").forward(request, response);
+            request.getRequestDispatcher("pages/auth/login.jsp").forward(request, response);
             return;
         }
 
@@ -40,11 +40,13 @@ public class LoginController extends HttpServlet {
             // Số điện thoại không tồn tại
             request.setAttribute("error", "Phone number does not exist!");
             request.setAttribute("phone", phone); // Giữ lại số điện thoại đã nhập
-            request.getRequestDispatcher("general/login.jsp").forward(request, response);
+            request.getRequestDispatcher("pages/auth/login.jsp").forward(request, response);
+            return;
         } else if (u.getPassword() == null) {
             request.setAttribute("error", "Wrong password!");
             request.setAttribute("phone", phone);
-            request.getRequestDispatcher("general/login.jsp").forward(request, response);
+            request.getRequestDispatcher("pages/auth/login.jsp").forward(request, response);
+            return;
         } else {
             // Check if password is hashed (starts with $2a$) or plain text
             boolean passwordMatch;
@@ -59,7 +61,7 @@ public class LoginController extends HttpServlet {
             if (!passwordMatch) {
                 request.setAttribute("error", "Wrong password!");
                 request.setAttribute("phone", phone);
-                request.getRequestDispatcher("general/login.jsp").forward(request, response);
+                request.getRequestDispatcher("pages/auth/login.jsp").forward(request, response);
                 return;
             }
 

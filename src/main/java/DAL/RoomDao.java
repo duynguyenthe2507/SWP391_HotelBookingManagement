@@ -77,4 +77,30 @@ public class RoomDao extends DBContext {
         } catch (SQLException e) { e.printStackTrace(); }
         return false;
     }
+    
+    // Method to get rooms with category information for receptionist view
+    public List<Map<String, Object>> getRoomsWithCategoryInfo() {
+        List<Map<String, Object>> list = new ArrayList<>();
+        String sql = "SELECT r.roomId, r.name, r.price, r.capacity, r.status, r.description, " +
+                    "c.name as categoryName, c.description as categoryDescription " +
+                    "FROM Room r " +
+                    "INNER JOIN Category c ON r.categoryId = c.categoryId " +
+                    "ORDER BY r.categoryId, r.name";
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Map<String, Object> roomInfo = new HashMap<>();
+                roomInfo.put("roomId", rs.getInt("roomId"));
+                roomInfo.put("name", rs.getString("name"));
+                roomInfo.put("price", rs.getDouble("price"));
+                roomInfo.put("capacity", rs.getInt("capacity"));
+                roomInfo.put("status", rs.getString("status"));
+                roomInfo.put("description", rs.getString("description"));
+                roomInfo.put("categoryName", rs.getString("categoryName"));
+                roomInfo.put("categoryDescription", rs.getString("categoryDescription"));
+                list.add(roomInfo);
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return list;
+    }
 }

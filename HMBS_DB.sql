@@ -1,9 +1,18 @@
-﻿-- Tạo database
+﻿-- =============================================
+-- HMBS Database - Complete Setup Script
+-- Execute this entire script at once
+-- =============================================
+
+-- Tạo database
 CREATE DATABASE HMBS_DB;
 GO
 
 USE HMBS_DB;
 GO
+
+-- =============================================
+-- CREATE TABLES
+-- =============================================
 
 -- Table: Rank
 CREATE TABLE Rank (
@@ -15,6 +24,7 @@ CREATE TABLE Rank (
     createdAt DATETIME DEFAULT GETDATE(),
     updatedAt DATETIME DEFAULT GETDATE()
 );
+GO
 
 -- Trigger cho Rank
 CREATE TRIGGER trg_update_rank
@@ -47,6 +57,7 @@ CREATE TABLE Users (
     updatedAt DATETIME DEFAULT GETDATE(),
     CONSTRAINT FK_Users_Rank FOREIGN KEY (rankId) REFERENCES Rank(rankId) ON DELETE SET NULL
 );
+GO
 
 -- Trigger cho Users
 CREATE TRIGGER trg_update_users
@@ -69,6 +80,7 @@ CREATE TABLE Services (
     description NVARCHAR(500) NULL,
     updatedAt DATETIME DEFAULT GETDATE()
 );
+GO
 
 -- Trigger cho Services
 CREATE TRIGGER trg_update_services
@@ -90,6 +102,7 @@ CREATE TABLE Category (
     description NVARCHAR(500) NULL,
     updatedAt DATETIME DEFAULT GETDATE()
 );
+GO
 
 -- Trigger cho Category
 CREATE TRIGGER trg_update_category
@@ -116,6 +129,7 @@ CREATE TABLE Room (
     updatedAt DATETIME DEFAULT GETDATE(),
     CONSTRAINT FK_Room_Category FOREIGN KEY (categoryId) REFERENCES Category(categoryId) ON DELETE NO ACTION
 );
+GO
 
 -- Trigger cho Room
 CREATE TRIGGER trg_update_room
@@ -144,6 +158,7 @@ CREATE TABLE Booking (
     CONSTRAINT FK_Booking_User FOREIGN KEY (userId) REFERENCES Users(userId) ON DELETE CASCADE,
     CONSTRAINT CHK_Booking_Dates CHECK (checkinTime < checkoutTime)
 );
+GO
 
 -- Trigger để tự động tính durationHours và totalPrice trong Booking
 CREATE TRIGGER trg_update_booking
@@ -191,6 +206,7 @@ CREATE TABLE BookingHistory (
     CONSTRAINT FK_BookingHistory_Booking FOREIGN KEY (bookingId) REFERENCES Booking(bookingId) ON DELETE CASCADE,
     CONSTRAINT UQ_BookingHistory_Booking UNIQUE (bookingId)
 );
+GO
 
 -- Trigger để cập nhật rankId trong Users dựa trên BookingHistory
 CREATE TRIGGER trg_update_bookingHistory
@@ -229,6 +245,7 @@ CREATE TABLE BookingDetail (
     CONSTRAINT FK_BookingDetail_Room FOREIGN KEY (roomId) REFERENCES Room(roomId) ON DELETE NO ACTION,
     CONSTRAINT UQ_BookingDetail_BookingRoom UNIQUE (bookingId, roomId)
 );
+GO
 
 -- Trigger cho BookingDetail
 CREATE TRIGGER trg_update_bookingDetail
@@ -254,6 +271,7 @@ CREATE TABLE Payment (
     updatedAt DATETIME DEFAULT GETDATE(),
     CONSTRAINT FK_Payment_Booking FOREIGN KEY (bookingId) REFERENCES Booking(bookingId) ON DELETE CASCADE
 );
+GO
 
 -- Trigger cho Payment
 CREATE TRIGGER trg_update_payment
@@ -280,6 +298,7 @@ CREATE TABLE Invoice (
     updatedAt DATETIME DEFAULT GETDATE(),
     CONSTRAINT FK_Invoice_Booking FOREIGN KEY (bookingId) REFERENCES Booking(bookingId) ON DELETE CASCADE
 );
+GO
 
 -- Trigger cho Invoice
 CREATE TRIGGER trg_update_invoice
@@ -304,6 +323,7 @@ CREATE TABLE Wishlist (
     CONSTRAINT FK_Wishlist_Room FOREIGN KEY (roomId) REFERENCES Room(roomId) ON DELETE CASCADE,
     CONSTRAINT UQ_Wishlist_UserRoom UNIQUE (userId, roomId)
 );
+GO
 
 -- Trigger cho Wishlist
 CREATE TRIGGER trg_update_wishlist
@@ -329,6 +349,7 @@ CREATE TABLE Cart (
     CONSTRAINT FK_Cart_Room FOREIGN KEY (roomId) REFERENCES Room(roomId) ON DELETE CASCADE,
     CONSTRAINT UQ_Cart_UserRoom UNIQUE (userId, roomId)
 );
+GO
 
 -- Trigger cho Cart
 CREATE TRIGGER trg_update_cart
@@ -355,6 +376,7 @@ CREATE TABLE Feedback (
     CONSTRAINT FK_Feedback_User FOREIGN KEY (userId) REFERENCES Users(userId) ON DELETE NO ACTION,
     CONSTRAINT FK_Feedback_Booking FOREIGN KEY (bookingId) REFERENCES Booking(bookingId) ON DELETE CASCADE
 );
+GO
 
 -- Trigger cho Feedback
 CREATE TRIGGER trg_update_feedback
@@ -380,6 +402,7 @@ CREATE TABLE ServiceRequest (
     CONSTRAINT FK_ServiceRequest_Booking FOREIGN KEY (bookingId) REFERENCES Booking(bookingId) ON DELETE CASCADE,
     CONSTRAINT FK_ServiceRequest_Service FOREIGN KEY (serviceTypeId) REFERENCES Services(serviceId) ON DELETE NO ACTION
 );
+GO
 
 -- Trigger cho ServiceRequest
 CREATE TRIGGER trg_update_serviceRequest
@@ -393,6 +416,10 @@ BEGIN
     INNER JOIN inserted ON ServiceRequest.requestId = inserted.requestId;
 END;
 GO
+
+-- =============================================
+-- CREATE INDEXES
+-- =============================================
 
 -- Thêm chỉ mục để tối ưu hiệu suất
 CREATE INDEX idx_users_email ON Users(email);
@@ -414,7 +441,10 @@ CREATE INDEX idx_serviceRequest_serviceTypeId ON ServiceRequest(serviceTypeId);
 CREATE INDEX idx_room_categoryId ON Room(categoryId);
 GO
 
--- Insert Sample Data
+-- =============================================
+-- INSERT SAMPLE DATA
+-- =============================================
+
 -- Insert Rank
 INSERT INTO Rank (name, description, minBookings, discountPercentage, createdAt, updatedAt)
 VALUES 
@@ -422,25 +452,29 @@ VALUES
     (N'Silver', N'Cấp bạc cho khách hàng trung thành', 5, 5.00, GETDATE(), GETDATE()),
     (N'Gold', N'Cấp vàng cho khách hàng VIP', 10, 10.00, GETDATE(), GETDATE()),
     (N'Diamond', N'Cấp cao nhất với ưu đãi đặc biệt', 20, 15.00, GETDATE(), GETDATE());
+GO
 
 -- Insert Category
 INSERT INTO Category (name, description, updatedAt)
 VALUES 
     (N'Standard', N'Phòng tiêu chuẩn với tiện nghi cơ bản', GETDATE()),
     (N'VIP', N'Phòng sang trọng với tiện nghi cao cấp', GETDATE());
+GO
 
 -- Insert Users
 INSERT INTO Users (mobilePhone, firstName, middleName, lastName, birthday, email, password, role, rankId, isBlackList, isActive, createdAt, updatedAt)
 VALUES 
     ('+84901234567', N'Hùng', N'Văn', N'Nguyễn', '1992-07-20', 'hung.nguyen@email.com', 'hashed_password5', 'customer', 1, 0, 1, GETDATE(), GETDATE()),
-    ('+84901234568', N'Linh', N'Thị', N'Trần', '1990-05-15', 'linh.tran@email.com', 'hashed_password6', 'customer', 2, 0, 1, GETDATE(), GETDATE());
+    ('+84901234568', N'Linh', N'Thị', N'Trần', '1990-05-15', 'linh.tran@email.com', 'hashed_password6', 'customer', 2, 0, 1, GETDATE(), GETDATE()),
+    ('0901234569', N'Mai', N'Thị', N'Nguyễn', '1988-03-10', 'mai.nguyen@hotel.com', 'receptionist123', 'receptionist', NULL, 0, 1, GETDATE(), GETDATE());
+GO
 
 -- Insert Services
 INSERT INTO Services (name, price, description, updatedAt)
 VALUES 
     (N'Bữa trưa', 100000.00, N'Bữa trưa với thực đơn đa dạng', GETDATE()),
     (N'Bữa tối', 150000.00, N'Bữa tối sang trọng với các món đặc sản', GETDATE());
-
+GO
 
 -- Insert Room
 INSERT INTO Room (name, categoryId, price, capacity, status, description, updatedAt)
@@ -449,99 +483,98 @@ VALUES
     (N'Phòng Standard 102', 1, 800000.00, 2, 'available', N'Phòng tiêu chuẩn với tiện nghi cơ bản', GETDATE()),
     (N'Phòng VIP 201', 2, 2000000.00, 4, 'booked', N'Phòng VIP với ban công và tiện nghi cao cấp', GETDATE()),
     (N'Phòng VIP 202', 2, 2000000.00, 4, 'available', N'Phòng VIP với view biển', GETDATE());
-
-
-
-
-UPDATE [dbo].[Category]
-   SET name = 'Family'
-      ,[description] = N'Phòng gia đình đẳng cấp'
-      ,[updatedAt] = GETDATE()
- WHERE categoryId = 1
 GO
 
+-- =============================================
+-- UPDATE DATA
+-- =============================================
 
+-- Update Category 1
 UPDATE [dbo].[Category]
-   SET name = 'Deluxe'
-      ,[description] = N'Phòng sang trọng đấy'
-      ,[updatedAt] = GETDATE()
- WHERE categoryId = 2
+SET name = 'Family',
+    [description] = N'Phòng gia đình đẳng cấp',
+    [updatedAt] = GETDATE()
+WHERE categoryId = 1;
 GO
 
+-- Update Category 2
+UPDATE [dbo].[Category]
+SET name = 'Deluxe',
+    [description] = N'Phòng sang trọng đấy',
+    [updatedAt] = GETDATE()
+WHERE categoryId = 2;
+GO
 
-Insert into Category (name, description, updatedAt) values 
-('Double', N'Phòng 2 giường', GETDATE()),
-('Premium King', N'Phòng này xịn đấy', GETDATE())
+-- Insert more Categories
+INSERT INTO Category (name, description, updatedAt) 
+VALUES 
+    ('Double', N'Phòng 2 giường', GETDATE()),
+    ('Premium King', N'Phòng này xịn đấy', GETDATE());
+GO
 
-
+-- Update Rank to English
 UPDATE Rank SET name = 'Bronze', description = 'Basic tier for new customers', updatedAt = GETDATE() WHERE rankId = 1;
 UPDATE Rank SET name = 'Silver', description = 'Silver tier for loyal customers', updatedAt = GETDATE() WHERE rankId = 2;
 UPDATE Rank SET name = 'Gold', description = 'Gold tier for VIP customers', updatedAt = GETDATE() WHERE rankId = 3;
 UPDATE Rank SET name = 'Diamond', description = 'Highest tier with special privileges', updatedAt = GETDATE() WHERE rankId = 4;
-
-
--- Cập nhật bản ghi CategoryId = 1 (trước đó là Family)
-UPDATE Category SET name = 'Family', description = 'Premium family room', updatedAt = GETDATE() WHERE categoryId = 1;
-
--- Cập nhật bản ghi CategoryId = 2 (trước đó là Deluxe)
-UPDATE Category SET name = 'Deluxe', description = 'Luxurious room', updatedAt = GETDATE() WHERE categoryId = 2;
-
--- Cập nhật bản ghi mới chèn (Double, Premium King)
--- Giả sử CategoryId = 3 là 'Double'
-UPDATE Category SET name = 'Double', description = 'Room with two beds', updatedAt = GETDATE() WHERE name = 'Double';
-
--- Bước 1: Xóa Category 4 ('Premium King')
-DELETE FROM Category 
-WHERE categoryId = 4;
 GO
 
--- Bước 2: Cập nhật tên Room cho Category Family (ID 1)
+-- Update Category to English
+UPDATE Category SET name = 'Family', description = 'Premium family room', updatedAt = GETDATE() WHERE categoryId = 1;
+UPDATE Category SET name = 'Deluxe', description = 'Luxurious room', updatedAt = GETDATE() WHERE categoryId = 2;
+UPDATE Category SET name = 'Double', description = 'Room with two beds', updatedAt = GETDATE() WHERE name = 'Double';
+GO
+
+-- Delete Category 4 ('Premium King')
+DELETE FROM Category WHERE categoryId = 4;
+GO
+
+-- Update Room names for Category Family (ID 1)
 UPDATE Room 
-SET 
-    name = N'Family 101', 
-    description = N'Family room 101 with city view', -- Cập nhật mô tả để đồng bộ
+SET name = N'Family 101', 
+    description = N'Family room 101 with city view',
     updatedAt = GETDATE() 
 WHERE roomId = 1;
 
 UPDATE Room 
-SET 
-    name = N'Family 102', 
-    description = N'Family room 102 with basic amenities', -- Cập nhật mô tả để đồng bộ
+SET name = N'Family 102', 
+    description = N'Family room 102 with basic amenities',
     updatedAt = GETDATE() 
 WHERE roomId = 2;
+GO
 
--- Cập nhật tên Room cho Category Deluxe (ID 2)
+-- Update Room names for Category Deluxe (ID 2)
 UPDATE Room 
-SET 
-    name = N'Deluxe 201', 
-    description = N'Deluxe room 201 with balcony and premium amenities (Booked)', -- Cập nhật mô tả
+SET name = N'Deluxe 201', 
+    description = N'Deluxe room 201 with balcony and premium amenities (Booked)',
     updatedAt = GETDATE() 
 WHERE roomId = 3;
 
 UPDATE Room 
-SET 
-    name = N'Deluxe 202', 
-    description = N'Deluxe room 202 with sea view', -- Cập nhật mô tả
+SET name = N'Deluxe 202', 
+    description = N'Deluxe room 202 with sea view',
     updatedAt = GETDATE() 
 WHERE roomId = 4;
 GO
 
--- Bước 3: Thêm Room cho Category Double (ID 3)
--- Giả sử Category 'Double' có categoryId là 3 (theo thứ tự insert của bạn)
+-- Insert Room for Category Double (ID 3)
 INSERT INTO Room (name, categoryId, price, capacity, status, description, updatedAt)
 VALUES 
     (N'Double 301', 3, 950000.00, 2, 'available', N'Spacious double room with basic amenities', GETDATE()),
     (N'Double 302', 3, 950000.00, 2, 'available', N'Double room with a nice view', GETDATE());
 GO
 
-
+-- Update Services to English
 UPDATE Services SET name = 'Lunch', description = 'Lunch with a diverse menu', updatedAt = GETDATE() WHERE serviceId = 1;
 UPDATE Services SET name = 'Dinner', description = 'Luxury dinner with specialties', updatedAt = GETDATE() WHERE serviceId = 2;
+GO
 
+-- Add imgUrl column to Category
 ALTER TABLE Category
 ADD imgUrl NVARCHAR(255) NULL;
 GO
 
+-- Add imgUrl column to Room
 ALTER TABLE Room
 ADD imgUrl NVARCHAR(255) NULL;
 GO
