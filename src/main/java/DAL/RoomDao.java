@@ -103,4 +103,61 @@ public class RoomDao extends DBContext {
         } catch (SQLException e) { e.printStackTrace(); }
         return list;
     }
+    
+    // Method to get single room with category information for detail view
+    public List<Map<String, Object>> getRoomWithCategoryInfo(int roomId) {
+        List<Map<String, Object>> list = new ArrayList<>();
+        String sql = "SELECT r.roomId, r.name, r.price, r.capacity, r.status, r.description, " +
+                    "c.name as categoryName, c.description as categoryDescription " +
+                    "FROM Room r " +
+                    "INNER JOIN Category c ON r.categoryId = c.categoryId " +
+                    "WHERE r.roomId = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, roomId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> roomInfo = new HashMap<>();
+                    roomInfo.put("roomId", rs.getInt("roomId"));
+                    roomInfo.put("name", rs.getString("name"));
+                    roomInfo.put("price", rs.getDouble("price"));
+                    roomInfo.put("capacity", rs.getInt("capacity"));
+                    roomInfo.put("status", rs.getString("status"));
+                    roomInfo.put("description", rs.getString("description"));
+                    roomInfo.put("categoryName", rs.getString("categoryName"));
+                    roomInfo.put("categoryDescription", rs.getString("categoryDescription"));
+                    list.add(roomInfo);
+                }
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return list;
+    }
+    
+    // Method to get rooms by category for similar rooms
+    public List<Map<String, Object>> getRoomsByCategory(String categoryName) {
+        List<Map<String, Object>> list = new ArrayList<>();
+        String sql = "SELECT r.roomId, r.name, r.price, r.capacity, r.status, r.description, " +
+                    "c.name as categoryName, c.description as categoryDescription " +
+                    "FROM Room r " +
+                    "INNER JOIN Category c ON r.categoryId = c.categoryId " +
+                    "WHERE c.name = ? " +
+                    "ORDER BY r.name";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, categoryName);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> roomInfo = new HashMap<>();
+                    roomInfo.put("roomId", rs.getInt("roomId"));
+                    roomInfo.put("name", rs.getString("name"));
+                    roomInfo.put("price", rs.getDouble("price"));
+                    roomInfo.put("capacity", rs.getInt("capacity"));
+                    roomInfo.put("status", rs.getString("status"));
+                    roomInfo.put("description", rs.getString("description"));
+                    roomInfo.put("categoryName", rs.getString("categoryName"));
+                    roomInfo.put("categoryDescription", rs.getString("categoryDescription"));
+                    list.add(roomInfo);
+                }
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return list;
+    }
 }

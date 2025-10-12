@@ -469,11 +469,11 @@
             background: #f8f9fa;
             color: #19191a;
             border: none;
-            padding: 20px 20px;
+            padding: 10px 5px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 13px;
+            letter-spacing: 0.5px;
+            font-size: 11px;
             border-bottom: 2px solid #e5e5e5;
             position: sticky;
             top: 0;
@@ -481,7 +481,7 @@
         }
 
         .room-fees-table tbody td {
-            padding: 25px 20px;
+            padding: 12px 8px;
             border-bottom: 1px solid #f0f0f0;
             vertical-align: middle;
             transition: all 0.3s ease;
@@ -517,15 +517,8 @@
         .room-price {
             color: #dfa974;
             font-weight: 800;
-            font-size: 20px;
+            font-size: 16px;
             font-family: "Lora", serif;
-        }
-
-        .room-price span {
-            font-size: 14px;
-            color: #6b6b6b;
-            font-weight: 400;
-            font-family: "Cabin", sans-serif;
         }
 
         /* Enhanced Badge Designs */
@@ -559,15 +552,17 @@
         }
 
         .status-badge {
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            border: 2px solid;
+            letter-spacing: 0.3px;
+            border: 1px solid;
             position: relative;
             overflow: hidden;
+            white-space: nowrap;
+            display: inline-block;
         }
 
         .status-available {
@@ -590,9 +585,21 @@
 
         .room-description {
             color: #6b6b6b;
-            font-size: 14px;
-            line-height: 1.6;
+            font-size: 12px;
+            line-height: 1.3;
             max-width: 200px;
+            word-wrap: break-word;
+        }
+
+        /* Status column specific styling */
+        .room-fees-table td:nth-child(5) {
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .room-fees-table td:nth-child(5) .status-badge {
+            margin: 0 auto;
+            display: inline-block;
         }
 
         .capacity-info {
@@ -775,6 +782,46 @@
             color: #721c24;
         }
 
+        /* Table Column Width Optimization */
+        .room-fees-table table {
+            table-layout: fixed;
+        }
+
+        .room-fees-table th:nth-child(1),
+        .room-fees-table td:nth-child(1) {
+            width: 18%;
+        }
+
+        .room-fees-table th:nth-child(2),
+        .room-fees-table td:nth-child(2) {
+            width: 12%;
+        }
+
+        .room-fees-table th:nth-child(3),
+        .room-fees-table td:nth-child(3) {
+            width: 12%;
+        }
+
+        .room-fees-table th:nth-child(4),
+        .room-fees-table td:nth-child(4) {
+            width: 8%;
+        }
+
+        .room-fees-table th:nth-child(5),
+        .room-fees-table td:nth-child(5) {
+            width: 12%;
+        }
+
+        .room-fees-table th:nth-child(6),
+        .room-fees-table td:nth-child(6) {
+            width: 25%;
+        }
+
+        .room-fees-table th:nth-child(7),
+        .room-fees-table td:nth-child(7) {
+            width: 13%;
+        }
+
         /* Responsive Design Enhancements */
         @media (max-width: 768px) {
             .receptionist-header h2 {
@@ -791,7 +838,7 @@
 
             .room-fees-table thead th,
             .room-fees-table tbody td {
-                padding: 15px 10px;
+                padding: 8px 5px;
             }
 
             .section-title h2 {
@@ -856,6 +903,30 @@
             .action-btn {
                 padding: 8px 15px;
                 font-size: 13px;
+            }
+
+            /* Mobile table optimization */
+            .room-fees-table {
+                font-size: 12px;
+            }
+
+            .room-fees-table thead th,
+            .room-fees-table tbody td {
+                padding: 6px 3px;
+            }
+
+            .status-badge {
+                padding: 3px 6px;
+                font-size: 9px;
+            }
+
+            .room-description {
+                max-width: 120px;
+                font-size: 11px;
+            }
+
+            .room-price {
+                font-size: 12px;
             }
         }
 
@@ -1194,17 +1265,23 @@
                         <tr>
                             <th><i class="fa fa-home"></i> Room Name</th>
                             <th><i class="fa fa-tag"></i> Category</th>
-                            <th><i class="fa fa-dollar"></i> Price</th>
+                            <th><i class="fa fa-dollar"></i> Price(/Night)</th>
                             <th><i class="fa fa-users"></i> Capacity</th>
                             <th><i class="fa fa-info-circle"></i> Status</th>
                             <th><i class="fa fa-file-text"></i> Description</th>
+                            <th><i class="fa fa-eye"></i> Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <c:forEach var="room" items="${roomsWithCategory}">
                             <tr data-status="${room.status}" data-category="${room.categoryName}">
                                 <td>
-                                    <div class="room-name">${room.name}</div>
+                                    <div class="room-name">
+                                        <a href="${pageContext.request.contextPath}/receptionist/room-fee-detail?roomId=${room.roomId}" 
+                                           style="color: #19191a; text-decoration: none; font-weight: 700;">
+                                            ${room.name}
+                                        </a>
+                                    </div>
                                     <div class="room-number">Room #${room.roomId}</div>
                                 </td>
                                 <td>
@@ -1213,7 +1290,6 @@
                                 <td>
                                     <div class="room-price">
                                         <fmt:formatNumber value="${room.price}" type="currency" currencyCode="VND"/>
-                                        <span>/night</span>
                                     </div>
                                 </td>
                                 <td>
@@ -1243,6 +1319,13 @@
                                 </td>
                                 <td>
                                     <div class="room-description">${room.description}</div>
+                                </td>
+                                <td>
+                                    <a href="${pageContext.request.contextPath}/receptionist/room-fee-detail?roomId=${room.roomId}" 
+                                       class="btn btn-sm" 
+                                       style="background: linear-gradient(135deg, #dfa974, #c8965a); color: white; border: none; padding: 8px 15px; border-radius: 15px; font-size: 12px; font-weight: 600; text-decoration: none; transition: all 0.3s ease;">
+                                        <i class="fa fa-eye"></i> View Details
+                                    </a>
                                 </td>
                             </tr>
                         </c:forEach>
@@ -1518,7 +1601,7 @@
 
             function exportToCSV() {
                 const visibleRows = Array.from(tableRows).filter(row => row.style.display !== 'none');
-                let csvContent = "Room Name,Category,Price,Capacity,Status,Description\n";
+                let csvContent = "Room Name,Category,Price(/Night),Capacity,Status,Description\n";
                 
                 visibleRows.forEach(row => {
                     const name = row.querySelector('.room-name').textContent.trim();
