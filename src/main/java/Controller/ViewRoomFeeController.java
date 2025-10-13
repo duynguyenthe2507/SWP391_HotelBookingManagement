@@ -35,19 +35,39 @@ public class ViewRoomFeeController extends HttpServlet {
         }
         
         try {
-            // Get all rooms with their fees and category information
-            List<Map<String, Object>> roomsWithCategory = roomDao.getRoomsWithCategoryInfo();
-            
+            // Parse pagination params
+            int page = 1;
+            int size = 10;
+            try {
+                String pageParam = request.getParameter("page");
+                String sizeParam = request.getParameter("size");
+                if (pageParam != null) page = Math.max(1, Integer.parseInt(pageParam));
+                if (sizeParam != null) size = Math.max(1, Integer.parseInt(sizeParam));
+            } catch (NumberFormatException ignore) { /* defaults kept */ }
+
+            int totalItems = roomDao.countAllRooms();
+            int totalPages = (int) Math.ceil(totalItems / (double) size);
+            if (totalPages == 0) totalPages = 1; // avoid divide by zero in UI
+            if (page > totalPages) page = totalPages;
+            int offset = (page - 1) * size;
+
+            // Get paginated rooms with their fees and category information
+            List<Map<String, Object>> roomsWithCategory = roomDao.getRoomsWithCategoryInfoPaged(offset, size);
+
             // Get all categories for reference
             List<Category> categories = categoryDao.getAll();
-            
+
             // Set attributes for JSP
             request.setAttribute("roomsWithCategory", roomsWithCategory);
             request.setAttribute("categories", categories);
-            
+            request.setAttribute("page", page);
+            request.setAttribute("size", size);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("totalItems", totalItems);
+
             // Forward to receptionist room fees page
             request.getRequestDispatcher("/pages/receptionist/room-fees.jsp").forward(request, response);
-            
+
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", "An error occurred while loading room fees.");
