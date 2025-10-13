@@ -1123,7 +1123,12 @@
                         <div class="icon-wrapper">
                             <i class="fa fa-bed"></i>
                         </div>
-                        <h3>${roomsWithCategory.size()}</h3>
+                        <h3>
+                            <c:choose>
+                                <c:when test="${not empty totalItems}">${totalItems}</c:when>
+                                <c:otherwise>${roomsWithCategory.size()}</c:otherwise>
+                            </c:choose>
+                        </h3>
                         <p>Total Rooms</p>
                     </div>
                 </div>
@@ -1336,6 +1341,41 @@
                     <h4>No rooms found</h4>
                     <p>Try adjusting your search criteria or filters</p>
                 </div>
+                <!-- Pagination Controls -->
+                <c:if test="${totalPages > 1}">
+                    <nav aria-label="Room fees pagination" style="padding: 10px 20px 20px 20px;">
+                        <ul class="pagination" style="margin:0; display:flex; justify-content:center; flex-wrap: wrap;">
+                            <li class="page-item ${page == 1 ? 'disabled' : ''}" style="margin: 2px;">
+                                <a class="page-link" href="${pageContext.request.contextPath}/receptionist/room-fees?page=${page - 1}&size=${size}" aria-label="Previous"
+                                   style="border-radius: 8px; padding: 8px 12px; border: 1px solid #e5e5e5; color: #19191a; text-decoration: none; display: inline-block;">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            <c:forEach var="i" begin="1" end="${totalPages}">
+                                <li class="page-item ${i == page ? 'active' : ''}" style="margin: 2px;">
+                                    <a class="page-link" href="${pageContext.request.contextPath}/receptionist/room-fees?page=${i}&size=${size}"
+                                       style="border-radius: 8px; padding: 8px 12px; border: 1px solid ${i == page ? '#dfa974' : '#e5e5e5'}; background: ${i == page ? 'linear-gradient(135deg, #dfa974, #c8965a)' : 'white'}; color: ${i == page ? 'white' : '#19191a'}; text-decoration: none; display: inline-block;">
+                                        ${i}
+                                    </a>
+                                </li>
+                            </c:forEach>
+                            <li class="page-item ${page == totalPages ? 'disabled' : ''}" style="margin: 2px;">
+                                <a class="page-link" href="${pageContext.request.contextPath}/receptionist/room-fees?page=${page + 1}&size=${size}" aria-label="Next"
+                                   style="border-radius: 8px; padding: 8px 12px; border: 1px solid #e5e5e5; color: #19191a; text-decoration: none; display: inline-block;">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                        <div style="margin-top:10px; color:#6b6b6b; font-size: 12px; text-align:center;">
+                            Page ${page} of ${totalPages} • Total ${totalItems} rooms
+                            <span style="margin-left:10px;">|</span>
+                            <span style="margin-left:10px;">Per page:</span>
+                            <a href="${pageContext.request.contextPath}/receptionist/room-fees?page=1&size=10" style="margin-left:6px; ${size == 10 ? 'font-weight:700;color:#c8965a;' : ''}">10</a>
+                            <a href="${pageContext.request.contextPath}/receptionist/room-fees?page=1&size=20" style="margin-left:6px; ${size == 20 ? 'font-weight:700;color:#c8965a;' : ''}">20</a>
+                            <a href="${pageContext.request.contextPath}/receptionist/room-fees?page=1&size=50" style="margin-left:6px; ${size == 50 ? 'font-weight:700;color:#c8965a;' : ''}">50</a>
+                        </div>
+                    </nav>
+                </c:if>
             </div>
 
             <!-- Category Summary Section -->
