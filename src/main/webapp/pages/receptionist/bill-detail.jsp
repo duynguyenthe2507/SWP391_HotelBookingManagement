@@ -414,37 +414,27 @@
                                 </form>
                             </c:when>
                             <c:otherwise>
-                                <!-- View Mode -->
-                                <!-- Room Cost row -->
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                    <label class="form-label" style="font-weight: 600; color: #333; margin: 0;">Room Cost</label>
-                                    <input type="text" class="form-control" readonly
-                                           value="đ<fmt:formatNumber value='${billInfo.invoice.totalRoomCost}' pattern='#,##0.00'/>"
-                                           style="width: auto; min-width: 180px; max-width: 250px; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; background: #f8f9fa; color: #333; text-align: right;">
-                                </div>
+                                <!-- View Mode - Bill Summary Style -->
+                                <div class="calculation-section">
+                                    <div class="calculation-row">
+                                        <span class="calculation-label">Room Cost:</span>
+                                        <span class="calculation-value">đ<fmt:formatNumber value='${billInfo.invoice.totalRoomCost}' pattern='#,##0.00'/></span>
+                                    </div>
 
-                                <!-- Service Cost row -->
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                    <label class="form-label" style="font-weight: 600; color: #333; margin: 0;">Service Cost</label>
-                                    <input type="text" class="form-control" readonly
-                                           value="đ<fmt:formatNumber value='${billInfo.invoice.totalServiceCost}' pattern='#,##0.00'/>"
-                                           style="width: auto; min-width: 180px; max-width: 250px; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; background: #f8f9fa; color: #333; text-align: right;">
-                                </div>
+                                    <div class="calculation-row">
+                                        <span class="calculation-label">Service Cost:</span>
+                                        <span class="calculation-value">đ<fmt:formatNumber value='${billInfo.invoice.totalServiceCost}' pattern='#,##0.00'/></span>
+                                    </div>
 
-                                <!-- Tax Amount row -->
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                    <label class="form-label" style="font-weight: 600; color: #333; margin: 0;">Tax Amount</label>
-                                    <input type="text" class="form-control" readonly
-                                           value="đ<fmt:formatNumber value='${billInfo.invoice.taxAmount}' pattern='#,##0.00'/>"
-                                           style="width: auto; min-width: 180px; max-width: 250px; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; background: #f8f9fa; color: #333; text-align: right;">
-                                </div>
+                                    <div class="calculation-row">
+                                        <span class="calculation-label">Tax Amount:</span>
+                                        <span class="calculation-value">đ<fmt:formatNumber value='${billInfo.invoice.taxAmount}' pattern='#,##0.00'/></span>
+                                    </div>
 
-                                <!-- Total Amount row -->
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <label class="form-label" style="font-weight: 900; color: #000; margin: 0; font-size: 16px;"><b><strong>TOTAL AMOUNT</strong></b></label>
-                                    <input type="text" class="form-control" readonly
-                                           value="đ<fmt:formatNumber value='${billInfo.invoice.totalAmount}' pattern='#,##0.00'/>"
-                                           style="width: auto; min-width: 180px; max-width: 250px; padding: 12px 15px; border: 1px solid #dfa974; border-radius: 8px; font-size: 14px; font-weight: 700; background: #dfa974; color: white; text-align: right;">
+                                    <div class="calculation-row">
+                                        <span class="calculation-label">Total Amount:</span>
+                                        <span class="calculation-value">đ<fmt:formatNumber value='${billInfo.invoice.totalAmount}' pattern='#,##0.00'/></span>
+                                    </div>
                                 </div>
                             </c:otherwise>
                         </c:choose>
