@@ -45,14 +45,14 @@ public class BookingDao extends DBContext {
 
     public boolean addBooking(Booking b) {
         String sql = "INSERT INTO Booking(userId, checkinTime, checkoutTime, durationHours, status, totalPrice) "
-                   + "VALUES (?,?,?,?,?,?,?,?,?)";
+                   + "VALUES (?,?,?,?,?,?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, b.getUserId());
-            ps.setTimestamp(3, Timestamp.valueOf(b.getCheckinTime()));
-            ps.setTimestamp(4, Timestamp.valueOf(b.getCheckoutTime()));
-            ps.setDouble(5, b.getDurationHours());
-            ps.setString(6, b.getStatus());
-            ps.setDouble(7, b.getTotalPrice());
+            ps.setTimestamp(2, Timestamp.valueOf(b.getCheckinTime()));
+            ps.setTimestamp(3, Timestamp.valueOf(b.getCheckoutTime()));
+            ps.setDouble(4, b.getDurationHours());
+            ps.setString(5, b.getStatus());
+            ps.setDouble(6, b.getTotalPrice());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) { e.printStackTrace(); }
         return false;
@@ -63,12 +63,12 @@ public class BookingDao extends DBContext {
                    + "status=?, totalPrice=? WHERE bookingId=?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, b.getUserId());
-            ps.setTimestamp(3, Timestamp.valueOf(b.getCheckinTime()));
-            ps.setTimestamp(4, Timestamp.valueOf(b.getCheckoutTime()));
-            ps.setDouble(5, b.getDurationHours());
-            ps.setString(6, b.getStatus());
-            ps.setDouble(7, b.getTotalPrice());
-            ps.setInt(8, b.getBookingId());
+            ps.setTimestamp(2, Timestamp.valueOf(b.getCheckinTime()));
+            ps.setTimestamp(3, Timestamp.valueOf(b.getCheckoutTime()));
+            ps.setDouble(4, b.getDurationHours());
+            ps.setString(5, b.getStatus());
+            ps.setDouble(6, b.getTotalPrice());
+            ps.setInt(7, b.getBookingId());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) { e.printStackTrace(); }
         return false;
