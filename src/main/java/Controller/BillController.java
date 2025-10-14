@@ -209,9 +209,34 @@ public class BillController extends HttpServlet {
 
     private void handleCreateBillForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         // Get bookings without invoices
         List<Map<String, Object>> availableBookings = invoiceDao.getBookingsWithoutInvoices();
+
+        // For each booking, get detailed room and service information
+        for (Map<String, Object> booking : availableBookings) {
+            int bookingId = (Integer) booking.get("bookingId");
+
+            // Get room details
+            List<Map<String, Object>> roomDetails = invoiceDao.getBookingRoomDetails(bookingId);
+            booking.put("roomDetails", roomDetails);
+
+            // Get service details
+            List<Map<String, Object>> serviceDetails = invoiceDao.getBookingServiceDetails(bookingId);
+            booking.put("serviceDetails", serviceDetails);
+
+            // Calculate room cost and service cost separately
+            double roomCost = roomDetails.stream()
+                .mapToDouble(room -> (Double) room.get("priceAtBooking"))
+                .sum();
+            double serviceCost = serviceDetails.stream()
+                .mapToDouble(service -> (Double) service.get("price"))
+                .sum();
+
+            booking.put("roomCost", roomCost);
+            booking.put("serviceCost", serviceCost);
+        }
+
         request.setAttribute("availableBookings", availableBookings);
         request.getRequestDispatcher("/pages/receptionist/create-bill.jsp").forward(request, response);
     }

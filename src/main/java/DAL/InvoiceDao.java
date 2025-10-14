@@ -438,4 +438,57 @@ public class InvoiceDao extends DBContext {
         } catch (SQLException e) { e.printStackTrace(); }
         return bookings;
     }
+
+    // Get room details for a booking (for bill creation)
+    public List<Map<String, Object>> getBookingRoomDetails(int bookingId) {
+        List<Map<String, Object>> roomDetails = new ArrayList<>();
+        String sql = """
+            SELECT bd.*, r.name AS roomName, c.name AS categoryName, r.capacity
+            FROM BookingDetail bd
+            INNER JOIN Room r ON bd.roomId = r.roomId
+            INNER JOIN Category c ON r.categoryId = c.categoryId
+            WHERE bd.bookingId = ?
+        """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, bookingId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Map<String, Object> room = new HashMap<>();
+                room.put("roomName", rs.getString("roomName"));
+                room.put("categoryName", rs.getString("categoryName"));
+                room.put("capacity", rs.getInt("capacity"));
+                room.put("guestCount", rs.getInt("guestCount"));
+                room.put("priceAtBooking", rs.getDouble("priceAtBooking"));
+                room.put("specialRequest", rs.getString("specialRequest"));
+                roomDetails.add(room);
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return roomDetails;
+    }
+
+    // Get service details for a booking (for bill creation)
+    public List<Map<String, Object>> getBookingServiceDetails(int bookingId) {
+        List<Map<String, Object>> serviceDetails = new ArrayList<>();
+        String sql = """
+            SELECT sr.*, s.name AS serviceName, s.description
+            FROM ServiceRequest sr
+            INNER JOIN Services s ON sr.serviceTypeId = s.serviceId
+            WHERE sr.bookingId = ? AND sr.status = 'completed'
+        """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, bookingId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Map<String, Object> service = new HashMap<>();
+                service.put("serviceName", rs.getString("serviceName"));
+                service.put("description", rs.getString("description"));
+                service.put("price", rs.getDouble("price"));
+                service.put("status", rs.getString("status"));
+                serviceDetails.add(service);
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return serviceDetails;
+    }
 }

@@ -147,21 +147,17 @@ body {
     font-size: 20px;
 }
 
-/* Calculation Section - 2 Column Layout */
+/* Calculation Section - Bill Summary Style */
 .calculation-section {
     background: #f8f9fa;
     padding: 25px;
     border-radius: 10px;
     border: 2px dashed #dfa974;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
 }
 
 .calculation-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    display: flex;
+    justify-content: space-between;
     align-items: center;
     padding: 10px 0;
     border-bottom: 1px solid #e5e5e5;
@@ -169,40 +165,23 @@ body {
 
 .calculation-row:last-child {
     border-bottom: none;
-    border-top: 2px solid #dfa974;
+    font-weight: 700;
+    font-size: 18px;
+    color: #dfa974;
     margin-top: 10px;
     padding-top: 15px;
+    border-top: 2px solid #dfa974;
 }
 
 .calculation-label {
     font-weight: 600;
     color: #19191a;
-    font-size: 14px;
-    text-align: left;
 }
 
 .calculation-value {
-    text-align: right;
-}
-
-.calculation-value .form-control {
-    text-align: right;
-    font-weight: 600;
-    color: #19191a;
-}
-
-.total-row .calculation-label {
     font-weight: 700;
-    font-size: 16px;
     color: #dfa974;
-}
-
-.total-row .calculation-value .form-control {
-    font-weight: 700;
-    font-size: 16px;
-    color: #dfa974;
-    border: 2px solid #dfa974;
-    background: rgba(223, 169, 116, 0.1);
+    font-family: "Lora", serif;
 }
 
 
@@ -475,6 +454,12 @@ body {
     .details-table th,
     .details-table td {
         padding: 8px;
+    }
+
+    .calculation-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
     }
 }
 
