@@ -1,24 +1,25 @@
-package DAL;
+package Dao;
 
-import Models.Category;
+import Models.Services;
 import Utils.DBContext;
 import java.sql.*;
 import java.util.*;
 
-public class CategoryDao extends DBContext {
+public class ServicesDao extends DBContext {
 
-    private Category map(ResultSet rs) throws SQLException {
-        return new Category(
-                rs.getInt("categoryId"),
+    private Services map(ResultSet rs) throws SQLException {
+        return new Services(
+                rs.getInt("serviceId"),
                 rs.getString("name"),
+                rs.getDouble("price"),
                 rs.getString("description"),
                 rs.getTimestamp("updatedAt").toLocalDateTime()
         );
     }
 
-    public List<Category> getAll() {
-        List<Category> list = new ArrayList<>();
-        String sql = "SELECT * FROM Category";
+    public List<Services> getAll() {
+        List<Services> list = new ArrayList<>();
+        String sql = "SELECT * FROM Services";
         try (PreparedStatement ps = connection.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) list.add(map(rs));
@@ -26,8 +27,8 @@ public class CategoryDao extends DBContext {
         return list;
     }
 
-    public Category getById(int id) {
-        String sql = "SELECT * FROM Category WHERE categoryId=?";
+    public Services getById(int id) {
+        String sql = "SELECT * FROM Services WHERE serviceId=?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
@@ -36,29 +37,31 @@ public class CategoryDao extends DBContext {
         return null;
     }
 
-    public boolean insert(Category c) {
-        String sql = "INSERT INTO Category(name, description) VALUES (?,?)";
+    public boolean insert(Services s) {
+        String sql = "INSERT INTO Services(name, price, description) VALUES (?,?,?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, c.getName());
-            ps.setString(2, c.getDescription());
+            ps.setString(1, s.getName());
+            ps.setDouble(2, s.getPrice());
+            ps.setString(3, s.getDescription());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) { e.printStackTrace(); }
         return false;
     }
 
-    public boolean update(Category c) {
-        String sql = "UPDATE Category SET name=?, description=? WHERE categoryId=?";
+    public boolean update(Services s) {
+        String sql = "UPDATE Services SET name=?, price=?, description=? WHERE serviceId=?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, c.getName());
-            ps.setString(2, c.getDescription());
-            ps.setInt(3, c.getCategoryId());
+            ps.setString(1, s.getName());
+            ps.setDouble(2, s.getPrice());
+            ps.setString(3, s.getDescription());
+            ps.setInt(4, s.getServiceId());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) { e.printStackTrace(); }
         return false;
     }
 
     public boolean delete(int id) {
-        String sql = "DELETE FROM Category WHERE categoryId=?";
+        String sql = "DELETE FROM Services WHERE serviceId=?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;

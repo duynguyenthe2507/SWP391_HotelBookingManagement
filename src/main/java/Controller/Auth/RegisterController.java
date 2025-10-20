@@ -5,7 +5,7 @@
 
 package Controller.Auth;
 
-import DAL.UsersDao;
+import Dao.UsersDao;
 import Models.Users;
 import Utils.PasswordUtil;
 import jakarta.servlet.ServletException;

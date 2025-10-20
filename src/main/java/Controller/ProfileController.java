@@ -1,7 +1,7 @@
 package Controller;
 
-import DAL.UsersDao;
-import DAL.RankDao;
+import Dao.UsersDao;
+import Dao.RankDao;
 import Models.Users;
 import Models.Rank;
 import jakarta.servlet.ServletException;
@@ -36,7 +36,7 @@ public class ProfileController extends HttpServlet {
         }
 
         request.setAttribute("user", loggedInUser);
-        request.setAttribute("rankName", userRank != null ? userRank.getName() : "Chưa có hạng");
+        request.setAttribute("rankName", userRank != null ? userRank.getName() : "Unranked");
         request.getRequestDispatcher("/pages/user/profile.jsp").forward(request, response);
     }
 

@@ -1,4 +1,4 @@
-package DAL;
+package Dao;
 
 import Models.ServiceRequest;
 import Utils.DBContext;

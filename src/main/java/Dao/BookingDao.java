@@ -1,4 +1,4 @@
-package DAL;
+package Dao;
 
 import Models.Booking;
 import Utils.DBContext;
