@@ -1370,6 +1370,7 @@
                             Page ${page} of ${totalPages} • Total ${totalItems} rooms
                             <span style="margin-left:10px;">|</span>
                             <span style="margin-left:10px;">Per page:</span>
+                            <a href="${pageContext.request.contextPath}/receptionist/room-fees?page=1&size=5" style="margin-left:6px; ${size == 5 ? 'font-weight:700;color:#c8965a;' : ''}">5</a>
                             <a href="${pageContext.request.contextPath}/receptionist/room-fees?page=1&size=10" style="margin-left:6px; ${size == 10 ? 'font-weight:700;color:#c8965a;' : ''}">10</a>
                             <a href="${pageContext.request.contextPath}/receptionist/room-fees?page=1&size=20" style="margin-left:6px; ${size == 20 ? 'font-weight:700;color:#c8965a;' : ''}">20</a>
                             <a href="${pageContext.request.contextPath}/receptionist/room-fees?page=1&size=50" style="margin-left:6px; ${size == 50 ? 'font-weight:700;color:#c8965a;' : ''}">50</a>

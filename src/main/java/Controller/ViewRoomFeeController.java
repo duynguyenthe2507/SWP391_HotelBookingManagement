@@ -37,7 +37,7 @@ public class ViewRoomFeeController extends HttpServlet {
         try {
             // Parse pagination params
             int page = 1;
-            int size = 10;
+            int size = 5;
             try {
                 String pageParam = request.getParameter("page");
                 String sizeParam = request.getParameter("size");
