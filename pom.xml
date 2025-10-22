@@ -24,6 +24,13 @@
     </properties>
     
     <dependencies>
+
+        <!-- https://mvnrepository.com/artifact/com.cloudinary/cloudinary-http45 -->
+        <dependency>
+            <groupId>com.cloudinary</groupId>
+            <artifactId>cloudinary-http45</artifactId>
+            <version>1.39.0</version>
+        </dependency>
         <dependency>
             <groupId>jakarta.platform</groupId>
             <artifactId>jakarta.jakartaee-api</artifactId>

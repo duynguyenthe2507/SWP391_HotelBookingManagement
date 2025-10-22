@@ -38,4 +38,15 @@ public class WishlistDao extends DBContext {
         }
         return wishlistItems;
     }
+
+    public boolean removeFromWishlist(int wishlistId) {
+        String sql = "DELETE FROM Wishlist WHERE wishlistId = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, wishlistId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

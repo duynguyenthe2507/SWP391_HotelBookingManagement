@@ -77,6 +77,8 @@
                                         <form action="add-to-cart" method="post" style="display: inline;">
                                             <input type="hidden" name="roomId" value="${item.roomId}">
                                             <input type="hidden" name="quantity" value="1">
+                                            <input type="hidden" name="wishlistId" value="${item.wishlistId}">
+                                            <input type="hidden" name="source" value="wishlist">
                                             <button type="submit" class="btn"
                                                     style="background-color: #dfa974; color: white; border: none; font-weight: 700; text-transform: uppercase;">
                                                 Add to cart

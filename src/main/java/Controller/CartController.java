@@ -19,31 +19,47 @@ public class CartController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String action = request.getParameter("action");
         HttpSession session = request.getSession();
         Users user = (Users) session.getAttribute("loggedInUser");
 
-        // Check user login
+        // Check login
         if (user == null) {
             response.sendRedirect("login");
             return;
         }
 
-        // Lấy dữ liệu giỏ hàng từ DAO
         CartDao cartDao = new CartDao();
-        List<CartItem> cartItems = cartDao.getCartByUserId(user.getUserId());
-        System.out.println("So luong cart item lay duoc: " + cartItems.size());
-        // Gửi data tới JSP
-        request.setAttribute("cartItems", cartItems);
 
-        // TÍNH TỔNG TIỀN
+        // Check có action xoá hay không
+        if ("remove".equals(action)) {
+            try {
+                int cartId = Integer.parseInt(request.getParameter("cartId"));
+                cartDao.removeFromCart(cartId);
+
+                // Sau khi xóa thì redirect về trang giỏ hàng để tải lại dữ liệu mới
+                response.sendRedirect("cart");
+                return;
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+                response.sendRedirect("cart");
+                return;
+            }
+        }
+
+        // Lấy cart items
+        List<CartItem> cartItems = cartDao.getCartByUserId(user.getUserId());
+
         double totalPrice = 0;
         for (CartItem item : cartItems) {
             totalPrice += item.getTotalPrice();
         }
-        request.setAttribute("totalPrice", totalPrice);
 
         request.setAttribute("pageTitle", "Your Cart");
         request.setAttribute("currentPage", "Cart");
+
+        request.setAttribute("cartItems", cartItems);
+        request.setAttribute("totalPrice", totalPrice);
 
         // Chuyển tiếp tới trang Cart
         request.getRequestDispatcher("/pages/user/cart.jsp").forward(request, response);
