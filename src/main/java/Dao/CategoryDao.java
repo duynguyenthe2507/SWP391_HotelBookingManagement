@@ -12,6 +12,7 @@ public class CategoryDao extends DBContext {
                 rs.getInt("categoryId"),
                 rs.getString("name"),
                 rs.getString("description"),
+                rs.getString("imgUrl"),
                 rs.getTimestamp("updatedAt").toLocalDateTime()
         );
     }
@@ -22,7 +23,9 @@ public class CategoryDao extends DBContext {
         try (PreparedStatement ps = connection.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) list.add(map(rs));
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return list;
     }
 
