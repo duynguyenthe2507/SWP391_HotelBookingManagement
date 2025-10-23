@@ -57,9 +57,6 @@
                                 <li><a href="./contact.jsp">Contact</a></li>
                             </ul>
                         </nav>
-                        <div class="nav-right search-switch">
-                            <i class="icon_search"></i>
-                        </div>
                     </div>
                 </div>
             </div>
