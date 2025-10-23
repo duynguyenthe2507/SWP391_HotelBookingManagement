@@ -1,6 +1,6 @@
 package Controller;
 
-import DAL.InvoiceDao;
+import Dao.InvoiceDao;
 import Models.Users;
 import Utils.PdfGenerator;
 import jakarta.servlet.ServletException;

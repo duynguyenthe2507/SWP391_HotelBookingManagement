@@ -2,7 +2,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>vn.fpt.edu</groupId>
-    <artifactId>HotelAManagement</artifactId>
+    <artifactId>hmbs</artifactId>
     <version>1.0</version>
     <packaging>war</packaging>
     <name>HotelAManagement-1.0</name>
@@ -15,9 +15,22 @@
         <maven.compiler.release>11</maven.compiler.release>
         <!-- SQL Server JDBC driver version (use suffix jre11, works on JDK 17) -->
         <mssql.driver.version>12.8.1.jre11</mssql.driver.version>
+        <!--Config DB -->
+        <db.url>jdbc:sqlserver://localhost:1433;databaseName=HMBS_DB;encrypt=true;trustServerCertificate=true</db.url>
+        <db.username>sa</db.username>
+        <db.password>123</db.password>
+
+
     </properties>
     
     <dependencies>
+
+        <!-- https://mvnrepository.com/artifact/com.cloudinary/cloudinary-http45 -->
+        <dependency>
+            <groupId>com.cloudinary</groupId>
+            <artifactId>cloudinary-http45</artifactId>
+            <version>1.39.0</version>
+        </dependency>
         <dependency>
             <groupId>jakarta.platform</groupId>
             <artifactId>jakarta.jakartaee-api</artifactId>

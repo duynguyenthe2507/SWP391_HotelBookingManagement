@@ -578,3 +578,18 @@ GO
 ALTER TABLE Room
 ADD imgUrl NVARCHAR(255) NULL;
 GO
+
+-- Update 21/10/2025
+UPDATE Category SET imgUrl = 'img/category/family_category.jpg' WHERE categoryId = 1;
+UPDATE Category SET imgUrl = 'img/category/deluxe_category.jpg' WHERE categoryId = 2;
+UPDATE Category SET imgUrl = 'img/category/double_category.jpg' WHERE categoryId = 3;
+
+INSERT INTO Services (name, price, description)
+VALUES ('Laundry', 100000, 'Professional laundry service, keeping your clothes clean and fresh');
+
+ALTER TABLE Services
+    ADD iconClass VARCHAR(50);
+
+UPDATE Services SET iconClass = 'flaticon-024-towel' WHERE name = 'Laundry';
+UPDATE Services SET iconClass = 'flaticon-033-dinner' WHERE name = 'Dinner';
+UPDATE Services SET iconClass = 'flaticon-033-dinner' WHERE name = 'Lunch';

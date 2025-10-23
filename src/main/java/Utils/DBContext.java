@@ -1,10 +1,8 @@
 package Utils;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.io.InputStream;
+import java.sql.*;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,48 +11,31 @@ public class DBContext {
     public Connection connection;
 
     public DBContext() {
+        try (InputStream input = getClass().getClassLoader().getResourceAsStream("config.properties")) {
+            Properties props = new Properties();
+            props.load(input);
 
-        try {
-            String user = "sa";
-            String pass = "123456";
-            String url = "jdbc:sqlserver://localhost:1433;databaseName=HMBS_DB;encrypt=true;trustServerCertificate=true";
+            String url = props.getProperty("db.url");
+            String user = props.getProperty("db.username");
+            String pass = props.getProperty("db.password");
+
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
             connection = DriverManager.getConnection(url, user, pass);
-        } catch (ClassNotFoundException | SQLException ex) {
+        } catch (Exception ex) {
             Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-
-    public ResultSet getData(String sql) {
-        ResultSet rs = null;
-        Statement state;
-        try {
-            state = connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-            rs = state.executeQuery(sql);
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-        return rs;
     }
 
     public boolean isConnected() {
         try {
             return connection != null && !connection.isClosed();
         } catch (SQLException ex) {
-            Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
     }
 
-    // Phương thức main để kiểm tra kết nối
     public static void main(String[] args) {
-        DBContext dbContext = new DBContext();
-        if (dbContext.isConnected()) {
-            System.out.println("Kết nối cơ sở dữ liệu thành công!");
-        } else {
-            System.out.println("Kết nối cơ sở dữ liệu thất bại.");
-        }
-
+        DBContext db = new DBContext();
+        System.out.println(db.isConnected() ? "Kết nối thành công!" : "Thất bại!");
     }
-
 }
