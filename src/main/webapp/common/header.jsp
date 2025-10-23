@@ -55,6 +55,7 @@
                                 <li class="active"><a href="${pageContext.request.contextPath}/home">Home</a></li>
                                 <li><a href="${pageContext.request.contextPath}/rooms">Rooms</a></li>
                                 <li><a href="./contact.jsp">Contact</a></li>
+                                <li><a href="${pageContext.request.contextPath}/rules">Rules</a></li>
                             </ul>
                         </nav>
                     </div>
