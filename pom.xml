@@ -11,9 +11,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <failOnMissingWebXml>false</failOnMissingWebXml>
         <jakartaee>10.0.0</jakartaee>
-        <!-- Default to Java 11; profiles will override when building with JDK 17 -->
         <maven.compiler.release>11</maven.compiler.release>
-        <!-- SQL Server JDBC driver version (use suffix jre11, works on JDK 17) -->
         <mssql.driver.version>12.8.1.jre11</mssql.driver.version>
         <!--Config DB -->
         <db.url>jdbc:sqlserver://localhost:1433;databaseName=HMBS_DB;encrypt=true;trustServerCertificate=true</db.url>

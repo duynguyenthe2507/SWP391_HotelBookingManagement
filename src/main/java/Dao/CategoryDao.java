@@ -1,9 +1,9 @@
-package DAL;
+package Dao;
 
 import Models.Category;
 import Utils.DBContext;
 import java.sql.*;
-import java.time.LocalDateTime; // Cần import LocalDateTime
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;

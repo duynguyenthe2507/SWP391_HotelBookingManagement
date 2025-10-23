@@ -18,7 +18,7 @@ public class CartItem {
     private int roomId;
     private String roomName;
     private double price;
-    private String roomImgUrl; // Giả sử bảng Room có cột imgUrl
+    private String roomImgUrl;
 
     // Thuộc tính tính toán
     public double getTotalPrice() {
