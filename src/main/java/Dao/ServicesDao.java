@@ -13,6 +13,7 @@ public class ServicesDao extends DBContext {
                 rs.getString("name"),
                 rs.getDouble("price"),
                 rs.getString("description"),
+                rs.getString("iconClass"),
                 rs.getTimestamp("updatedAt").toLocalDateTime()
         );
     }

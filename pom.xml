@@ -2,7 +2,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>vn.fpt.edu</groupId>
-    <artifactId>HotelAManagement</artifactId>
+    <artifactId>hmbs</artifactId>
     <version>1.0</version>
     <packaging>war</packaging>
     <name>HotelAManagement-1.0</name>
@@ -24,6 +24,13 @@
     </properties>
     
     <dependencies>
+
+        <!-- https://mvnrepository.com/artifact/com.cloudinary/cloudinary-http45 -->
+        <dependency>
+            <groupId>com.cloudinary</groupId>
+            <artifactId>cloudinary-http45</artifactId>
+            <version>1.39.0</version>
+        </dependency>
         <dependency>
             <groupId>jakarta.platform</groupId>
             <artifactId>jakarta.jakartaee-api</artifactId>
@@ -63,6 +70,12 @@
             <groupId>com.sun.mail</groupId>
             <artifactId>jakarta.mail</artifactId>
             <version>2.0.1</version>
+        </dependency>
+        <!-- iText PDF library for PDF generation -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>itextpdf</artifactId>
+            <version>5.5.13.3</version>
         </dependency>
     </dependencies>
     
