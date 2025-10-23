@@ -1,0 +1,472 @@
+/* Enhanced Professional Styles for Bill Detail */
+
+/* Page Layout & Background */
+body {
+    background: #f8f9fa;
+    font-family: "Cabin", sans-serif;
+}
+
+/* Professional Header Section */
+.receptionist-header {
+    background: linear-gradient(135deg, #dfa974 0%, #c8965a 100%);
+    color: white;
+    padding: 40px 0;
+    margin-bottom: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.receptionist-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    opacity: 0.3;
+}
+
+.receptionist-header .container {
+    position: relative;
+    z-index: 2;
+}
+
+.receptionist-header h2 {
+    color: white;
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.receptionist-header p {
+    color: rgba(255, 255, 255, 0.9);
+    margin: 10px 0 0 0;
+    font-size: 1.1rem;
+    font-weight: 300;
+}
+
+.receptionist-header .fa {
+    margin-right: 10px;
+    font-size: 2rem;
+    vertical-align: middle;
+}
+
+/* Main Content Area */
+.main-content {
+    background: white;
+    margin: -20px 0 0 0;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+    padding: 40px 0;
+    position: relative;
+    z-index: 1;
+}
+
+/* Bill Information Cards */
+.bill-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 30px;
+    overflow: hidden;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #dfa974 0%, #c8965a 100%);
+    padding: 20px 30px;
+    color: white;
+}
+
+.card-header h4 {
+    margin: 0;
+    color: white;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.card-header h4 i {
+    margin-right: 10px;
+}
+
+.card-body {
+    padding: 30px;
+}
+
+/* Bill Summary - Force 3x2 Layout */
+.bill-summary {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    grid-template-rows: repeat(2, auto) !important;
+    gap: 20px !important;
+    margin-bottom: 30px;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden;
+}
+
+.summary-item {
+    background: #f8f9fa !important;
+    padding: 20px !important;
+    border-radius: 10px !important;
+    border-left: 4px solid #dfa974 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    min-height: 80px !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    float: none !important;
+    position: relative !important;
+}
+
+.summary-label {
+    font-size: 12px;
+    color: #6b6b6b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+}
+
+.summary-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #19191a;
+}
+
+.summary-value.amount {
+    color: #dfa974;
+    font-family: "Lora", serif;
+    font-size: 20px;
+}
+
+/* Calculation Section - Bill Summary Style */
+.calculation-section {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 10px;
+    border: 2px dashed #dfa974;
+}
+
+.calculation-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.calculation-row:last-child {
+    border-bottom: none;
+    font-weight: 700;
+    font-size: 18px;
+    color: #dfa974;
+    margin-top: 10px;
+    padding-top: 15px;
+    border-top: 2px solid #dfa974;
+}
+
+.calculation-label {
+    font-weight: 600;
+    color: #19191a;
+}
+
+.calculation-value {
+    font-weight: 700;
+    color: #dfa974;
+    font-family: "Lora", serif;
+}
+
+
+/* Customer Information - All items in one row */
+.customer-info {
+    display: grid !important;
+    grid-template-columns: repeat(6, 1fr) !important;
+    grid-template-rows: 1fr !important;
+    gap: 15px !important;
+    width: 100% !important;
+    overflow-x: auto;
+}
+
+.info-item {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 10px !important;
+    background: #f8f9fa !important;
+    border-radius: 8px !important;
+    border-left: 3px solid #dfa974 !important;
+}
+
+.info-label {
+    font-size: 12px;
+    color: #6b6b6b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+}
+
+.info-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #19191a;
+}
+
+/* Room Details Table */
+.details-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.details-table th {
+    background: #f8f9fa;
+    padding: 12px;
+    text-align: left;
+    font-weight: 700;
+    color: #19191a;
+    border-bottom: 2px solid #e5e5e5;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.details-table td {
+    padding: 12px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+}
+
+.details-table tr:hover {
+    background: rgba(223, 169, 116, 0.05);
+}
+
+/* Form Styles for Edit Mode */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #19191a;
+    font-size: 14px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e5e5e5;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #dfa974;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(223, 169, 116, 0.1);
+}
+
+.form-control[readonly] {
+    background: #f8f9fa;
+    color: #6b6b6b;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.action-btn.primary {
+    background: linear-gradient(135deg, #dfa974, #c8965a);
+    color: white;
+}
+
+.action-btn.primary:hover {
+    background: linear-gradient(135deg, #c8965a, #b8855a);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(223, 169, 116, 0.3);
+    color: white;
+}
+
+.action-btn.secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.action-btn.secondary:hover {
+    background: #5a6268;
+    color: white;
+}
+
+.action-btn.success {
+    background: #28a745;
+    color: white;
+}
+
+.action-btn.success:hover {
+    background: #218838;
+    color: white;
+}
+
+.action-btn.danger {
+    background: #dc3545;
+    color: white;
+}
+
+.action-btn.danger:hover {
+    background: #c82333;
+    color: white;
+}
+
+/* Status Badge */
+.status-badge {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
+}
+
+.status-confirmed {
+    background: linear-gradient(135deg, #d4edda, #c3e6cb);
+    color: #155724;
+}
+
+.status-pending {
+    background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+    color: #856404;
+}
+
+.status-cancelled {
+    background: linear-gradient(135deg, #f8d7da, #f1b0b7);
+    color: #721c24;
+}
+
+/* Alert Messages */
+.alert {
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    border: 1px solid;
+}
+
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    border-color: #c3e6cb;
+}
+
+.alert-error {
+    background: #f8d7da;
+    color: #721c24;
+    border-color: #f1b0b7;
+}
+
+/* Print Styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    body {
+        background: white;
+    }
+    
+    .main-content {
+        box-shadow: none;
+        margin: 0;
+        border-radius: 0;
+    }
+    
+    .bill-card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .bill-summary {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 1200px) {
+    .customer-info {
+        grid-template-columns: repeat(3, 1fr) !important;
+        grid-template-rows: repeat(2, 1fr) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .bill-summary {
+        grid-template-columns: 1fr;
+        grid-template-rows: repeat(6, 1fr);
+    }
+    
+    .customer-info {
+        grid-template-columns: repeat(2, 1fr) !important;
+        grid-template-rows: repeat(3, 1fr) !important;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .details-table {
+        font-size: 12px;
+    }
+    
+    .details-table th,
+    .details-table td {
+        padding: 8px;
+    }
+
+    .calculation-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .customer-info {
+        grid-template-columns: 1fr !important;
+        grid-template-rows: repeat(6, 1fr) !important;
+    }
+}
+
