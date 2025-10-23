@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+
 import java.io.IOException;
 
 @WebServlet("/login")
@@ -66,10 +67,21 @@ public class LoginController extends HttpServlet {
             // Password is correct, proceed to login
             HttpSession session = request.getSession();
             session.setAttribute("loggedInUser", u);
+            session.setAttribute("role", u.getRole());
+        }
+        // Kiểm tra role và điều hướng
+        String role = (u.getRole() != null) ? u.getRole().trim() : "";
+
+        if ("Receptionist".equalsIgnoreCase(role)) {
+            // Nếu là lễ tân → vào trang dashboard riêng
+            response.sendRedirect(request.getContextPath() + "/pages/Receptionist/dashboard.jsp");
+            return;
+        } else {
+            // User thường → vào home
             response.sendRedirect(request.getContextPath() + "/home");
+            return;
         }
     }
-
     @Override
     public String getServletInfo() {
         return "Login Servlet - Handles user authentication";

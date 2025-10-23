@@ -593,3 +593,36 @@ ALTER TABLE Services
 UPDATE Services SET iconClass = 'flaticon-024-towel' WHERE name = 'Laundry';
 UPDATE Services SET iconClass = 'flaticon-033-dinner' WHERE name = 'Dinner';
 UPDATE Services SET iconClass = 'flaticon-033-dinner' WHERE name = 'Lunch';
+
+
+-- Update: Rules :23/10/2025
+CREATE TABLE Rules (
+                       ruleId INT IDENTITY(1,1) PRIMARY KEY,
+                       title NVARCHAR(255) NOT NULL,
+                       description NVARCHAR(MAX) NOT NULL,
+                       status BIT DEFAULT 1, -- 1 = Active, 0 = Inactive
+                       createdAt DATETIME DEFAULT GETDATE(),
+                       updatedAt DATETIME DEFAULT GETDATE()
+);
+GO
+
+-- Trigger cập nhật thời gian khi sửa rule
+CREATE TRIGGER trg_update_rules
+    ON Rules
+    AFTER UPDATE
+              AS
+BEGIN
+UPDATE Rules
+SET updatedAt = GETDATE()
+    FROM Rules
+    INNER JOIN inserted ON Rules.ruleId = inserted.ruleId;
+END;
+GO
+
+-- Dữ liệu mẫu
+INSERT INTO Rules (title, description, status)
+VALUES
+(N'Check-in / Check-out', N'Khách có thể nhận phòng từ 14h và trả phòng trước 12h trưa hôm sau.', 1),
+(N'Không hút thuốc', N'Vui lòng không hút thuốc trong phòng hoặc khu vực công cộng.', 1),
+(N'Thu cưng', N'Không mang thú cưng vào khách sạn.', 1);
+GO
