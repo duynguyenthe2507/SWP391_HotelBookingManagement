@@ -1,7 +1,7 @@
 package Controller;
 
-import DAL.RoomDao;
-import DAL.CategoryDao;
+import Dao.RoomDao;
+import Dao.CategoryDao;
 import Models.Room;
 import Models.Category;
 import Models.Users;

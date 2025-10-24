@@ -5,20 +5,16 @@
         <servlet-class>Controller.ProfileController</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>VerifyController</servlet-name>
-        <servlet-class>Controller.VerifyController</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>ForgotPasswordController</servlet-name>
-        <servlet-class>Controller.ForgotPasswordController</servlet-class>
+        <servlet-class>Controller.Auth.ForgotPasswordController</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>OTPController</servlet-name>
-        <servlet-class>Controller.OTPController</servlet-class>
+        <servlet-class>Controller.Auth.OTPController</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>ResetPasswordController</servlet-name>
-        <servlet-class>Controller.ResetPasswordController</servlet-class>
+        <servlet-class>Controller.Auth.ResetPasswordController</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>EmailUtil</servlet-name>
@@ -27,10 +23,6 @@
     <servlet-mapping>
         <servlet-name>ProfileController</servlet-name>
         <url-pattern>/profile</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>VerifyController</servlet-name>
-        <url-pattern>/verify</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ForgotPasswordController</servlet-name>

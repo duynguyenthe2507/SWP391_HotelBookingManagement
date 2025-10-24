@@ -15,4 +15,6 @@ public class Room {
     private String status; // available / booked / maintenance
     private String description;
     private LocalDateTime updatedAt;
+    private String imgUrl;
+    private Category category;
 }
