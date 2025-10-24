@@ -266,7 +266,7 @@
                                 <h4>Reviews</h4>
                                 <div class="review-item">
                                     <div class="ri-pic">
-                                        <img src="${pageContext.request.contextPath}/img/room/avatar/avatar-1.jpg" alt="">
+                                        <img src="${pageContext.request.contextPath}/img/room/avatar/default-avatar.png" alt="">
                                     </div>
                                     <div class="ri-text">
                                         <span>27 Aug 2019</span>
@@ -285,7 +285,7 @@
                                 </div>
                                 <div class="review-item">
                                     <div class="ri-pic">
-                                        <img src="${pageContext.request.contextPath}/img/room/avatar/avatar-2.jpg" alt="">
+                                        <img src="${pageContext.request.contextPath}/img/room/avatar/default-avatar.png" alt="">
                                     </div>
                                     <div class="ri-text">
                                         <span>27 Aug 2019</span>
