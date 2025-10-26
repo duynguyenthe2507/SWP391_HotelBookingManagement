@@ -16,13 +16,16 @@ import java.time.format.DateTimeParseException;
 import Services.CloudinaryService; // Import CloudinaryService
 import jakarta.servlet.annotation.MultipartConfig; // Import cho multipart
 import jakarta.servlet.http.Part;
+import java.util.regex.Pattern;
 
-@WebServlet(name = "ProfileController", urlPatterns = { "/profile" })
+@WebServlet(name = "ProfileController", urlPatterns = {"/profile"})
 // hỗ trợ upload file
 @MultipartConfig(fileSizeThreshold = 1024 * 1024, maxFileSize = 1024 * 1024 * 5, maxRequestSize = 1024 * 1024 * 10)
 
 public class ProfileController extends HttpServlet {
 
+    //khởi tạo pattern password theo yêu cầu
+    private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d@$!%*#?&]{8,}$");
     private CloudinaryService cloudinaryService;
 
     public void init() {
@@ -97,7 +100,7 @@ public class ProfileController extends HttpServlet {
                 }
             }
 
-            // Basic validation
+            // Validate các trường rỗng cơ bản
             if (firstName == null || firstName.trim().isEmpty()
                     || lastName == null || lastName.trim().isEmpty()
                     || phone == null || phone.trim().isEmpty()
@@ -143,7 +146,13 @@ public class ProfileController extends HttpServlet {
 
             if (udao.update(loggedInUser)) {
                 session.setAttribute("loggedInUser", loggedInUser);
-                request.setAttribute("success", "Profile updated successfully!");
+                //validate password theo đúng form ở backend 
+                if (!PASSWORD_PATTERN.matcher(password).matches()) {
+                    request.setAttribute("error", "Password must have 8 characters, including word and number!");
+                    session.setAttribute("loggedInUser", loggedInUser);
+                } else {
+                    request.setAttribute("success", "Profile updated successfully!");
+                }
             } else {
                 request.setAttribute("error", "Updated failed! Please try again.");
             }
