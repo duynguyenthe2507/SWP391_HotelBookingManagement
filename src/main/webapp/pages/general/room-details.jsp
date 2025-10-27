@@ -623,7 +623,7 @@
                                         <img src="${pageContext.request.contextPath}/img/room/avatar/default-avatar.png" alt="">
                                     </div>
                                     <div class="ri-text">
-                                        <span>27 Aug 2019</span>
+                                        <span>27 Aug 2025</span>
                                         <div class="rating">
                                             <i class="icon_star"></i>
                                             <i class="icon_star"></i>
@@ -642,7 +642,7 @@
                                         <img src="${pageContext.request.contextPath}/img/room/avatar/default-avatar.png" alt="">
                                     </div>
                                     <div class="ri-text">
-                                        <span>27 Aug 2019</span>
+                                        <span>27 Aug 2025</span>
                                         <div class="rating">
                                             <i class="icon_star"></i>
                                             <i class="icon_star"></i>
