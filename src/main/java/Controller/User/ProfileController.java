@@ -1,4 +1,4 @@
-package Controller;
+package Controller.User;
 
 import Dao.UsersDao;
 import Dao.RankDao;

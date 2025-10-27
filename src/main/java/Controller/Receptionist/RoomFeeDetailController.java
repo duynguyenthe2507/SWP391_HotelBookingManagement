@@ -1,4 +1,4 @@
-package Controller;
+package Controller.Receptionist;
 
 import Dao.RoomDao;
 import Dao.CategoryDao;

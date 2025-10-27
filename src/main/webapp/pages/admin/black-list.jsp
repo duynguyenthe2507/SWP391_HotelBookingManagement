@@ -1,9 +1,3 @@
-<%-- 
-    Document   : black-list
-    Created on : Oct 22, 2025, 12:19:17 AM
-    Author     : Dell
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>

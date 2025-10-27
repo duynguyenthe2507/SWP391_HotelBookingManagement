@@ -1,4 +1,4 @@
-package Controller;
+package Controller.User;
 
 import Services.EmailService;
 import jakarta.servlet.ServletException;
