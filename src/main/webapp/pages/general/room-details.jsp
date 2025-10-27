@@ -78,7 +78,7 @@
             box-shadow: 0 4px 12px rgba(223, 169, 116, 0.4);
         }
 
-        /* Header Improvements */
+/*         Header Improvements 
         .header-section .top-nav {
             background-color: #f8f9fa;
             padding: 15px 0;
@@ -130,7 +130,7 @@
         .header-section .menu-item {
             padding: 1px 0;
             border-bottom: 1px solid #e0e0e0;
-        }
+        }*/
 
         /* Room Details Section */
         .room-details-section {
@@ -479,7 +479,7 @@
         <div class="search-icon search-switch">
             <i class="icon_search"></i>
         </div>
-        <div class="header-configure-area">
+<!--        <div class="header-configure-area">
             <div class="language-option">
                 <img src="${pageContext.request.contextPath}/img/flag.jpg" alt="">
                 <span>EN <i class="fa fa-angle-down"></i></span>
@@ -502,7 +502,7 @@
                     <a href="${pageContext.request.contextPath}/logout" class="bk-btn" style="margin-left: 5px;">Logout</a>
                 </c:otherwise>
             </c:choose>
-        </div>
+        </div>-->
         <nav class="mainmenu mobile-menu">
             <ul>
                 <li class="${(requestScope.activeMenu == 'home') ? 'active' : ''}">
@@ -533,77 +533,7 @@
     </div>
 
     <!-- Header Section -->
-    <header class="header-section">
-        <div class="top-nav">
-            <div class="container">
-                <div class="row align-items-center">
-                    <div class="col-lg-4 col-md-4 col-sm-6">
-                        <ul class="tn-left">
-                            <li><i class="fa fa-phone"></i> (84) 359 797 703</li>
-                            <li><i class="fa fa-envelope"></i> 36hotel@gmail.com</li>
-                        </ul>
-                    </div>
-                    <div class="col-lg-4 col-md-4 d-none d-md-block text-center">
-                        <div class="top-social">
-                            <a href="#"><i class="fa fa-facebook"></i></a>
-                            <a href="#"><i class="fa fa-twitter"></i></a>
-                            <a href="#"><i class="fa fa-tripadvisor"></i></a>
-                            <a href="#"><i class="fa fa-instagram"></i></a>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-4 col-sm-6">
-                        <div class="tn-right">
-                            <c:choose>
-                                <c:when test="${sessionScope.loggedInUser == null}">
-                                    <a href="${pageContext.request.contextPath}/login" class="bk-btn">Login</a>
-                                    <a href="${pageContext.request.contextPath}/register" class="bk-btn">Be our member</a>
-                                </c:when>
-                                <c:otherwise>
-                                    <a href="${pageContext.request.contextPath}/profile" class="bk-btn">Profile</a>
-                                    <a href="${pageContext.request.contextPath}/cart" class="bk-btn">Cart</a>
-                                    <a href="${pageContext.request.contextPath}/wishlist" class="bk-btn">Wishlist</a>
-                                    <a href="${pageContext.request.contextPath}/logout" class="bk-btn">Logout</a>
-                                </c:otherwise>
-                            </c:choose>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="menu-item">
-            <div class="container">
-                <div class="row align-items-center">
-                    <div class="col-lg-2">
-                        <div class="logo">
-                            <a href="${pageContext.request.contextPath}/home">
-                                <h1>36</h1>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-lg-10">
-                        <div class="nav-menu">
-                            <nav class="mainmenu">
-                                <ul>
-                                    <li class="${(requestScope.activeMenu == 'home') ? 'active' : ''}">
-                                        <a href="${pageContext.request.contextPath}/home">Home</a>
-                                    </li>
-                                    <li class="${(requestScope.activeMenu == 'rooms') ? 'active' : ''}">
-                                        <a href="${pageContext.request.contextPath}/rooms">Rooms</a>
-                                    </li>
-                                    <li class="${(requestScope.activeMenu == 'contact') ? 'active' : ''}">
-                                        <a href="${pageContext.request.contextPath}/contact">Contact</a>
-                                    </li>
-                                    <li class="${(requestScope.activeMenu == 'rules') ? 'active' : ''}">
-                                        <a href="${pageContext.request.contextPath}/rules">Rules</a>
-                                    </li>
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
+    <jsp:include page="/common/header.jsp"/>
 
     <!-- Breadcrumb Section -->
     <div class="breadcrumb-section">
@@ -809,71 +739,7 @@
         </div>
     </section>
 
-    <!-- Footer Section -->
-    <footer class="footer-section">
-        <div class="container">
-            <div class="footer-text">
-                <div class="row">
-                    <div class="col-lg-4">
-                        <div class="ft-about">
-                            <div class="logo">
-                                <a href="${pageContext.request.contextPath}/home">
-                                    <img src="${pageContext.request.contextPath}/img/footer-logo.png" alt="">
-                                </a>
-                            </div>
-                            <p>We inspire and reach millions of travelers<br /> across 90 local websites</p>
-                            <div class="fa-social">
-                                <a href="https://only-fans.me/highaileri"><i class="fa fa-facebook"></i></a>
-                                <a href="https://only-fans.me/highaileri"><i class="fa fa-twitter"></i></a>
-                                <a href="https://only-fans.me/highaileri"><i class="fa fa-tripadvisor"></i></a>
-                                <a href="https://only-fans.me/highaileri"><i class="fa fa-instagram"></i></a>
-                                <a href="https://only-fans.me/highaileri"><i class="fa fa-youtube-play"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 offset-lg-1">
-                        <div class="ft-contact">
-                            <h6>Contact Us</h6>
-                            <ul>
-                                <li>(84) 359 797 703</li>
-                                <li>36hotel@gmail.com</li>
-                                <li>Thanh Hoa, Viet Nam</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 offset-lg-1">
-                        <div class="ft-newslatter">
-                            <h6>Latest News</h6>
-                            <p>Get the latest updates and offers.</p>
-                            <form action="#" method="post" class="fn-form">
-                                <input type="text" placeholder="Email">
-                                <button type="submit"><i class="fa fa-send"></i></button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="copyright-option">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-7">
-                        <ul>
-                            <li><a href="https://only-fans.me/highaileri">Contact</a></li>
-                            <li><a href="https://only-fans.me/highaileri">Terms of use</a></li>
-                            <li><a href="https://only-fans.me/highaileri">Privacy</a></li>
-                            <li><a href="https://only-fans.me/highaileri">Environmental Policy</a></li>
-                        </ul>
-                    </div>
-                    <div class="col-lg-5">
-                        <div class="co-text">
-                            <p>Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved by 36 Hotel</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <jsp:include page="/common/footer.jsp"/>
 
     <!-- Search Model -->
     <div class="search-model">
