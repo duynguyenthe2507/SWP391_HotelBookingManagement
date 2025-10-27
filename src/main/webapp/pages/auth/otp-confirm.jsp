@@ -164,7 +164,6 @@
             name="otp"
             class="form-input"
             required
-            placeholder="000000"
             maxlength="6"
             pattern="[0-9]{6}"
             title="Please enter 6 digits"
