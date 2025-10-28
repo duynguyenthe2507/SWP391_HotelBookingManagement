@@ -591,3 +591,41 @@ VALUES
 (N'Check-in / Check-out', N'Khách có thể nhận phòng từ 14h và trả phòng trước 12h trưa hôm sau.', 1),
 (N'Không hút thuốc', N'Vui lòng không hút thuốc trong phòng hoặc khu vực công cộng.', 1),
 (N'Thu cưng', N'Không mang thú cưng vào khách sạn.', 1);
+
+-- Update 28/10/2025
+
+
+ALTER TABLE Booking
+ALTER COLUMN userId INT NULL;
+
+ALTER TABLE Booking
+    ADD
+        roomId INT NOT NULL,
+    receptionistId INT NULL,
+    guestName NVARCHAR(255) NULL,
+    guestCount INT NOT NULL DEFAULT 1,
+    specialRequest NVARCHAR(1000) NULL;
+
+ALTER TABLE Booking
+DROP COLUMN durationHours;
+
+ALTER TABLE Booking
+    ADD CONSTRAINT FK_Booking_Room
+        FOREIGN KEY (roomId) REFERENCES Room(roomId);
+
+ALTER TABLE Booking
+    ADD CONSTRAINT FK_Booking_Receptionist
+        FOREIGN KEY (receptionistId) REFERENCES Users(userId);
+
+ALTER TABLE Booking
+DROP CONSTRAINT CK__Booking__status__59063A47;
+
+ALTER TABLE Booking
+    ADD CONSTRAINT CK_Booking_Status_Allowed
+        CHECK (status IN (
+                          'pending',
+                          'confirmed',
+                          'cancelled',
+                          'checked-in',
+                          'checked-out'
+            ));
