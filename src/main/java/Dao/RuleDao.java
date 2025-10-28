@@ -6,7 +6,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RuleDao {
+public class RuleDao extends DBContext {
 
     // Lấy tất cả các Rule (cho lễ tân hoặc admin)
     public List<Rule> getAllRules() {
