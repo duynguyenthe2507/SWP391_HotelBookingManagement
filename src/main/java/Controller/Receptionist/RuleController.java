@@ -29,7 +29,7 @@ public class RuleController extends HttpServlet {
 
                 if (user != null && "receptionist".equalsIgnoreCase(user.getRole())) {
                     // Receptionist có thể quản lý
-                    request.getRequestDispatcher("/pages/Receptionist/rules-list.jsp").forward(request, response);
+                    request.getRequestDispatcher("/pages/receptionist/rules-list.jsp").forward(request, response);
                 } else {
                     // User chỉ xem
                     request.getRequestDispatcher("/pages/user/rules.jsp").forward(request, response);
@@ -42,7 +42,7 @@ public class RuleController extends HttpServlet {
                     int id = Integer.parseInt(request.getParameter("id"));
                     Rule rule = ruleDao.getRuleById(id);
                     request.setAttribute("rule", rule);
-                    request.getRequestDispatcher("/pages/Receptionist/rules-edit.jsp").forward(request, response);
+                    request.getRequestDispatcher("/pages/receptionist/rules-edit.jsp").forward(request, response);
                 } catch (Exception e) {
                     e.printStackTrace();
                     response.sendRedirect(request.getContextPath() + "/rules");
@@ -122,7 +122,7 @@ public class RuleController extends HttpServlet {
             e.printStackTrace();
             request.setAttribute("error", "Lưu thất bại: " + e.getMessage());
             request.setAttribute("rules", ruleDao.getAllRules());
-            request.getRequestDispatcher("/pages/Receptionist/rules-list.jsp").forward(request, response);
+            request.getRequestDispatcher("/pages/receptionist/rules-list.jsp").forward(request, response);
         }
     }
 }
