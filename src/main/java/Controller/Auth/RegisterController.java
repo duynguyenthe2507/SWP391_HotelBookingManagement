@@ -15,10 +15,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDate;
-
+import java.util.regex.Pattern;//import cái này để dùng pattern regex theo yêu cầu
 @WebServlet("/register")
 public class RegisterController extends HttpServlet {
-
+    
+    //tạo pattern regex để validate password
+    private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d@$!%*#?&]{8,}$");
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -35,12 +37,19 @@ public class RegisterController extends HttpServlet {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
         String birthday = request.getParameter("dob");
-
+        
+        //validate cơ bản
         if (isBlank(firstName) || isBlank(lastName) || isBlank(mobilePhone) || isBlank(email) || isBlank(password)) {
             request.setAttribute("error", "Please fill all the fields above.");
             request.getRequestDispatcher("/pages/auth/register.jsp").forward(request, response);
             return;
         }
+        //validate password ở backend
+        if (!PASSWORD_PATTERN.matcher(password).matches()){
+            request.setAttribute("error", "Password must contain at least 8 characters, including word and number!");
+            request.getRequestDispatcher("/pages/auth/register.jsp").forward(request, response);
+        }
+        
 
         UsersDao usersDao = new UsersDao();
         if (usersDao.getByMobilePhone(mobilePhone) != null) {

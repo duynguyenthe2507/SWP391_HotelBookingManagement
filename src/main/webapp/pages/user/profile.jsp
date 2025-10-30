@@ -255,8 +255,6 @@
         </div>
       </div>
     </div>
-    <%-- Include Footer --%>
-    <jsp:include page="/common/footer.jsp" />
     <script>
       function logout() {
         if (confirm("Are you sure you want to logout?")) {

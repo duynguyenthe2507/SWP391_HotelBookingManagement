@@ -1,8 +1,7 @@
-package Controller;
+package Controller.Receptionist;
 
 import Dao.RoomDao;
 import Dao.CategoryDao;
-import Models.Room;
 import Models.Category;
 import Models.Users;
 import jakarta.servlet.ServletException;

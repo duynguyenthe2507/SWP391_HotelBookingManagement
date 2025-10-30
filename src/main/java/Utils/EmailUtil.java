@@ -132,8 +132,8 @@ public class EmailUtil {
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress(EMAIL_USERNAME));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
-            message.setSubject(subject); // Dùng chủ đề tùy chỉnh
-            message.setContent(htmlContent, "text/html; charset=utf-8"); // Dùng nội dung tùy chỉnh
+            message.setSubject(subject);
+            message.setContent(htmlContent, "text/html; charset=utf-8");
 
             Transport.send(message);
             return true;

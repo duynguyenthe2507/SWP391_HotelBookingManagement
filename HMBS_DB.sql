@@ -561,24 +561,19 @@ UPDATE Services SET iconClass = 'flaticon-024-towel' WHERE name = 'Laundry';
 UPDATE Services SET iconClass = 'flaticon-033-dinner' WHERE name = 'Dinner';
 UPDATE Services SET iconClass = 'flaticon-033-dinner' WHERE name = 'Lunch';
 
-<<<<<<< HEAD
 --update 23/10/2025
 ALTER TABLE Users
 ADD avatar_url NVARCHAR(500) NULL DEFAULT '/img/room/avatar/default-avatar.png';
-=======
 
--- Update: Rules :23/10/2025
 CREATE TABLE Rules (
                        ruleId INT IDENTITY(1,1) PRIMARY KEY,
                        title NVARCHAR(255) NOT NULL,
                        description NVARCHAR(MAX) NOT NULL,
-                       status BIT DEFAULT 1, -- 1 = Active, 0 = Inactive
+                       status BIT DEFAULT 1,
                        createdAt DATETIME DEFAULT GETDATE(),
                        updatedAt DATETIME DEFAULT GETDATE()
 );
-GO
 
--- Trigger cập nhật thời gian khi sửa rule
 CREATE TRIGGER trg_update_rules
     ON Rules
     AFTER UPDATE
@@ -591,11 +586,8 @@ SET updatedAt = GETDATE()
 END;
 GO
 
--- Dữ liệu mẫu
 INSERT INTO Rules (title, description, status)
 VALUES
 (N'Check-in / Check-out', N'Khách có thể nhận phòng từ 14h và trả phòng trước 12h trưa hôm sau.', 1),
 (N'Không hút thuốc', N'Vui lòng không hút thuốc trong phòng hoặc khu vực công cộng.', 1),
 (N'Thu cưng', N'Không mang thú cưng vào khách sạn.', 1);
->>>>>>> 09230bf4f10612421680170403ad770e37831bd3
-GO
