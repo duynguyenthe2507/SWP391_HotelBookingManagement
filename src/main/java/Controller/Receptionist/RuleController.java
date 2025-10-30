@@ -45,23 +45,21 @@ public class RuleController extends HttpServlet {
                     request.getRequestDispatcher("/pages/receptionist/rules-edit.jsp").forward(request, response);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    response.sendRedirect(request.getContextPath() + "/rules");
+                    response.sendRedirect(request.getContextPath() + "/common/SideBar.jsp");
                 }
                 break;
 
             case "/rules/delete":
-                // Xóa Rule
                 try {
                     int deleteId = Integer.parseInt(request.getParameter("id"));
                     ruleDao.deleteRule(deleteId);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                response.sendRedirect(request.getContextPath() + "/rules");
+                response.sendRedirect(request.getContextPath() + "/common/SideBar.jsp");
                 break;
-
             default:
-                response.sendRedirect(request.getContextPath() + "/rules");
+                response.sendRedirect(request.getContextPath() + "/common/SideBar.jsp");
         }
     }
 
@@ -115,8 +113,9 @@ public class RuleController extends HttpServlet {
 
                 ruleDao.updateRule(rule);
             }
+            // Sau khi lưu thành công, chuyển sang trang SideBar.jsp
+            response.sendRedirect(request.getContextPath() + "/common/SideBar.jsp");
 
-            response.sendRedirect(request.getContextPath() + "/rules");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -125,4 +124,5 @@ public class RuleController extends HttpServlet {
             request.getRequestDispatcher("/pages/receptionist/rules-list.jsp").forward(request, response);
         }
     }
+
 }
