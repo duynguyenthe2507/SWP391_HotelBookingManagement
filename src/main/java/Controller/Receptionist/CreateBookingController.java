@@ -22,14 +22,14 @@ import java.util.List;
 @WebServlet("/receptionist/create-booking")
 public class CreateBookingController extends HttpServlet {
 
-    private RoomDao roomDao = new RoomDao();
-    private ServicesDao servicesDao = new ServicesDao();
-    private BookingService bookingService = new BookingService();
-
     // Hiển thị form tạo booking
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        RoomDao roomDao = new RoomDao();
+        ServicesDao servicesDao = new ServicesDao();
+        BookingService bookingService = new BookingService();
 
         // Lấy danh sách phòng trống
         List<Room> availableRooms = roomDao.getAvailableRooms();
@@ -44,13 +44,16 @@ public class CreateBookingController extends HttpServlet {
         request.setAttribute("pageTitle", "Create Booking");
         request.setAttribute("currentPage", "Create Booking");
 
-        request.getRequestDispatcher("/pages/receptionist/createBooking.jsp").forward(request, response);
-    }
+        request.getRequestDispatcher("/pages/receptionist/createBooking.jsp").forward(request, response);    }
 
     // Xử lý khi nhấn nút Submit
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        RoomDao roomDao = new RoomDao();
+        ServicesDao servicesDao = new ServicesDao();
+        BookingService bookingService = new BookingService();
 
         HttpSession session = request.getSession();
         Users receptionist = (Users) session.getAttribute("loggedInUser");
@@ -61,6 +64,13 @@ public class CreateBookingController extends HttpServlet {
             int roomId = Integer.parseInt(request.getParameter("roomId"));
             LocalDateTime checkInDate = LocalDateTime.parse(request.getParameter("checkInDate"));
             LocalDateTime checkOutDate = LocalDateTime.parse(request.getParameter("checkOutDate"));
+
+            if (checkOutDate.isBefore(checkInDate)) {
+                session.setAttribute("bookingMessage", "Error: Check-out date must be after check-in date.");
+                response.sendRedirect(request.getContextPath() + "/receptionist/create-booking");
+                return;
+            }
+
             int guestCount = Integer.parseInt(request.getParameter("guestCount"));
             String specialRequest = request.getParameter("specialRequest");
             double priceAtBooking = Double.parseDouble(request.getParameter("priceAtBooking"));

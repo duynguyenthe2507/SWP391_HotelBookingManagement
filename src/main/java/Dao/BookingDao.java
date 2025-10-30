@@ -1,6 +1,8 @@
 package Dao;
 
 import Models.Booking;
+import Models.Category;
+import Models.Room;
 import Models.Services;
 import Utils.DBContext;
 
@@ -19,9 +21,9 @@ public class BookingDao extends DBContext {
     private Booking mapResultSetToBooking(ResultSet rs) throws SQLException {
         return new Booking(
                 rs.getInt("bookingId"),
-                (Integer) rs.getObject("userId"), // Có thể NULL
-                (Integer) rs.getObject("receptionistId"), // Có thể NULL
-                rs.getString("guestName"), // Có thể NULL
+                (Integer) rs.getObject("userId"),
+                (Integer) rs.getObject("receptionistId"),
+                rs.getString("guestName"),
                 rs.getInt("roomId"),
                 rs.getTimestamp("checkinTime").toLocalDateTime(),
                 rs.getTimestamp("checkoutTime").toLocalDateTime(),
@@ -48,7 +50,7 @@ public class BookingDao extends DBContext {
             ps.setInt(6, booking.getGuestCount());
             ps.setString(7, booking.getSpecialRequest());
             ps.setDouble(8, booking.getTotalPrice());
-            ps.setString(9, "Pending"); // Mặc định là Pending
+            ps.setString(9, "Pending");
 
             int affectedRows = ps.executeUpdate();
 
@@ -60,7 +62,7 @@ public class BookingDao extends DBContext {
                 }
             }
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Error inserting offline booking", e);
+            Logger.getLogger(BookingDao.class.getName()).log(Level.SEVERE, "Error inserting offline booking", e);
         }
         return -1; // Thất bại
     }
@@ -104,10 +106,10 @@ public class BookingDao extends DBContext {
         List<Object> params = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder(
-                "SELECT b.*, r.name as roomName, u_guest.username as guestUsername " +
+                "SELECT b.*, r.name as roomName, (u_guest.firstName + ' ' + u_guest.lastName) as guestCustomerName " +
                         "FROM Booking b " +
                         "JOIN Room r ON b.roomId = r.roomId " +
-                        "LEFT JOIN [User] u_guest ON b.userId = u_guest.userId " + // LEFT JOIN cho guest
+                        "LEFT JOIN Users u_guest ON b.userId = u_guest.userId " +
                         "WHERE 1=1 "
         );
 
@@ -120,7 +122,8 @@ public class BookingDao extends DBContext {
             params.add(checkIn);
         }
         if (keyword != null && !keyword.isEmpty()) {
-            sql.append("AND (b.guestName LIKE ? OR u_guest.username LIKE ? OR r.name LIKE ?) ");
+            sql.append("AND (b.guestName LIKE ? OR u_guest.firstName LIKE ? OR u_guest.lastName LIKE ? OR r.name LIKE ?) ");
+            params.add("%" + keyword + "%");
             params.add("%" + keyword + "%");
             params.add("%" + keyword + "%");
             params.add("%" + keyword + "%");
@@ -139,7 +142,7 @@ public class BookingDao extends DBContext {
                     Map<String, Object> map = new HashMap<>();
                     map.put("booking", mapResultSetToBooking(rs));
                     map.put("roomName", rs.getString("roomName"));
-                    map.put("customerName", rs.getString("guestName") != null ? rs.getString("guestName") : rs.getString("guestUsername"));
+                    map.put("customerName", rs.getString("guestName") != null ? rs.getString("guestName") : rs.getString("guestCustomerName"));
                     list.add(map);
                 }
             }
@@ -155,7 +158,7 @@ public class BookingDao extends DBContext {
                 "SELECT COUNT(*) " +
                         "FROM Booking b " +
                         "JOIN Room r ON b.roomId = r.roomId " +
-                        "LEFT JOIN [User] u_guest ON b.userId = u_guest.userId " +
+                        "LEFT JOIN Users u_guest ON b.userId = u_guest.userId " +
                         "WHERE 1=1 "
         );
 
@@ -168,7 +171,8 @@ public class BookingDao extends DBContext {
             params.add(checkIn);
         }
         if (keyword != null && !keyword.isEmpty()) {
-            sql.append("AND (b.guestName LIKE ? OR u_guest.username LIKE ? OR r.name LIKE ?) ");
+            sql.append("AND (b.guestName LIKE ? OR u_guest.firstName LIKE ? OR u_guest.lastName LIKE ? OR r.name LIKE ?) ");
+            params.add("%" + keyword + "%");
             params.add("%" + keyword + "%");
             params.add("%" + keyword + "%");
             params.add("%" + keyword + "%");
@@ -214,7 +218,7 @@ public class BookingDao extends DBContext {
         String sql = "INSERT INTO Booking(userId, roomId, checkinTime, checkoutTime, guestCount, status, totalPrice, createdAt) "
                 + "VALUES (?,?,?,?,?,?,?, GETDATE())";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setObject(1, b.getUserId());
+            ps.setInt(1, b.getUserId());
             ps.setInt(2, b.getRoomId());
             ps.setTimestamp(3, Timestamp.valueOf(b.getCheckinTime()));
             ps.setTimestamp(4, Timestamp.valueOf(b.getCheckoutTime()));
@@ -254,5 +258,57 @@ public class BookingDao extends DBContext {
             return ps.executeUpdate() > 0;
         } catch (SQLException e) { e.printStackTrace(); }
         return false;
+    }
+
+    public Map<String, Object> getBookingDetailsById(int bookingId) {
+        Map<String, Object> details = new HashMap<>();
+        String sql = "SELECT b.*, r.*, " +
+                "r.name as roomName, r.description as roomDescription, r.imgUrl as roomImgUrl, r.updatedAt as roomUpdatedAt, " +
+                "c.name as categoryName, c.description as categoryDescription, c.imgUrl as categoryImgUrl, c.updatedAt as categoryUpdatedAt, " +
+                "(u_guest.firstName + ' ' + u_guest.lastName) as guestUsername, " +
+                "(u_rep.firstName + ' ' + u_rep.lastName) as receptionistUsername " +
+                "FROM Booking b " +
+                "JOIN Room r ON b.roomId = r.roomId " +
+                "JOIN Category c ON r.categoryId = c.categoryId " +
+                "LEFT JOIN [User] u_guest ON b.userId = u_guest.userId " +
+                "LEFT JOIN [User] u_rep ON b.receptionistId = u_rep.userId " +
+                "WHERE b.bookingId = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, bookingId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    // Map thông tin Booking
+                    Booking booking = mapResultSetToBooking(rs);
+                    details.put("booking", booking);
+
+                    Room room = new Room();
+                    room.setRoomId(rs.getInt("roomId"));
+                    room.setName(rs.getString("roomName"));
+                    room.setPrice(rs.getDouble("price"));
+                    room.setCapacity(rs.getInt("capacity"));
+                    room.setStatus(rs.getString("status"));
+                    room.setDescription(rs.getString("roomDescription"));
+                    room.setImgUrl(rs.getString("roomImgUrl"));
+
+                    Category category = new Category();
+                    category.setName(rs.getString("categoryName"));
+                    room.setCategory(category);
+                    details.put("room", room);
+
+                    // Lấy tên khách hàng
+                    String customerName = booking.getGuestName() != null ? booking.getGuestName() : rs.getString("guestUsername");
+                    details.put("customerName", customerName);
+
+                    // Lấy tên lễ tân
+                    details.put("receptionistName", rs.getString("receptionistUsername"));
+
+                    return details;
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error getting booking details for ID: " + bookingId, e);
+        }
+        return null; // Không tìm thấy booking
     }
 }

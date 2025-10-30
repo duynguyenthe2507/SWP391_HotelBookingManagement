@@ -74,7 +74,7 @@ public class LoginController extends HttpServlet {
 
         if ("Receptionist".equalsIgnoreCase(role)) {
             // Nếu là lễ tân → vào trang dashboard riêng
-            response.sendRedirect(request.getContextPath() + "/pages/receptionist/dashboard.jsp");
+            response.sendRedirect(request.getContextPath() + "/pages/receptionist/booking-list.jsp");
             return;
         } else {
             // User thường → vào home

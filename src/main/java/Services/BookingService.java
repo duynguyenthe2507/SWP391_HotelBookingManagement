@@ -4,7 +4,12 @@ import Dao.BookingDao;
 import Dao.RoomDao;
 import Dao.ServicesDao;
 import Models.Booking;
+import Models.BookingDetailsViewModel;
+import Models.Room;
 import Models.Services;
+import lombok.extern.java.Log;
+
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,7 +38,7 @@ public class BookingService {
             }
             LOGGER.log(Level.INFO, "Inserted new booking with ID: {0}", bookingId);
 
-            // Liên kết các dịch vụ đã chọn (nếu có)
+            // Liên kết các dịch vụ đã chọn nếu có
             if (serviceIds != null && serviceIds.length > 0) {
                 // Lấy Map của tất cả services để có thông tin giá
                 // Gọi phương thức instance trên đối tượng instance servicesDao
@@ -59,6 +64,62 @@ public class BookingService {
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error creating offline booking", e);
+            return false;
+        }
+    }
+
+    public BookingDetailsViewModel getBookingDetails (int bookingId) {
+        // Lấy (Booking, Room, Tên) từ BookingDao
+        Map<String, Object> basicDetails = bookingDao.getBookingDetailsById(bookingId);
+        if (basicDetails == null) {
+            return null; // Booking không tồn tại
+        }
+
+        // Lấy danh sách dịch vụ đã dùng
+        List<Map<String,Object>> servicesUsed = servicesDao.getServicesByBookingId(bookingId);
+
+        // Tạo đối tượng viewModel để trả về
+        BookingDetailsViewModel viewModel = new BookingDetailsViewModel();
+        viewModel.setBooking((Booking) basicDetails.get("booking"));
+        viewModel.setRoom((Room) basicDetails.get("room"));
+        viewModel.setCustomerName((String) basicDetails.get("customerName"));
+        viewModel.setReceptionistName((String) basicDetails.get("receptionistName"));
+        viewModel.setServices(servicesUsed);
+
+        return viewModel;
+    }
+
+    public boolean checkInBooking (int bookingId, int roomId) {
+        try {
+            // Cập nhật trạng thái Booking
+            boolean bookingUpdated = bookingDao.updateBookingStatus(bookingId, "checked-in");
+            if (!bookingUpdated) {
+                return false;
+            }
+
+            // Cập nhật trạng thái room
+            boolean roomUpdated = roomDao.updateRoomStatus(roomId, "occupied");
+            if(!roomUpdated) {
+                return false;
+            }
+
+            return true;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error during checking in for bookingId:" + bookingId, e);
+            return false;
+        }
+    }
+
+    public boolean checkOutBooking (int bookingId, int roomId) {
+        try {
+            boolean bookingUpdated = bookingDao.updateBookingStatus(bookingId, "available");
+            if (!bookingUpdated) {
+                return false;
+            }
+
+            return true;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error during checking out for bookingId:" + bookingId, e);
             return false;
         }
     }
