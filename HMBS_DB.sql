@@ -1,4 +1,4 @@
-﻿-- Tạo database
+-- Tạo database
 CREATE DATABASE HMBS_DB;
 GO
 
@@ -142,29 +142,34 @@ GO
 -- Table: Booking
 CREATE TABLE Booking (
     bookingId INT IDENTITY(1,1) PRIMARY KEY,
-    userId INT NOT NULL,
+    userId INT NULL,
+    roomId INT NOT NULL,
+    receptionistId INT NULL,
+    guestName NVARCHAR(255) NULL,
+    guestCount INT NOT NULL DEFAULT 1,
+    specialRequest NVARCHAR(1000) NULL,
     checkinTime DATETIME NOT NULL,
     checkoutTime DATETIME NOT NULL,
-    durationHours DECIMAL(10,2) NOT NULL,
-    status VARCHAR(15) DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'cancelled')),
+    status VARCHAR(15) DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'cancelled', 'checked-in', 'checked-out')),
     totalPrice DECIMAL(10,2) NOT NULL,
     createdAt DATETIME DEFAULT GETDATE(),
     updatedAt DATETIME DEFAULT GETDATE(),
     CONSTRAINT FK_Booking_User FOREIGN KEY (userId) REFERENCES Users(userId) ON DELETE CASCADE,
+    CONSTRAINT FK_Booking_Room FOREIGN KEY (roomId) REFERENCES Room(roomId),
+    CONSTRAINT FK_Booking_Receptionist FOREIGN KEY (receptionistId) REFERENCES Users(userId),
     CONSTRAINT CHK_Booking_Dates CHECK (checkinTime < checkoutTime)
 );
 GO
 
--- Trigger để tự động tính durationHours và totalPrice trong Booking
+-- Trigger để tự động tính updatedAt trong Booking (đã loại bỏ durationHours)
 CREATE TRIGGER trg_update_booking
 ON Booking
 AFTER INSERT, UPDATE
 AS
 BEGIN
-    -- Only maintain duration and updatedAt here to avoid premature totalPrice calculation
+    -- Chỉ cập nhật updatedAt; durationHours không còn sử dụng nữa
     UPDATE Booking
-    SET durationHours = DATEDIFF(HOUR, inserted.checkinTime, inserted.checkoutTime),
-        updatedAt = GETDATE()
+    SET updatedAt = GETDATE()
     FROM Booking
     INNER JOIN inserted ON Booking.bookingId = inserted.bookingId;
 
@@ -502,8 +507,8 @@ GO
 
 -- SAMPLE DATA - Bookings with Invoices
 -- Booking 1: John Doe (userId=4) - WITH Invoice
-INSERT INTO Booking (userId, checkinTime, checkoutTime, durationHours, status, totalPrice)
-VALUES (4, DATEADD(DAY, -5, GETDATE()), DATEADD(DAY, -3, GETDATE()), 48.0, 'confirmed', 1600000.00);
+INSERT INTO Booking (userId, roomId, checkinTime, checkoutTime, status, totalPrice)
+VALUES (4, 1, DATEADD(DAY, -5, GETDATE()), DATEADD(DAY, -3, GETDATE()), 'confirmed', 1600000.00);
 
 DECLARE @booking1 INT = SCOPE_IDENTITY();
 
@@ -535,8 +540,8 @@ VALUES (@booking1, 800000.00, 300000.00, 110000.00, 1210000.00, DATEADD(DAY, -4,
 GO
 
 -- Booking 2: Jane Smith (userId=5) - WITH Invoice
-INSERT INTO Booking (userId, checkinTime, checkoutTime, durationHours, status, totalPrice)
-VALUES (5, DATEADD(DAY, -7, GETDATE()), DATEADD(DAY, -5, GETDATE()), 48.0, 'confirmed', 1900000.00);
+INSERT INTO Booking (userId, roomId, checkinTime, checkoutTime, status, totalPrice)
+VALUES (5, 2, DATEADD(DAY, -7, GETDATE()), DATEADD(DAY, -5, GETDATE()), 'confirmed', 1900000.00);
 
 DECLARE @booking2 INT = SCOPE_IDENTITY();
 
@@ -570,8 +575,8 @@ VALUES (@booking2, 1750000.00, 330000.00, 208000.00, 2288000.00, DATEADD(DAY, -6
 GO
 
 -- Booking 3: Robert Johnson (userId=6) - WITH Invoice
-INSERT INTO Booking (userId, checkinTime, checkoutTime, durationHours, status, totalPrice)
-VALUES (6, DATEADD(DAY, -10, GETDATE()), DATEADD(DAY, -8, GETDATE()), 48.0, 'confirmed', 4000000.00);
+INSERT INTO Booking (userId, roomId, checkinTime, checkoutTime, status, totalPrice)
+VALUES (6, 3, DATEADD(DAY, -10, GETDATE()), DATEADD(DAY, -8, GETDATE()), 'confirmed', 4000000.00);
 
 DECLARE @booking3 INT = SCOPE_IDENTITY();
 
@@ -607,8 +612,8 @@ VALUES (@booking3, 4000000.00, 930000.00, 493000.00, 5423000.00, DATEADD(DAY, -9
 GO
 
 -- Booking 4: John Doe (userId=4) - WITH Invoice (additional)
-INSERT INTO Booking (userId, checkinTime, checkoutTime, durationHours, status, totalPrice)
-VALUES (4, DATEADD(DAY, -15, GETDATE()), DATEADD(DAY, -13, GETDATE()), 48.0, 'confirmed', 1600000.00);
+INSERT INTO Booking (userId, roomId, checkinTime, checkoutTime, status, totalPrice)
+VALUES (4, 4, DATEADD(DAY, -15, GETDATE()), DATEADD(DAY, -13, GETDATE()), 'confirmed', 1600000.00);
 
 DECLARE @booking4 INT = SCOPE_IDENTITY();
 
@@ -639,8 +644,8 @@ VALUES (@booking4, 800000.00, 180000.00, 98000.00, 1078000.00, DATEADD(DAY, -14,
 GO
 
 -- Booking 5: Jane Smith (userId=5) - WITH Invoice (additional)
-INSERT INTO Booking (userId, checkinTime, checkoutTime, durationHours, status, totalPrice)
-VALUES (5, DATEADD(DAY, -20, GETDATE()), DATEADD(DAY, -18, GETDATE()), 48.0, 'confirmed', 1900000.00);
+INSERT INTO Booking (userId, roomId, checkinTime, checkoutTime, status, totalPrice)
+VALUES (5, 5, DATEADD(DAY, -20, GETDATE()), DATEADD(DAY, -18, GETDATE()), 'confirmed', 1900000.00);
 
 DECLARE @booking5 INT = SCOPE_IDENTITY();
 
@@ -675,8 +680,8 @@ GO
 
 -- SAMPLE DATA - Bookings WITHOUT Invoices
 -- Booking 6: John Doe (userId=4) - NO Invoice
-INSERT INTO Booking (userId, checkinTime, checkoutTime, durationHours, status, totalPrice)
-VALUES (4, DATEADD(DAY, -2, GETDATE()), DATEADD(DAY, -1, GETDATE()), 22.0, 'confirmed', 1200000.00);
+INSERT INTO Booking (userId, roomId, checkinTime, checkoutTime, status, totalPrice)
+VALUES (4, 6, DATEADD(DAY, -2, GETDATE()), DATEADD(DAY, -1, GETDATE()), 'confirmed', 1200000.00);
 
 DECLARE @booking6 INT = SCOPE_IDENTITY();
 
@@ -706,8 +711,8 @@ WHERE bookingId = @booking6;
 GO
 
 -- Booking 7: Jane Smith (userId=5) - NO Invoice
-INSERT INTO Booking (userId, checkinTime, checkoutTime, durationHours, status, totalPrice)
-VALUES (5, DATEADD(DAY, -1, GETDATE()), GETDATE(), 20.0, 'confirmed', 1500000.00);
+INSERT INTO Booking (userId, roomId, checkinTime, checkoutTime, status, totalPrice)
+VALUES (5, 1, DATEADD(DAY, -1, GETDATE()), GETDATE(), 'confirmed', 1500000.00);
 
 DECLARE @booking7 INT = SCOPE_IDENTITY();
 
@@ -737,8 +742,8 @@ WHERE bookingId = @booking7;
 GO
 
 -- Booking 8: Robert Johnson (userId=6) - NO Invoice
-INSERT INTO Booking (userId, checkinTime, checkoutTime, durationHours, status, totalPrice)
-VALUES (6, DATEADD(DAY, -3, GETDATE()), DATEADD(DAY, -2, GETDATE()), 18.0, 'confirmed', 2200000.00);
+INSERT INTO Booking (userId, roomId, checkinTime, checkoutTime, status, totalPrice)
+VALUES (6, 2, DATEADD(DAY, -3, GETDATE()), DATEADD(DAY, -2, GETDATE()), 'confirmed', 2200000.00);
 
 DECLARE @booking8 INT = SCOPE_IDENTITY();
 
@@ -767,4 +772,5 @@ SET totalPrice = COALESCE((
 ), 1)
 WHERE bookingId = @booking8;
 GO
+
 

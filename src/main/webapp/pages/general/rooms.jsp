@@ -1,9 +1,9 @@
 <%@page contentType="text/html" pageEncoding="UTF-8" isELIgnored="false"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %> <%-- Đã thêm dòng này để sử dụng fn:escapeXml --%>
+<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
-<html lang="zxx">
+<html lang="vi">
 
     <head>
         <meta charset="UTF-8">
@@ -31,92 +31,116 @@
             .filter-form {
                 display: grid;
                 grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 15px; 
-                margin-bottom: 30px; 
-                padding: 25px; 
-                border: 1px solid #e0e0e0; 
-                border-radius: 8px; 
-                background-color: #ffffff; 
-                box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+                gap: 15px;
+                margin-bottom: 30px;
+                padding: 25px;
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                background-color: #ffffff;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            }
+            .filter-form .form-group {
+                display: flex;
+                flex-direction: column;
             }
             .filter-form label {
                 font-weight: bold;
-                margin-bottom: 8px; 
+                margin-bottom: 8px;
                 display: block;
-                color: #333; 
+                color: #333;
                 font-size: 0.95em;
             }
             .filter-form input[type="text"],
             .filter-form input[type="number"],
             .filter-form select {
-                padding: 10px 12px; 
+                padding: 10px 12px;
                 border: 1px solid #d0d0d0;
-                border-radius: 5px; 
+                border-radius: 5px;
                 width: 100%;
                 box-sizing: border-box;
                 font-size: 1em;
                 color: #555;
                 transition: border-color 0.3s;
+                height: 46px;
             }
-            .filter-form input:focus,
-            .filter-form select:focus {
-                border-color: #007bff; 
-                outline: none; 
+            .filter-form input.date-input {
+                position: relative;
+                background-color: #fff;
+            }
+            .filter-form .form-group-button {
+                align-self: flex-end;
             }
             .filter-form button[type="submit"] {
-                background-color: #dfa974; 
+                background-color: #dfa974;
                 color: white;
                 cursor: pointer;
                 border: none;
-                padding: 12px 20px; 
+                padding: 12px 20px;
                 border-radius: 5px;
                 font-size: 1em;
                 font-weight: 600;
                 transition: background-color 0.3s;
-                margin-top: 25px; 
+                margin-top: 29px;
+                height: 46px;
+                width: 100%;
             }
             .filter-form button[type="submit"]:hover {
-                background-color: #c78d59; 
+                background-color: #c78d59;
             }
             .pagination {
                 margin-top: 40px;
-                padding-top: 20px; 
-                border-top: 1px solid #eee; 
+                padding-top: 20px;
+                border-top: 1px solid #eee;
                 text-align: center;
             }
             .pagination a, .pagination span {
                 display: inline-block;
-                padding: 10px 15px; 
+                padding: 10px 15px;
                 margin: 0 5px;
                 border: 1px solid #ddd;
-                border-radius: 5px; 
+                border-radius: 5px;
                 text-decoration: none;
                 color: #666;
                 font-weight: 600;
                 transition: all 0.3s;
             }
             .pagination a:hover {
-                background-color: #dfa974; 
+                background-color: #dfa974;
                 color: white;
                 border-color: #dfa974;
             }
             .pagination .current-page {
-                background-color: #dfa974; 
+                background-color: #dfa974;
                 color: white;
                 border-color: #dfa974;
-                pointer-events: none; 
+                pointer-events: none;
             }
             .pagination .disabled {
                 color: #aaa;
                 cursor: not-allowed;
                 background-color: #f8f8f8;
             }
-            .error-message {
-                color: red;
-                font-weight: bold;
-                text-align: center;
+            .pagination span:not(.current-page):not(.disabled) {
+                padding: 10px 8px;
+                margin: 0 5px;
+                color: #999;
+                font-weight: normal;
+            }
+            .alert-warning, .alert-danger {
+                padding: 15px;
                 margin-bottom: 20px;
-                font-size: 1.1em;
+                border: 1px solid transparent;
+                border-radius: 4px;
+            }
+            .alert-danger {
+                color: #721c24;
+                background-color: #f8d7da;
+                border-color: #f5c6cb;
+            }
+            .alert-warning {
+                color: #856404;
+                background-color: #fff3cd;
+                border-color: #ffeeba;
             }
             .room-item .ri-text table {
                 width: 100%;
@@ -124,13 +148,13 @@
                 border-collapse: collapse;
             }
             .room-item .ri-text table td {
-                padding: 8px 0; 
+                padding: 8px 0;
                 border-bottom: 1px dotted #e0e0e0;
                 text-align: left;
                 font-size: 0.9em;
             }
             .room-item .ri-text table td.r-o {
-                width: 40%; 
+                width: 40%;
                 font-weight: bold;
                 color: #555;
             }
@@ -142,7 +166,80 @@
                 margin-top: 15px;
             }
             .room-item .ri-text .room-detail-btn {
-                margin-right: 15px; 
+                margin-right: 15px;
+            }
+            .header-divider {
+                width: 100%;
+                height: 1px;
+                background-color: #e0e0e0;
+                margin: 0 auto;
+            }
+            /* DEBUG BOX */
+            .debug-box {
+                background: #f0f8ff;
+                border: 1px solid #b0e0e6;
+                padding: 10px;
+                margin: 15px 0;
+                font-family: monospace;
+                font-size: 13px;
+                color: #006400;
+            }
+            .room-item-wrapper {
+                height: 100%; /* Ensures the card wrapper fills the column height */
+            }
+            .room-item-card {
+                height: 100%;
+                display: flex;
+                flex-direction: column; /* Arranges card content vertically */
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+            .room-item-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+            }
+            .room-item-card .card-img-top {
+                width: 100%;
+                height: 250px; /* Fixed height for all images */
+                object-fit: cover; /* Prevents image stretching */
+            }
+            .room-item-card .card-body {
+                display: flex;
+                flex-direction: column;
+                flex-grow: 1; /* Makes the card body fill remaining space */
+            }
+            .room-item-card .card-title {
+                font-family: 'Lora', serif;
+            }
+            .room-item-card .room-price {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: #dfa974;
+                margin-bottom: 15px;
+            }
+            .room-item-card .room-info {
+                font-size: 0.9em;
+                color: #6c757d;
+            }
+            .room-item-card .card-actions {
+                margin-top: auto; /* Pushes buttons to the bottom */
+                display: flex;
+                gap: 5px; /* Space between buttons */
+            }
+            .room-item-card .card-actions .btn,
+            .room-item-card .card-actions form {
+                flex: 1; /* Make buttons share space */
+            }
+            .room-item-card .card-actions .btn,
+            .room-item-card .card-actions button {
+                width: 100%;
+                font-size: 12px;
+                padding: 8px 5px;
+                text-transform: uppercase;
+                font-weight: 600;
+            }
+            .room-item-card .card-actions .btn-wishlist {
+                flex-grow: 0; /* Stop wishlist button from growing */
+                flex-basis: 45px; /* Give it a fixed width */
             }
         </style>
     </head>
@@ -152,239 +249,106 @@
             <div class="loader"></div>
         </div>
 
-        <div class="offcanvas-menu-overlay"></div>
-        <div class="canvas-open">
-            <i class="icon_menu"></i>
-        </div>
-        <div class="offcanvas-menu-wrapper">
-            <div class="canvas-close">
-                <i class="icon_close"></i>
-            </div>
-            <div class="search-icon search-switch">
-                <i class="icon_search"></i>
-            </div>
-            <div class="header-configure-area">
-                <div class="language-option">
-                    <img src="${pageContext.request.contextPath}/img/flag.jpg" alt="">
-                    <span>EN <i class="fa fa-angle-down"></i></span>
-                    <div class="flag-dropdown">
-                        <ul>
-                            <li><a href="#">Zi</a></li>
-                            <li><a href="#">Fr</a></li>
-                        </ul>
-                    </div>
-                </div>
-                <a href="${pageContext.request.contextPath}/booking" class="bk-btn">Booking Now</a>
-            </div>
-            <nav class="mainmenu mobile-menu">
-                <ul>
-                    <li><a href="${pageContext.request.contextPath}/home">Home</a></li>
-                    <li class="active"><a href="${pageContext.request.contextPath}/rooms">Rooms</a></li>
-                    <li><a href="${pageContext.request.contextPath}/about-us">About Us</a></li>
-                    <li><a href="#">Pages</a>
-                        <ul class="dropdown">
-                            <li><a href="${pageContext.request.contextPath}/room-details">Room Details</a></li>
-                            <li><a href="${pageContext.request.contextPath}/blog-details">Blog Details</a></li>
-                        </ul>
-                    </li>
-                    <li><a href="${pageContext.request.contextPath}/blog">News</a></li>
-                    <li><a href="${pageContext.request.contextPath}/contact">Contact</a></li>
-                </ul>
-            </nav>
-            <div id="mobile-menu-wrap"></div>
-            <div class="top-social">
-                <a href="https://only-fans.me/highaileri"><i class="fa fa-facebook"></i></a>
-                <a href="https://only-fans.me/highaileri"><i class="fa fa-twitter"></i></a>
-                <a href="https://only-fans.me/highaileri"><i class="fa fa-tripadvisor"></i></a>
-                <a href="https://only-fans.me/highaileri"><i class="fa fa-instagram"></i></a>
-            </div>
-            <ul class="top-widget">
-                <li><i class="fa fa-phone"></i> (84) 359 797 703</li>
-                <li><i class="fa fa-envelope"></i> 36hotel@gmail.com</li>
-            </ul>
-        </div>
-        <header class="header-section header-normal">
-            <div class="top-nav">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <ul class="tn-left">
-                                <li><i class="fa fa-phone"></i> (84) 359 797 703</li>
-                                <li><i class="fa fa-envelope"></i> 36hotel@gmail.com</li>
-                            </ul>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="tn-right">
-                                <div class="top-social">
-                                    <a href="https://only-fans.me/highaileri"><i class="fa fa-facebook"></i></a>
-                                    <a href="https://only-fans.me/highaileri"><i class="fa fa-twitter"></i></a>
-                                    <a href="https://only-fans.me/highaileri"><i class="fa fa-tripadvisor"></i></a>
-                                    <a href="https://only-fans.me/highaileri"><i class="fa fa-instagram"></i></a>
-                                </div>
-                                <a href="${pageContext.request.contextPath}/booking" class="bk-btn">Booking Now</a>
-                                <div class="language-option">
-                                    <img src="${pageContext.request.contextPath}/img/flag.jpg" alt="">
-                                    <span>EN <i class="fa fa-angle-down"></i></span>
-                                    <div class="flag-dropdown">
-                                        <ul>
-                                            <li><a href="#">Zi</a></li>
-                                            <li><a href="#">Fr</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="menu-item">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-lg-2">
-                            <div class="logo">
-                                <a href="${pageContext.request.contextPath}/home">
-                                    <img src="${pageContext.request.contextPath}/img/logo.png" alt="">
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-lg-10">
-                            <div class="nav-menu">
-                                <nav class="mainmenu">
-                                    <ul>
-                                        <li><a href="${pageContext.request.contextPath}/home">Home</a></li>
-                                        <li class="active"><a href="${pageContext.request.contextPath}/rooms">Rooms</a></li>
-                                        <li><a href="${pageContext.request.contextPath}/about-us">About Us</a></li>
-                                        <li><a href="#">Pages</a>
-                                            <ul class="dropdown">
-                                                <li><a href="${pageContext.request.contextPath}/room-details">Room Details</a></li>
-                                                <li><a href="${pageContext.request.contextPath}/blog-details">Blog Details</a></li>
-                                            </ul>
-                                        </li>
-                                        <li><a href="${pageContext.request.contextPath}/blog">News</a></li>
-                                        <li><a href="${pageContext.request.contextPath}/contact">Contact</a></li>
-                                    </ul>
-                                </nav>
-                                <div class="nav-right search-switch">
-                                    <i class="icon_search"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </header>
-        <div class="breadcrumb-section">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="breadcrumb-text">
-                            <h2>Our Rooms</h2>
-                            <div class="bt-option">
-                                <a href="${pageContext.request.contextPath}/home">Home</a>
-                                <span>Rooms</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <jsp:include page="/common/header.jsp" />
+        <jsp:include page="/common/breadcrumb.jsp" />
+
         <section class="rooms-section spad">
             <div class="container">
-                <c:if test="${not empty requestScope.errorMessage}">
-                    <p class="error-message"><c:out value="${requestScope.errorMessage}"/></p>
+
+
+                <c:if test="${not empty requestScope.errorMessage || not empty requestScope.dateError}">
+                    <div class="alert alert-danger" role="alert">
+                        <c:out value="${requestScope.errorMessage}"/><c:out value="${requestScope.dateError}"/>
+                    </div>
+                </c:if>
+
+                <c:if test="${not empty sessionScope.cartMessage}">
+                    <div class="alert ${sessionScope.cartMessageType == 'ERROR' ? 'alert-danger' : (sessionScope.cartMessageType == 'WARNING' ? 'alert-warning' : 'alert-success')}" role="alert">
+                        <c:out value="${sessionScope.cartMessage}"/>
+                    </div>
+                    <% session.removeAttribute("cartMessage"); %>
+                    <% session.removeAttribute("cartMessageType"); %>
                 </c:if>
 
                 <form action="${pageContext.request.contextPath}/rooms" method="GET" class="filter-form">
-                    <div>
-                        <label for="search">Tìm kiếm theo tên:</label>
-                        <input type="text" id="search" name="search" value="${fn:escapeXml(param.search)}" placeholder="Tên phòng...">
+                    <div class="form-group">
+                        <label for="search">Search:</label>
+                        <input type="text" id="search" name="search" value="${fn:escapeXml(param.search)}" placeholder="Room name...">
                     </div>
-                    <div>
-                        <label for="category">Loại phòng:</label>
-                        <select id="category" name="categoryId"> <%-- Đã đổi name thành categoryId --%>
-                            <option value="">Tất cả</option>
+                    <div class="form-group">
+                        <label for="category">Room Type:</label>
+                        <select id="category" name="categoryId" class="nice-select-custom">
+                            <option value="">All Types</option>
                             <c:forEach var="cat" items="${requestScope.categories}">
-                                <option value="${cat.categoryId}" ${cat.categoryId == param.categoryId ? 'selected' : ''}> <%-- Đã đổi param.category thành param.categoryId --%>
+                                <option value="${cat.categoryId}" ${cat.categoryId == param.categoryId ? 'selected' : ''}>
                                     <c:out value="${cat.name}"/>
                                 </option>
                             </c:forEach>
                         </select>
                     </div>
-                    <div>
-                        <label for="minPrice">Giá từ:</label>
-                        <input type="number" id="minPrice" name="minPrice" value="${fn:escapeXml(param.minPrice)}" placeholder="Giá thấp nhất..." min="0">
+                    <div class="form-group">
+                        <label for="minPrice">Price From:</label>
+                        <input type="number" id="minPrice" name="minPrice" value="${fn:escapeXml(param.minPrice)}" placeholder="Min price..." min="0">
                     </div>
-                    <div>
-                        <label for="maxPrice">Giá đến:</label>
-                        <input type="number" id="maxPrice" name="maxPrice" value="${fn:escapeXml(param.maxPrice)}" placeholder="Giá cao nhất..." min="0">
+                    <div class="form-group">
+                        <label for="maxPrice">Price To:</label>
+                        <input type="number" id="maxPrice" name="maxPrice" value="${fn:escapeXml(param.maxPrice)}" placeholder="Max price..." min="0">
                     </div>
-                    <div>
-                        <label for="minCapacity">Sức chứa tối thiểu:</label>
-                        <input type="number" id="minCapacity" name="minCapacity" value="${fn:escapeXml(param.minCapacity)}" placeholder="Sức chứa..." min="1">
+                    <div class="form-group">
+                        <label for="minCapacity">Min Capacity:</label>
+                        <input type="number" id="minCapacity" name="minCapacity" value="${fn:escapeXml(param.minCapacity)}" placeholder="Guests..." min="1">
                     </div>
-                    
-                    <div>
-                        <label for="check-in">Ngày nhận phòng:</label>
-                        <input type="text" class="date-input" id="check-in" name="checkInDate" value="${fn:escapeXml(param.checkInDate)}" placeholder="dd/mm/yyyy" readonly>
-                        <i class="icon_calendar"></i>
+                    <div class="form-group">
+                        <label for="date-in">Check In:</label>
+                        <input type="text" class="date-input" id="date-in" name="checkInDate" value="${fn:escapeXml(param.checkInDate)}" placeholder="dd/mm/yyyy">
                     </div>
-                    <div>
-                        <label for="check-out">Ngày trả phòng:</label>
-                        <input type="text" class="date-input" id="check-out" name="checkOutDate" value="${fn:escapeXml(param.checkOutDate)}" placeholder="dd/mm/yyyy" readonly>
-                        <i class="icon_calendar"></i>
+                    <div class="form-group">
+                        <label for="date-out">Check Out:</label>
+                        <input type="text" class="date-input" id="date-out" name="checkOutDate" value="${fn:escapeXml(param.checkOutDate)}" placeholder="dd/mm/yyyy">
                     </div>
-                    <div>
-                        <label for="statusFilter">Trạng thái:</label>
-                        <select id="statusFilter" name="statusFilter">
-                            <option value="">Tất cả trạng thái</option>
-                            <option value="Available" ${param.statusFilter == 'Available' ? 'selected' : ''}>Available</option>
-                            <option value="Booked" ${param.statusFilter == 'Booked' ? 'selected' : ''}>Booked</option>
-<!--                            <option value="Maintenance" ${param.statusFilter == 'Maintenance' ? 'selected' : ''}>Maintenance</option>-->
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <button type="submit">Lọc & Tìm kiếm</button>
+
+                    <div class="form-group form-group-button">
+                        <button type="submit">Filter Rooms</button>
                     </div>
                 </form>
 
                 <div class="row">
                     <c:choose>
-                        <c:when test="${not empty requestScope.rooms}"> <%-- Đã đổi roomList thành rooms --%>
-                            <c:forEach var="room" items="${requestScope.rooms}"> <%-- Đã đổi roomList thành rooms --%>
+                        <c:when test="${not empty requestScope.rooms}">
+                            <c:forEach var="room" items="${requestScope.rooms}">
                                 <div class="col-lg-4 col-md-6">
                                     <div class="room-item">
-                                        <img src="${pageContext.request.contextPath}/${room.imgUrl}" 
-                                             alt="${room.name}" 
-                                             onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/img/placeholder.jpg';" 
+                                        <c:set var="imgSrc" value="${not empty room.imgUrl ? pageContext.request.contextPath.concat('/').concat(room.imgUrl) : pageContext.request.contextPath.concat('/img/placeholder.jpg')}"/>
+                                        <img src="${imgSrc}"
+                                             alt="${room.name}"
+                                             onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/img/placeholder.jpg';"
                                              style="width:100%; height:250px; object-fit: cover;">
                                         <div class="ri-text">
                                             <h4><c:out value="${room.name}"/></h4>
                                             <h3>
                                                 <fmt:formatNumber value="${room.price}" pattern="#,##0"/> VND
                                                 <span>/Pernight</span>
-                                            </h3>        <table>
+                                            </h3>   
+                                            <table>
                                                 <tbody>
                                                     <tr>
-                                                        <td class="r-o">Loại:</td>
+                                                        <td class="r-o">Type:</td>
                                                         <td><strong><c:out value="${room.category.name}"/></strong></td>
                                                     </tr>
                                                     <tr>
-                                                        <td class="r-o">Sức chứa:</td>
-                                                        <td>Max <c:out value="${room.capacity}"/> persion</td>
+                                                        <td class="r-o">Capacity:</td>
+                                                        <td>Max <c:out value="${room.capacity}"/> person(s)</td>
                                                     </tr>
                                                     <tr>
-                                                        <td class="r-o">Mô tả:</td>
-                                                        <td><c:out value="${room.description}"/></td>        
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="r-o">Trạng thái:</td>
+                                                        <td class="r-o">Status:</td>
                                                         <td><c:out value="${room.status}"/></td>
                                                     </tr>
                                                 </tbody>
                                             </table>
-                                            <a href="${pageContext.request.contextPath}/room-details?roomId=${room.roomId}" class="primary-btn room-detail-btn">More Details</a>
-                                            <a href="#" class="primary-btn">Booking Now</a>
+                                            <c:url value="/room-details" var="detailsUrl">
+                                                <c:param name="roomId" value="${room.roomId}"/>
+                                            </c:url>
+                                            <a href="${detailsUrl}" class="primary-btn room-detail-btn">More Details</a>
                                         </div>
                                     </div>
                                 </div>
@@ -392,155 +356,187 @@
                         </c:when>
                         <c:otherwise>
                             <div class="col-lg-12">
-                                <p class="text-center">Không tìm thấy phòng nào phù hợp với tiêu chí tìm kiếm/lọc của bạn.</p>
+                                <p class="text-center" style="font-size: 1.2em; margin-top: 30px;">
+                                    No rooms were found matching your search criteria.
+                                </p>
                             </div>
                         </c:otherwise>
                     </c:choose>
 
+                    <!-- PHÂN TRANG ĐÃ SỬA: DÙNG noOfPages -->
+                    <!-- PHÂN TRANG ĐÃ SỬA URL -->
+                    <!-- PHÂN TRANG ĐÃ SỬA 100% - KHÔNG CÒN LỖI 404 -->
                     <div class="col-lg-12">
                         <div class="room-pagination pagination">
-                            <c:url var="basePageUrl" value="/rooms">
-                                <c:param name="search" value="${param.search}"/>
-                                <c:param name="categoryId" value="${param.categoryId}"/> <%-- Đã đổi param.category thành param.categoryId --%>
-                                <c:param name="minPrice" value="${param.minPrice}"/>
-                                <c:param name="maxPrice" value="${param.maxPrice}"/>
-                                <c:param name="minCapacity" value="${param.minCapacity}"/>
-                                <c:param name="checkInDate" value="${param.checkInDate}"/> <%-- Thêm tham số ngày --%>
-                                <c:param name="checkOutDate" value="${param.checkOutDate}"/> <%-- Thêm tham số ngày --%>
-                                <c:param name="statusFilter" value="${param.statusFilter}"/> <%-- Thêm tham số trạng thái --%>
-                            </c:url>
+                            <c:if test="${not empty requestScope.rooms && requestScope.noOfPages > 0}">
 
-                            <c:if test="${requestScope.currentPage > 1}">
-                                <a href="${basePageUrl}&page=${requestScope.currentPage - 1}">&laquo; Trước</a>
-                            </c:if>
-                            <c:if test="${requestScope.currentPage <= 1}">
-                                <span class="disabled">&laquo; Trước</span>
-                            </c:if>
+                                <!-- Tạo base URL chỉ /rooms -->
+                                <c:url var="cleanBase" value="/rooms" />
 
-                            <c:forEach var="i" begin="1" end="${requestScope.noOfPages}"> <%-- Đã đổi totalPages thành noOfPages --%>
+                                <!-- Tạo URL có tham số filter (nếu có) -->
+                                <c:set var="hasParam" value="false" />
+                                <c:url var="basePageUrl" value="/rooms">
+                                    <c:if test="${not empty param.search}">
+                                        <c:param name="search" value="${param.search}"/>
+                                        <c:set var="hasParam" value="true"/>
+                                    </c:if>
+                                    <c:if test="${not empty param.categoryId}">
+                                        <c:param name="categoryId" value="${param.categoryId}"/>
+                                        <c:set var="hasParam" value="true"/>
+                                    </c:if>
+                                    <c:if test="${not empty param.minPrice}">
+                                        <c:param name="minPrice" value="${param.minPrice}"/>
+                                        <c:set var="hasParam" value="true"/>
+                                    </c:if>
+                                    <c:if test="${not empty param.maxPrice}">
+                                        <c:param name="maxPrice" value="${param.maxPrice}"/>
+                                        <c:set var="hasParam" value="true"/>
+                                    </c:if>
+                                    <c:if test="${not empty param.minCapacity}">
+                                        <c:param name="minCapacity" value="${param.minCapacity}"/>
+                                        <c:set var="hasParam" value="true"/>
+                                    </c:if>
+                                    <c:if test="${not empty param.checkInDate}">
+                                        <c:param name="checkInDate" value="${param.checkInDate}"/>
+                                        <c:set var="hasParam" value="true"/>
+                                    </c:if>
+                                    <c:if test="${not empty param.checkOutDate}">
+                                        <c:param name="checkOutDate" value="${param.checkOutDate}"/>
+                                        <c:set var="hasParam" value="true"/>
+                                    </c:if>
+                                    <c:if test="${not empty param.statusFilter}">
+                                        <c:param name="statusFilter" value="${param.statusFilter}"/>
+                                        <c:set var="hasParam" value="true"/>
+                                    </c:if>
+                                </c:url>
+
+                                <!-- Hàm tạo link trang -->
+                                <c:set var="pageLink">
+                                    <c:choose>
+                                        <c:when test="${hasParam}">
+                                            ${basePageUrl}&page=
+                                        </c:when>
+                                        <c:otherwise>
+                                            ${cleanBase}?page=
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:set>
+
+                                <!-- Previous -->
                                 <c:choose>
-                                    <c:when test="${i == requestScope.currentPage}">
-                                        <span class="current-page">${i}</span>
+                                    <c:when test="${requestScope.currentPage > 1}">
+                                        <a href="${pageLink}${requestScope.currentPage - 1}">Previous</a>
                                     </c:when>
                                     <c:otherwise>
-                                        <a href="${basePageUrl}&page=${i}">${i}</a>
+                                        <span class="disabled">Previous</span>
                                     </c:otherwise>
                                 </c:choose>
-                            </c:forEach>
 
-                            <c:if test="${requestScope.currentPage < requestScope.noOfPages}"> <%-- Đã đổi totalPages thành noOfPages --%>
-                                <a href="${basePageUrl}&page=${requestScope.currentPage + 1}">Sau &raquo;</a>
-                            </c:if>
-                            <c:if test="${requestScope.currentPage >= requestScope.noOfPages}"> <%-- Đã đổi totalPages thành noOfPages --%>
-                                <span class="disabled">Sau &raquo;</span>
-                            </c:if>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <footer class="footer-section">
-            <div class="container">
-                <div class="footer-text">
-                    <div class="row">
-                        <div class="col-lg-4">
-                            <div class="ft-about">
-                                <div class="logo">
-                                    <a href="${pageContext.request.contextPath}/home">
-                                        <img src="${pageContext.request.contextPath}/img/footer-logo.png" alt="">
-                                    </a>
-                                </div>
-                                <p>We inspire and reach millions of travelers<br /> across 90 local websites</p>
-                                <div class="fa-social">
-                                    <a href="https://only-fans.me/highaileri"><i class="fa fa-facebook"></i></a>
-                                    <a href="https://only-fans.me/highaileri"><i class="fa fa-twitter"></i></a>
-                                    <a href="https://only-fans.me/highaileri"><i class="fa fa-tripadvisor"></i></a>
-                                    <a href="https://only-fans.me/highaileri"><i class="fa fa-instagram"></i></a>
-                                    <a href="https://only-fans.me/highaileri"><i class="fa fa-youtube-play"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 offset-lg-1">
-                            <div class="ft-contact">
-                                <h6>Contact Us</h6>
-                                <ul>
-                                    <li>(84) 359 797 703</li>
-                                    <li>36hotel@gmail.com</li>
-                                    <li>Thanh Hoa, Viet Nam</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 offset-lg-1">
-                            <div class="ft-newslatter">
-                                <h6>New latest</h6>
-                                <p>Get the latest updates and offers.</p>
-                                <form action="#" method="post" class="fn-form">    
-                                    <input type="text" placeholder="Email">
-                                    <button type="submit"><i class="fa fa-send"></i></button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="copyright-option">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-lg-7">
-                            <ul>
-                                <li><a href="https://only-fans.me/highaileri">Contact</a></li>
-                                <li><a href="https://only-fans.me/highaileri">Terms of use</a></li>
-                                <li><a href="https://only-fans.me/highaileri">Privacy</a></li>
-                                <li><a href="https://only-fans.me/highaileri">Environmental Policy</a></li>
-                            </ul>
-                        </div>
-                        <div class="col-lg-5">
-                            <div class="co-text"><p>
-                                    Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved by 36 Hotel
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </footer>
-            <div class="search-model">
-                <div class="h-100 d-flex align-items-center justify-content-center">
-                    <div class="search-close-switch"><i class="icon_close"></i></div>
-                    <form class="search-model-form">
-                        <input type="text" id="search-input" placeholder="Search here.....">
-                    </form>
-                </div>
-            </div>
-            <script src="${pageContext.request.contextPath}/js/jquery-3.3.1.min.js"></script>
-            <script src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>
-            <script src="${pageContext.request.contextPath}/js/jquery.magnific-popup.min.js"></script>
-            <script src="${pageContext.request.contextPath}/js/jquery.nice-select.min.js"></script>
-            <script src="${pageContext.request.contextPath}/js/jquery-ui.min.js"></script>
-            <script src="${pageContext.request.contextPath}/js/jquery.slicknav.js"></script>
-            <script src="${pageContext.request.contextPath}/js/owl.carousel.min.js"></script>
-            <script src="${pageContext.request.contextPath}/js/main.js"></script>
-            <script>
-                $(document).ready(function() {
-                    // Khởi tạo datepicker cho các trường ngày
-                    $(".date-input").datepicker({
-                        dateFormat: 'dd/mm/yy', 
-                        minDate: 0, 
-                        onSelect: function(selectedDate) {
-                            var option = this.id == "check-in" ? "minDate" : "maxDate";
-                            var instance = $(this).data("datepicker");
-                            var date = $.datepicker.parseDate(instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings);
+                                <!-- Tính trang hiển thị -->
+                                <c:set var="startPage" value="${requestScope.currentPage - 2}"/>
+                                <c:set var="endPage" value="${requestScope.currentPage + 2}"/>
+                                <c:if test="${startPage < 1}">
+                                    <c:set var="startPage" value="1"/>
+                                    <c:set var="endPage" value="${requestScope.noOfPages >= 5 ? 5 : requestScope.noOfPages}"/>
+                                </c:if>
+                                <c:if test="${endPage > requestScope.noOfPages}">
+                                    <c:set var="endPage" value="${requestScope.noOfPages}"/>
+                                    <c:set var="startPage" value="${requestScope.noOfPages - 4 > 1 ? requestScope.noOfPages - 4 : 1}"/>
+                                </c:if>
 
-                            if (this.id === "check-in" && $("#check-out").val()) {
-                                $("#check-out").datepicker("option", "minDate", date);
-                            }
-                            if (this.id === "check-out" && $("#check-in").val()) {
-                                $("#check-in").datepicker("option", "maxDate", date);
+                                <!-- Trang đầu + ... -->
+                                <c:if test="${startPage > 1}">
+                                    <a href="${pageLink}1">1</a>
+                                    <c:if test="${startPage > 2}"><span>...</span></c:if>
+                                </c:if>
+
+                                <!-- Các trang chính -->
+                                <c:forEach var="i" begin="${startPage}" end="${endPage}">
+                                    <c:choose>
+                                        <c:when test="${i == requestScope.currentPage}">
+                                            <span class="current-page">${i}</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <a href="${pageLink}${i}">${i}</a>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:forEach>
+
+                                <!-- ... + trang cuối -->
+                                <c:if test="${endPage < requestScope.noOfPages}">
+                                    <c:if test="${endPage < requestScope.noOfPages - 1}"><span>...</span></c:if>
+                                    <a href="${pageLink}${requestScope.noOfPages}">${requestScope.noOfPages}</a>
+                                </c:if>
+
+                                <!-- Next -->
+                                <c:choose>
+                                    <c:when test="${requestScope.currentPage < requestScope.noOfPages}">
+                                        <a href="${pageLink}${requestScope.currentPage + 1}">Next</a>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="disabled">Next</span>
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:if>
+
+                            <!-- Không có phòng -->
+                            <c:if test="${empty requestScope.rooms}">
+                                <p class="text-center text-muted">No rooms available.</p>
+                            </c:if>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <jsp:include page="/common/footer.jsp"/>
+
+    <div class="search-model">
+        <div class="h-100 d-flex align-items-center justify-content-center">
+            <div class="search-close-switch"><i class="icon_close"></i></div>
+            <form class="search-model-form">
+                <input type="text" id="search-input" placeholder="Search here.....">
+            </form>
+        </div>
+    </div>
+
+    <script src="${pageContext.request.contextPath}/js/jquery-3.3.1.min.js"></script>
+    <script src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>
+    <script src="${pageContext.request.contextPath}/js/jquery.magnific-popup.min.js"></script>
+    <script src="${pageContext.request.contextPath}/js/jquery.nice-select.min.js"></script>
+    <script src="${pageContext.request.contextPath}/js/jquery-ui.min.js"></script>
+    <script src="${pageContext.request.contextPath}/js/jquery.slicknav.js"></script>
+    <script src="${pageContext.request.contextPath}/js/owl.carousel.min.js"></script>
+    <script src="${pageContext.request.contextPath}/js/main.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $(".date-input").datepicker({
+                dateFormat: 'dd/mm/yy',
+                minDate: 0,
+                onSelect: function (selectedDate) {
+                    var option = this.id === "date-in" ? "minDate" : "maxDate";
+                    var instance = $(this).data("datepicker");
+                    var date = $.datepicker.parseDate(instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings);
+
+                    if (this.id === "date-in") {
+                        var dateOutVal = $("#date-out").val();
+                        if (dateOutVal) {
+                            var dateOut = $.datepicker.parseDate(instance.settings.dateFormat, dateOutVal, instance.settings);
+                            if (dateOut < date) {
+                                $("#date-out").val("");
                             }
                         }
-                    });
-                    $('select').niceSelect();
-                });
-            </script>
-        </body>
+                        $("#date-out").datepicker("option", "minDate", date);
+                    } else if (this.id === "date-out") {
+                        $("#date-in").datepicker("option", "maxDate", date);
+                    }
+                }
+            });
 
-    </html>
+            $('select.nice-select-custom').niceSelect();
+        });
+    </script>
+</body>
+</html>

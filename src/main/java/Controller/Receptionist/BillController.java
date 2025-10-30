@@ -236,7 +236,6 @@ public class BillController extends HttpServlet {
             booking.put("roomCost", roomCost);
             booking.put("serviceCost", serviceCost);
         }
-
         request.setAttribute("availableBookings", availableBookings);
         request.getRequestDispatcher("/pages/receptionist/create-bill.jsp").forward(request, response);
     }
