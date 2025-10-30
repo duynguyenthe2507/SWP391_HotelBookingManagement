@@ -629,3 +629,33 @@ ALTER TABLE Booking
                           'checked-in',
                           'checked-out'
             ));
+
+CREATE TABLE BookingServiceLink (
+                                    bookingId INT NOT NULL,
+                                    serviceId INT NOT NULL,
+                                    quantity INT NOT NULL DEFAULT 1,
+                                    priceAtBooking DECIMAL(10, 2) NOT NULL,
+
+                                    PRIMARY KEY (bookingId, serviceId),
+
+                                    FOREIGN KEY (bookingId) REFERENCES Booking(bookingId) ON DELETE CASCADE,
+                                    FOREIGN KEY (serviceId) REFERENCES Services(serviceId)
+);
+
+ALTER TABLE Room
+DROP CONSTRAINT CK__Room__status__52593CB8; -- có thể kh phải tên này nhé
+GO
+
+-- 2. Thêm ràng buộc mới với tên rõ ràng và đầy đủ trạng thái
+ALTER TABLE Room
+    ADD CONSTRAINT CK_Room_Status_Allowed
+        CHECK (status IN (
+                          'available',    -- Phòng trống, sẵn sàng
+                          'booked',       -- Đã được đặt trước, chưa check-in
+                          'occupied',     -- Đang có khách ở (Sau khi check-in)
+                          'maintenance',  -- Đang bảo trì
+                          'cleaning'      -- Đã check-out, đang dọn dẹp
+            ));
+GO
+
+DROP TRIGGER trg_update_booking;
