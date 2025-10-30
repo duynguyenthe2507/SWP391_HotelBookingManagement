@@ -507,4 +507,32 @@ public class RoomDao extends DBContext {
         }
         return list;
     }
+
+    public boolean updateRoomStatus(int roomId, String newStatus) {
+        String sql = "UPDATE Room SET status = ?, updatedAt = GETDATE() WHERE roomId = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, newStatus);
+            ps.setInt(2, roomId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error updating room status for " + roomId, e);
+            return false;
+        }
+    }
+
+    public List<Room> getAvailableRooms() {
+        List<Room> list = new ArrayList<>();
+        String sql = "SELECT r.*, r.name as roomName, r.description as roomDescription, r.imgUrl as roomImgUrl, r.updatedAt as roomUpdatedAt, " +
+                "c.name as categoryName, c.description as categoryDescription, c.imgUrl as categoryImgUrl, c.updatedAt as categoryUpdatedAt " +
+                "FROM Room r JOIN Category c ON r.categoryId = c.categoryId WHERE r.status = 'available'";
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(map(rs));
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error getting available rooms", e);
+        }
+        return list;
+    }
 }

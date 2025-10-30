@@ -89,7 +89,7 @@ public class LoginController extends HttpServlet { // Đổi tên class
 
             if ("Receptionist".equalsIgnoreCase(role) || "Admin".equalsIgnoreCase(role)) { 
                 LOGGER.log(Level.INFO, "Redirecting Admin/Receptionist to dashboard.");
-                response.sendRedirect(request.getContextPath() + "/pages/Receptionist/dashboard.jsp"); 
+                response.sendRedirect(request.getContextPath() + "/pages/Receptionist/booking-list.jsp"); 
             } else {
                 LOGGER.log(Level.INFO, "Redirecting Customer to home page.");
                 response.sendRedirect(request.getContextPath() + "/home");

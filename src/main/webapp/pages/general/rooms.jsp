@@ -184,6 +184,63 @@
                 font-size: 13px;
                 color: #006400;
             }
+            .room-item-wrapper {
+                height: 100%; /* Ensures the card wrapper fills the column height */
+            }
+            .room-item-card {
+                height: 100%;
+                display: flex;
+                flex-direction: column; /* Arranges card content vertically */
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+            .room-item-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+            }
+            .room-item-card .card-img-top {
+                width: 100%;
+                height: 250px; /* Fixed height for all images */
+                object-fit: cover; /* Prevents image stretching */
+            }
+            .room-item-card .card-body {
+                display: flex;
+                flex-direction: column;
+                flex-grow: 1; /* Makes the card body fill remaining space */
+            }
+            .room-item-card .card-title {
+                font-family: 'Lora', serif;
+            }
+            .room-item-card .room-price {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: #dfa974;
+                margin-bottom: 15px;
+            }
+            .room-item-card .room-info {
+                font-size: 0.9em;
+                color: #6c757d;
+            }
+            .room-item-card .card-actions {
+                margin-top: auto; /* Pushes buttons to the bottom */
+                display: flex;
+                gap: 5px; /* Space between buttons */
+            }
+            .room-item-card .card-actions .btn,
+            .room-item-card .card-actions form {
+                flex: 1; /* Make buttons share space */
+            }
+            .room-item-card .card-actions .btn,
+            .room-item-card .card-actions button {
+                width: 100%;
+                font-size: 12px;
+                padding: 8px 5px;
+                text-transform: uppercase;
+                font-weight: 600;
+            }
+            .room-item-card .card-actions .btn-wishlist {
+                flex-grow: 0; /* Stop wishlist button from growing */
+                flex-basis: 45px; /* Give it a fixed width */
+            }
         </style>
     </head>
 
@@ -192,57 +249,8 @@
             <div class="loader"></div>
         </div>
 
-        <div class="offcanvas-menu-overlay"></div>
-        <div class="canvas-open">
-            <i class="icon_menu"></i>
-        </div>
-        <div class="offcanvas-menu-wrapper">
-            <div class="canvas-close">
-                <i class="icon_close"></i>
-            </div>
-            <div class="search-icon search-switch">
-                <i class="icon_search"></i>
-            </div>
-            <nav class="mainmenu mobile-menu">
-                <ul>
-                    <li><a href="${pageContext.request.contextPath}/home">Home</a></li>
-                    <li class="active"><a href="${pageContext.request.contextPath}/rooms">Rooms</a></li>
-                    <li><a href="${pageContext.request.contextPath}/contact">Contact</a></li>
-                    <li><a href="${pageContext.request.contextPath}/rules">Rules</a></li>
-                </ul>
-            </nav>
-            <div id="mobile-menu-wrap"></div>
-            <div class="top-social">
-                <a href="https://only-fans.me/highaileri"><i class="fa fa-facebook"></i></a>
-                <a href="https://only-fans.me/highaileri"><i class="fa fa-twitter"></i></a>
-                <a href="https://only-fans.me/highaileri"><i class="fa fa-tripadvisor"></i></a>
-                <a href="https://only-fans.me/highaileri"><i class="fa fa-instagram"></i></a>
-            </div>
-            <ul class="top-widget">
-                <li><i class="fa fa-phone"></i> (84) 359 797 703</li>
-                <li><i class="fa fa-envelope"></i> 36hotel@gmail.com</li>
-            </ul>
-        </div>
-
-        <jsp:include page="/common/header.jsp"/>
-
-        <div class="header-divider"></div>
-
-        <div class="breadcrumb-section">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="breadcrumb-text">
-                            <h2>Our Rooms</h2>
-                            <div class="bt-option">
-                                <a href="${pageContext.request.contextPath}/home">Home</a>
-                                <span>Rooms</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <jsp:include page="/common/header.jsp" />
+        <jsp:include page="/common/breadcrumb.jsp" />
 
         <section class="rooms-section spad">
             <div class="container">
