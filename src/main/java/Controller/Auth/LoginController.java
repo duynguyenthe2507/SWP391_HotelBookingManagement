@@ -42,10 +42,12 @@ public class LoginController extends HttpServlet {
             request.setAttribute("error", "Phone number does not exist!");
             request.setAttribute("phone", phone); // Giữ lại số điện thoại đã nhập
             request.getRequestDispatcher("/pages/auth/login.jsp").forward(request, response);
+            return;
         } else if (u.getPassword() == null) {
             request.setAttribute("error", "Wrong password!");
             request.setAttribute("phone", phone);
             request.getRequestDispatcher("/pages/auth/login.jsp").forward(request, response);
+            return;
         } else {
             // Check if password is hashed (starts with $2a$) or plain text
             boolean passwordMatch;
@@ -72,9 +74,9 @@ public class LoginController extends HttpServlet {
         // Kiểm tra role và điều hướng
         String role = (u.getRole() != null) ? u.getRole().trim() : "";
 
-        if ("Receptionist".equalsIgnoreCase(role)) {
+        if ("receptionist".equalsIgnoreCase(role) || "receptionist123".equalsIgnoreCase(role)) {
             // Nếu là lễ tân → vào trang dashboard riêng
-            response.sendRedirect(request.getContextPath() + "/common/SideBar.jsp");
+            response.sendRedirect(request.getContextPath() + "/pages/receptionist/receptionist-dashboard.jsp");
             return;
         } else {
             // User thường → vào home

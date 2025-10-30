@@ -51,12 +51,41 @@
                 <div class="col-lg-10">
                     <div class="nav-menu">
                         <nav class="mainmenu">
-                            <ul>
-                                <li class="active"><a href="${pageContext.request.contextPath}/home">Home</a></li>
-                                <li><a href="${pageContext.request.contextPath}/rooms">Rooms</a></li>
-                                <li><a href="${pageContext.request.contextPath}/contact">Contact</a></li>
-                                <li><a href="${pageContext.request.contextPath}/rules">Rules</a></li>
-                            </ul>
+                            <c:choose>
+                              <c:when test="${not empty pageActive}">
+                                <ul>
+                                  <li <c:if test="${pageActive eq 'dashboard'}">class="active"</c:if>>
+                                    <a href="${pageContext.request.contextPath}/pages/receptionist/receptionist-dashboard.jsp">Dashboard</a>
+                                  </li>
+                                  <li <c:if test="${pageActive eq 'bills'}">class="active"</c:if>>
+                                    <a href="${pageContext.request.contextPath}/receptionist/bills">Bills</a>
+                                  </li>
+                                  <li <c:if test="${pageActive eq 'room-fees'}">class="active"</c:if>>
+                                    <a href="${pageContext.request.contextPath}/receptionist/room-fees">Room Fees</a>
+                                  </li>
+                                  <li <c:if test="${pageActive eq 'bookings'}">class="active"</c:if>>
+                                    <a href="${pageContext.request.contextPath}/receptionist/bookings">Bookings</a>
+                                  </li>
+                                  <li <c:if test="${pageActive eq 'penalties'}">class="active"</c:if>>
+                                    <a href="${pageContext.request.contextPath}/receptionist/penalties">Penalties</a>
+                                  </li>
+                                  <li <c:if test="${pageActive eq 'feedback'}">class="active"</c:if>>
+                                    <a href="${pageContext.request.contextPath}/receptionist/feedback">Feedback</a>
+                                  </li>
+                                  <li <c:if test="${pageActive eq 'room-list'}">class="active"</c:if>>
+                                    <a href="${pageContext.request.contextPath}/receptionist/rooms">Room List</a>
+                                  </li>
+                                </ul>
+                              </c:when>
+                              <c:otherwise>
+                                <ul>
+                                  <li class="active"><a href="${pageContext.request.contextPath}/home">Home</a></li>
+                                  <li><a href="${pageContext.request.contextPath}/rooms">Rooms</a></li>
+                                  <li><a href="${pageContext.request.contextPath}/contact">Contact</a></li>
+                                  <li><a href="${pageContext.request.contextPath}/rules">Rules</a></li>
+                                </ul>
+                              </c:otherwise>
+                            </c:choose>
                         </nav>
                     </div>
                 </div>
@@ -64,3 +93,20 @@
         </div>
     </div>
 </header>
+<style>
+  .mainmenu ul li a {
+    border-bottom: none !important;
+    background: none;
+    color: #222;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .mainmenu ul li.active a {
+    border-bottom: 2.5px solid #dfa974 !important;
+    border-radius: 2px;
+    color: #dfa974;
+  }
+  .mainmenu ul li a:hover {
+    color: #dfa974;
+  }
+</style>

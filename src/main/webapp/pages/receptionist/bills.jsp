@@ -31,6 +31,29 @@
 </head>
 
 <body>
+<c:set var="pageActive" value="bills"/>
+<div class="d-flex" style="min-height:100vh;">
+  <nav class="sidebar d-flex flex-column col-lg-2 col-md-3 col-3 p-0 min-vh-100" style="background-color: #23242a;">
+    <div class="sidebar-sticky flex-grow-1 d-flex flex-column">
+      <div class="text-center mt-4 mb-4">
+        <div style="font-family: 'Lora', serif; font-style:italic; font-weight:bold; font-size:2em; color:#dfa974; letter-spacing:1px;">Sona.</div>
+        <h5 class="font-weight-bold" style="color: #dfa974;">Reception Dashboard</h5>
+      </div>
+      <ul class="nav flex-column flex-grow-1">
+        <li class="nav-item"><a href="${pageContext.request.contextPath}/pages/receptionist/receptionist-dashboard.jsp" class="nav-link text-white"><i class="fa fa-tachometer mr-2"></i> Dashboard</a></li>
+        <li class="nav-item"><a href="${pageContext.request.contextPath}/receptionist/bills" class="nav-link text-white active" style="background-color: #dfa974; font-weight: bold;"><i class="fa fa-file-text-o mr-2"></i> Bills</a></li>
+        <li class="nav-item"><a href="${pageContext.request.contextPath}/receptionist/room-fees" class="nav-link text-white"><i class="fa fa-dollar mr-2"></i> Room Fees</a></li>
+        <li class="nav-item"><a href="${pageContext.request.contextPath}/receptionist/bookings" class="nav-link text-white"><i class="fa fa-calendar mr-2"></i> Bookings</a></li>
+        <li class="nav-item"><a href="${pageContext.request.contextPath}/receptionist/penalties" class="nav-link text-white"><i class="fa fa-gavel mr-2"></i> Penalties</a></li>
+        <li class="nav-item"><a href="${pageContext.request.contextPath}/receptionist/feedback" class="nav-link text-white"><i class="fa fa-comments mr-2"></i> Feedback</a></li>
+        <li class="nav-item"><a href="${pageContext.request.contextPath}/receptionist/rooms" class="nav-link text-white"><i class="fa fa-home mr-2"></i> Room List</a></li>
+        <li class="nav-item"><a href="${pageContext.request.contextPath}/profile" class="nav-link text-white"><i class="fa fa-user mr-2"></i> Profile</a></li>
+        <li class="nav-item"><a href="${pageContext.request.contextPath}/login" class="nav-link text-white"><i class="fa fa-sign-out mr-2"></i> Logout</a></li>
+      </ul>
+      <div class="mt-auto mb-3"></div>
+    </div>
+  </nav>
+  <div class="flex-grow-1 d-flex flex-column">
     <!-- Page Preloder -->
     <div id="preloder">
         <div class="loader"></div>
@@ -139,17 +162,27 @@
                         <div class="nav-menu">
                             <nav class="mainmenu">
                                 <ul>
-                                    <li class="active"><a href="${pageContext.request.contextPath}/home">Home</a></li>
-                                    <li><a href="${pageContext.request.contextPath}/rooms">Rooms</a></li>
-                                    <li><a href="${pageContext.request.contextPath}/about-us">About Us</a></li>
-                                    <li><a href="#">Pages</a>
-                                        <ul class="dropdown">
-                                            <li><a href="${pageContext.request.contextPath}/room-details">Room Details</a></li>
-                                            <li><a href="${pageContext.request.contextPath}/blog-details">Blog Details</a></li>
-                                        </ul>
+                                    <li <c:if test="${pageActive eq 'dashboard'}">class="active"</c:if>>
+                                        <a href="${pageContext.request.contextPath}/pages/receptionist/receptionist-dashboard.jsp">Dashboard</a>
                                     </li>
-                                    <li><a href="${pageContext.request.contextPath}/blog">News</a></li>
-                                    <li><a href="${pageContext.request.contextPath}/contact">Contact</a></li>
+                                    <li <c:if test="${pageActive eq 'bills'}">class="active"</c:if>>
+                                        <a href="${pageContext.request.contextPath}/receptionist/bills">Bills</a>
+                                    </li>
+                                    <li <c:if test="${pageActive eq 'room-fees'}">class="active"</c:if>>
+                                        <a href="${pageContext.request.contextPath}/receptionist/room-fees">Room Fees</a>
+                                    </li>
+                                    <li <c:if test="${pageActive eq 'bookings'}">class="active"</c:if>>
+                                        <a href="${pageContext.request.contextPath}/receptionist/bookings">Bookings</a>
+                                    </li>
+                                    <li <c:if test="${pageActive eq 'penalties'}">class="active"</c:if>>
+                                        <a href="${pageContext.request.contextPath}/receptionist/penalties">Penalties</a>
+                                    </li>
+                                    <li <c:if test="${pageActive eq 'feedback'}">class="active"</c:if>>
+                                        <a href="${pageContext.request.contextPath}/receptionist/feedback">Feedback</a>
+                                    </li>
+                                    <li <c:if test="${pageActive eq 'room-list'}">class="active"</c:if>>
+                                        <a href="${pageContext.request.contextPath}/receptionist/rooms">Room List</a>
+                                    </li>
                                 </ul>
                             </nav>
                             <div class="nav-right search-switch">
@@ -441,6 +474,8 @@
         </div>
     </div>
     <!-- Search model end -->
+  </div>
+</div>
 
     <!-- Js Plugins -->
     <script src="${pageContext.request.contextPath}/js/jquery-3.3.1.min.js"></script>
