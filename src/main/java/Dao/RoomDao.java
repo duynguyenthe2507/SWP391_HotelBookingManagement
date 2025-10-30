@@ -53,15 +53,15 @@ public class RoomDao extends DBContext {
     }
 
     public List<Room> findAllRooms(String searchKeyword, Integer categoryId, Double minPrice, Double maxPrice,
-                                   Integer minCapacity, String checkInDate, String checkOutDate, String statusFilter,
-                                   int pageNumber, int pageSize) {
+            Integer minCapacity, String checkInDate, String checkOutDate, String statusFilter,
+            int pageNumber, int pageSize) {
         List<Room> roomList = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder(
-                "SELECT r.roomId, r.name as roomName, r.categoryId, r.price, r.capacity, " +
-                "r.status, r.description as roomDescription, r.imgUrl as roomImgUrl, r.updatedAt as roomUpdatedAt, " +
-                "c.name as categoryName, c.description as categoryDescription, c.imgUrl as categoryImgUrl, c.updatedAt as categoryUpdatedAt " +
-                "FROM Room r JOIN Category c ON r.categoryId = c.categoryId WHERE 1=1 "
+                "SELECT r.roomId, r.name as roomName, r.categoryId, r.price, r.capacity, "
+                + "r.status, r.description as roomDescription, r.imgUrl as roomImgUrl, r.updatedAt as roomUpdatedAt, "
+                + "c.name as categoryName, c.description as categoryDescription, c.imgUrl as categoryImgUrl, c.updatedAt as categoryUpdatedAt "
+                + "FROM Room r JOIN Category c ON r.categoryId = c.categoryId WHERE 1=1 "
         );
         List<Object> params = new ArrayList<>();
 
@@ -90,14 +90,14 @@ public class RoomDao extends DBContext {
             params.add(statusFilter);
         }
 
-        if (checkInDate != null && !checkInDate.trim().isEmpty() &&
-            checkOutDate != null && !checkOutDate.trim().isEmpty()) {
+        if (checkInDate != null && !checkInDate.trim().isEmpty()
+                && checkOutDate != null && !checkOutDate.trim().isEmpty()) {
 
             try {
                 // Parse dd/MM/yyyy sang LocalDateTime (dùng bởi BookingDao)
                 LocalDateTime checkInLDT = LocalDateTime.parse(checkInDate + " 14:00", DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
                 LocalDateTime checkOutLDT = LocalDateTime.parse(checkOutDate + " 12:00", DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
-                
+
                 // Sử dụng logic join và kiểm tra overlap giống BookingDao
                 sql.append(" AND r.roomId NOT IN (");
                 sql.append("   SELECT bd.roomId FROM BookingDetail bd ");
@@ -118,8 +118,8 @@ public class RoomDao extends DBContext {
         params.add(pageSize);
 
         try (Connection c = new DBContext().getConnection(); // Tạo connection riêng cho hàm đọc
-             PreparedStatement ps = c.prepareStatement(sql.toString())) {
-            
+                 PreparedStatement ps = c.prepareStatement(sql.toString())) {
+
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
@@ -132,90 +132,67 @@ public class RoomDao extends DBContext {
             LOGGER.log(Level.SEVERE, "Error in RoomDao.findAllRooms()", e);
             e.printStackTrace();
         } catch (Exception e) {
-             LOGGER.log(Level.SEVERE, "Error getting connection in findAllRooms", e);
-             e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error getting connection in findAllRooms", e);
+            e.printStackTrace();
         }
         return roomList;
     }
 
     public int getTotalRoomsCount(String searchKeyword, Integer categoryId, Double minPrice, Double maxPrice,
-                                  Integer minCapacity, String checkInDate, String checkOutDate, String statusFilter) {
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Room r JOIN Category c ON r.categoryId = c.categoryId WHERE 1=1 ");
+            Integer minCapacity, String checkInDate, String checkOutDate, String statusFilter) {
+        int total = 0;
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Rooms r WHERE 1=1");
+
         List<Object> params = new ArrayList<>();
-        int count = 0;
 
         if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
-            sql.append(" AND r.name LIKE ? ");
-            params.add("%" + searchKeyword + "%");
+            sql.append(" AND r.name LIKE ?");
+            params.add("%" + searchKeyword.trim() + "%");
         }
-        if (categoryId != null && categoryId > 0) {
-            sql.append(" AND r.categoryId = ? ");
+        if (categoryId != null) {
+            sql.append(" AND r.category_id = ?");
             params.add(categoryId);
         }
-        if (minPrice != null && minPrice >= 0) {
-            sql.append(" AND r.price >= ? ");
+        if (minPrice != null) {
+            sql.append(" AND r.price >= ?");
             params.add(minPrice);
         }
-        if (maxPrice != null && maxPrice >= 0) {
-            sql.append(" AND r.price <= ? ");
+        if (maxPrice != null) {
+            sql.append(" AND r.price <= ?");
             params.add(maxPrice);
         }
-        if (minCapacity != null && minCapacity > 0) {
-            sql.append(" AND r.capacity >= ? ");
+        if (minCapacity != null) {
+            sql.append(" AND r.capacity >= ?");
             params.add(minCapacity);
         }
-        if (statusFilter != null && !statusFilter.trim().isEmpty()) {
-            sql.append(" AND r.status = ? ");
+        if (statusFilter != null && !statusFilter.isEmpty()) {
+            sql.append(" AND r.status = ?");
             params.add(statusFilter);
         }
-        if (checkInDate != null && !checkInDate.trim().isEmpty() &&
-            checkOutDate != null && !checkOutDate.trim().isEmpty()) {
 
-            try {
-                LocalDateTime checkInLDT = LocalDateTime.parse(checkInDate + " 14:00", DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
-                LocalDateTime checkOutLDT = LocalDateTime.parse(checkOutDate + " 12:00", DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        try (Connection con = new DBContext().getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
-                sql.append(" AND r.roomId NOT IN (");
-                sql.append("   SELECT bd.roomId FROM BookingDetail bd ");
-                sql.append("   JOIN Booking b ON bd.bookingId = b.bookingId ");
-                sql.append("   WHERE b.status IN ('pending', 'confirmed') ");
-                sql.append("   AND (b.checkinTime < ? AND b.checkoutTime > ?)");
-                sql.append(")");
-                params.add(Timestamp.valueOf(checkOutLDT));
-                params.add(Timestamp.valueOf(checkInLDT));
-                
-            } catch (DateTimeParseException e) {
-                LOGGER.log(Level.WARNING, "Invalid date format in getTotalRoomsCount: " + checkInDate + " - " + checkOutDate, e);
-            }
-        }
-
-        try (Connection c = new DBContext().getConnection(); // Tạo connection riêng
-             PreparedStatement ps = c.prepareStatement(sql.toString())) {
-            
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    count = rs.getInt(1);
-                }
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                total = rs.getInt(1);
             }
+
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Error in RoomDao.getTotalRoomsCount()", e);
             e.printStackTrace();
-        } catch (Exception e) {
-             LOGGER.log(Level.SEVERE, "Error getting connection in getTotalRoomsCount", e);
-             e.printStackTrace();
         }
-        return count;
+
+        return total;
     }
 
     public List<Category> getAllCategories() {
         List<Category> categories = new ArrayList<>();
         String sql = "SELECT categoryId, name, description, imgUrl, updatedAt FROM Category ORDER BY name";
         try (Connection c = new DBContext().getConnection(); // Tạo connection riêng
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                 PreparedStatement ps = c.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 Category category = new Category();
                 category.setCategoryId(rs.getInt("categoryId"));
@@ -230,21 +207,21 @@ public class RoomDao extends DBContext {
             LOGGER.log(Level.SEVERE, "Error in RoomDao.getAllCategories()", e);
             e.printStackTrace();
         } catch (Exception e) {
-             LOGGER.log(Level.SEVERE, "Error getting connection in getAllCategories", e);
-             e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error getting connection in getAllCategories", e);
+            e.printStackTrace();
         }
         return categories;
     }
 
     public Room getById(int id) {
-        String sql = "SELECT r.roomId, r.name as roomName, r.categoryId, r.price, r.capacity, " +
-                     "r.status, r.description as roomDescription, r.imgUrl as roomImgUrl, r.updatedAt as roomUpdatedAt, " +
-                     "c.name as categoryName, c.description as categoryDescription, c.imgUrl as categoryImgUrl, c.updatedAt as categoryUpdatedAt " +
-                     "FROM Room r JOIN Category c ON r.categoryId = c.categoryId WHERE r.roomId=?";
+        String sql = "SELECT r.roomId, r.name as roomName, r.categoryId, r.price, r.capacity, "
+                + "r.status, r.description as roomDescription, r.imgUrl as roomImgUrl, r.updatedAt as roomUpdatedAt, "
+                + "c.name as categoryName, c.description as categoryDescription, c.imgUrl as categoryImgUrl, c.updatedAt as categoryUpdatedAt "
+                + "FROM Room r JOIN Category c ON r.categoryId = c.categoryId WHERE r.roomId=?";
 
         try (Connection c = new DBContext().getConnection(); // Tạo connection riêng
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            
+                 PreparedStatement ps = c.prepareStatement(sql)) {
+
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -255,41 +232,40 @@ public class RoomDao extends DBContext {
             LOGGER.log(Level.SEVERE, "SQL Error in RoomDao.getById() for ID: " + id, e);
             e.printStackTrace();
         } catch (Exception e) {
-             LOGGER.log(Level.SEVERE, "General Error in RoomDao.getById() for ID: " + id, e);
-             e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "General Error in RoomDao.getById() for ID: " + id, e);
+            e.printStackTrace();
         }
         return null;
     }
 
     public List<Room> getAll() {
         List<Room> list = new ArrayList<>();
-        String sql = "SELECT r.roomId, r.name as roomName, r.categoryId, r.price, r.capacity, " +
-                     "r.status, r.description as roomDescription, r.imgUrl as roomImgUrl, r.updatedAt as roomUpdatedAt, " +
-                     "c.name as categoryName, c.description as categoryDescription, c.imgUrl as categoryImgUrl, c.updatedAt as categoryUpdatedAt " +
-                     "FROM Room r JOIN Category c ON r.categoryId = c.categoryId ORDER BY r.roomId";
-                     
+        String sql = "SELECT r.roomId, r.name as roomName, r.categoryId, r.price, r.capacity, "
+                + "r.status, r.description as roomDescription, r.imgUrl as roomImgUrl, r.updatedAt as roomUpdatedAt, "
+                + "c.name as categoryName, c.description as categoryDescription, c.imgUrl as categoryImgUrl, c.updatedAt as categoryUpdatedAt "
+                + "FROM Room r JOIN Category c ON r.categoryId = c.categoryId ORDER BY r.roomId";
+
         try (Connection c = new DBContext().getConnection(); // Tạo connection riêng
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                 PreparedStatement ps = c.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 list.add(map(rs));
             }
-        } catch (SQLException e) { 
+        } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error in getAll()", e);
-            e.printStackTrace(); 
+            e.printStackTrace();
         } catch (Exception e) {
-             LOGGER.log(Level.SEVERE, "Error getting connection in getAll", e);
-             e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error getting connection in getAll", e);
+            e.printStackTrace();
         }
         return list;
     }
 
     public boolean insert(Room r) {
-        String sql = "INSERT INTO Room(name, categoryId, price, capacity, status, description, imgUrl) " +
-                     "VALUES (?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO Room(name, categoryId, price, capacity, status, description, imgUrl) "
+                + "VALUES (?,?,?,?,?,?,?)";
         try (Connection c = new DBContext().getConnection(); // Tạo connection riêng
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            
+                 PreparedStatement ps = c.prepareStatement(sql)) {
+
             ps.setString(1, r.getName());
             ps.setInt(2, r.getCategoryId());
             ps.setDouble(3, r.getPrice());
@@ -298,12 +274,12 @@ public class RoomDao extends DBContext {
             ps.setString(6, r.getDescription());
             ps.setString(7, r.getImgUrl());
             return ps.executeUpdate() > 0;
-        } catch (SQLException e) { 
+        } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error in insert()", e);
-            e.printStackTrace(); 
+            e.printStackTrace();
         } catch (Exception e) {
-             LOGGER.log(Level.SEVERE, "Error getting connection in insert", e);
-             e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error getting connection in insert", e);
+            e.printStackTrace();
         }
         return false;
     }
@@ -311,8 +287,8 @@ public class RoomDao extends DBContext {
     public boolean update(Room r) {
         String sql = "UPDATE Room SET name=?, categoryId=?, price=?, capacity=?, status=?, description=?, imgUrl=? WHERE roomId=?";
         try (Connection c = new DBContext().getConnection(); // Tạo connection riêng
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            
+                 PreparedStatement ps = c.prepareStatement(sql)) {
+
             ps.setString(1, r.getName());
             ps.setInt(2, r.getCategoryId());
             ps.setDouble(3, r.getPrice());
@@ -322,12 +298,12 @@ public class RoomDao extends DBContext {
             ps.setString(7, r.getImgUrl());
             ps.setInt(8, r.getRoomId());
             return ps.executeUpdate() > 0;
-        } catch (SQLException e) { 
+        } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error in update()", e);
-            e.printStackTrace(); 
+            e.printStackTrace();
         } catch (Exception e) {
-             LOGGER.log(Level.SEVERE, "Error getting connection in update", e);
-             e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error getting connection in update", e);
+            e.printStackTrace();
         }
         return false;
     }
@@ -335,31 +311,30 @@ public class RoomDao extends DBContext {
     public boolean delete(int id) {
         String sql = "DELETE FROM Room WHERE roomId=?";
         try (Connection c = new DBContext().getConnection(); // Tạo connection riêng
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            
+                 PreparedStatement ps = c.prepareStatement(sql)) {
+
             ps.setInt(1, id);
             return ps.executeUpdate() > 0;
-        } catch (SQLException e) { 
+        } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error in delete()", e);
-            e.printStackTrace(); 
+            e.printStackTrace();
         } catch (Exception e) {
-             LOGGER.log(Level.SEVERE, "Error getting connection in delete", e);
-             e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error getting connection in delete", e);
+            e.printStackTrace();
         }
         return false;
     }
 
     public List<Map<String, Object>> getRoomsWithCategoryInfo() {
         List<Map<String, Object>> list = new ArrayList<>();
-        String sql = "SELECT r.roomId, r.name, r.price, r.capacity, r.status, r.description, r.imgUrl, " +
-                     "c.name as categoryName, c.description as categoryDescription " +
-                     "FROM Room r " +
-                     "INNER JOIN Category c ON r.categoryId = c.categoryId " +
-                     "ORDER BY r.categoryId, r.name";
+        String sql = "SELECT r.roomId, r.name, r.price, r.capacity, r.status, r.description, r.imgUrl, "
+                + "c.name as categoryName, c.description as categoryDescription "
+                + "FROM Room r "
+                + "INNER JOIN Category c ON r.categoryId = c.categoryId "
+                + "ORDER BY r.categoryId, r.name";
         try (Connection c = new DBContext().getConnection(); // Tạo connection riêng
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            
+                 PreparedStatement ps = c.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
             while (rs.next()) {
                 Map<String, Object> roomInfo = new HashMap<>();
                 roomInfo.put("roomId", rs.getInt("roomId"));
@@ -373,27 +348,27 @@ public class RoomDao extends DBContext {
                 roomInfo.put("categoryDescription", rs.getString("categoryDescription"));
                 list.add(roomInfo);
             }
-        } catch (SQLException e) { 
+        } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error in getRoomsWithCategoryInfo()", e);
-            e.printStackTrace(); 
+            e.printStackTrace();
         } catch (Exception e) {
-             LOGGER.log(Level.SEVERE, "Error getting connection in getRoomsWithCategoryInfo", e);
-             e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error getting connection in getRoomsWithCategoryInfo", e);
+            e.printStackTrace();
         }
         return list;
     }
 
     public List<Map<String, Object>> getRoomsWithCategoryInfoPaged(int offset, int limit) {
         List<Map<String, Object>> list = new ArrayList<>();
-        String sql = "SELECT r.roomId, r.name, r.price, r.capacity, r.status, r.description, r.imgUrl, " +
-                     "c.name as categoryName, c.description as categoryDescription " +
-                     "FROM Room r " +
-                     "INNER JOIN Category c ON r.categoryId = c.categoryId " +
-                     "ORDER BY r.categoryId, r.name " +
-                     "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        String sql = "SELECT r.roomId, r.name, r.price, r.capacity, r.status, r.description, r.imgUrl, "
+                + "c.name as categoryName, c.description as categoryDescription "
+                + "FROM Room r "
+                + "INNER JOIN Category c ON r.categoryId = c.categoryId "
+                + "ORDER BY r.categoryId, r.name "
+                + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try (Connection c = new DBContext().getConnection(); // Tạo connection riêng
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            
+                 PreparedStatement ps = c.prepareStatement(sql)) {
+
             ps.setInt(1, Math.max(0, offset));
             ps.setInt(2, Math.max(1, limit));
             try (ResultSet rs = ps.executeQuery()) {
@@ -411,12 +386,12 @@ public class RoomDao extends DBContext {
                     list.add(roomInfo);
                 }
             }
-        } catch (SQLException e) { 
+        } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error in getRoomsWithCategoryInfoPaged()", e);
-            e.printStackTrace(); 
+            e.printStackTrace();
         } catch (Exception e) {
-             LOGGER.log(Level.SEVERE, "Error getting connection in getRoomsWithCategoryInfoPaged", e);
-             e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error getting connection in getRoomsWithCategoryInfoPaged", e);
+            e.printStackTrace();
         }
         return list;
     }
@@ -424,32 +399,31 @@ public class RoomDao extends DBContext {
     public int countAllRooms() {
         String sql = "SELECT COUNT(*) AS total FROM Room";
         try (Connection c = new DBContext().getConnection(); // Tạo connection riêng
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            
+                 PreparedStatement ps = c.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
             if (rs.next()) {
                 return rs.getInt("total");
             }
-        } catch (SQLException e) { 
+        } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error in countAllRooms()", e);
-            e.printStackTrace(); 
+            e.printStackTrace();
         } catch (Exception e) {
-             LOGGER.log(Level.SEVERE, "Error getting connection in countAllRooms", e);
-             e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error getting connection in countAllRooms", e);
+            e.printStackTrace();
         }
         return 0;
     }
 
     public List<Map<String, Object>> getRoomWithCategoryInfo(int roomId) {
         List<Map<String, Object>> list = new ArrayList<>();
-        String sql = "SELECT r.roomId, r.name, r.price, r.capacity, r.status, r.description, r.imgUrl, " +
-                     "c.name as categoryName, c.description as categoryDescription " +
-                     "FROM Room r " +
-                     "INNER JOIN Category c ON r.categoryId = c.categoryId " +
-                     "WHERE r.roomId = ?";
+        String sql = "SELECT r.roomId, r.name, r.price, r.capacity, r.status, r.description, r.imgUrl, "
+                + "c.name as categoryName, c.description as categoryDescription "
+                + "FROM Room r "
+                + "INNER JOIN Category c ON r.categoryId = c.categoryId "
+                + "WHERE r.roomId = ?";
         try (Connection c = new DBContext().getConnection(); // Tạo connection riêng
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            
+                 PreparedStatement ps = c.prepareStatement(sql)) {
+
             ps.setInt(1, roomId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -466,27 +440,27 @@ public class RoomDao extends DBContext {
                     list.add(roomInfo);
                 }
             }
-        } catch (SQLException e) { 
+        } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error in getRoomWithCategoryInfo() for room ID: " + roomId, e);
-            e.printStackTrace(); 
+            e.printStackTrace();
         } catch (Exception e) {
-             LOGGER.log(Level.SEVERE, "Error getting connection in getRoomWithCategoryInfo", e);
-             e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error getting connection in getRoomWithCategoryInfo", e);
+            e.printStackTrace();
         }
         return list;
     }
 
     public List<Map<String, Object>> getRoomsByCategory(String categoryName) {
         List<Map<String, Object>> list = new ArrayList<>();
-        String sql = "SELECT r.roomId, r.name, r.price, r.capacity, r.status, r.description, r.imgUrl, " +
-                     "c.name as categoryName, c.description as categoryDescription " +
-                     "FROM Room r " +
-                     "INNER JOIN Category c ON r.categoryId = c.categoryId " +
-                     "WHERE c.name = ? " +
-                     "ORDER BY r.name";
+        String sql = "SELECT r.roomId, r.name, r.price, r.capacity, r.status, r.description, r.imgUrl, "
+                + "c.name as categoryName, c.description as categoryDescription "
+                + "FROM Room r "
+                + "INNER JOIN Category c ON r.categoryId = c.categoryId "
+                + "WHERE c.name = ? "
+                + "ORDER BY r.name";
         try (Connection c = new DBContext().getConnection(); // Tạo connection riêng
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            
+                 PreparedStatement ps = c.prepareStatement(sql)) {
+
             ps.setString(1, categoryName);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -503,12 +477,12 @@ public class RoomDao extends DBContext {
                     list.add(roomInfo);
                 }
             }
-        } catch (SQLException e) { 
+        } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error in getRoomsByCategory() for category: " + categoryName, e);
-            e.printStackTrace(); 
+            e.printStackTrace();
         } catch (Exception e) {
-             LOGGER.log(Level.SEVERE, "Error getting connection in getRoomsByCategory", e);
-             e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Error getting connection in getRoomsByCategory", e);
+            e.printStackTrace();
         }
         return list;
     }
