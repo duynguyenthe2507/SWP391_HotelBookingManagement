@@ -20,7 +20,7 @@ public class CartDao extends DBContext {
                 "WHERE c.userId = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, userId);
+            ps.setInt(1, userId); // gán userId vào
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     CartItem item = new CartItem(

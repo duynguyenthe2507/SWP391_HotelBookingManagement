@@ -8,11 +8,15 @@ import lombok.*;
 @AllArgsConstructor
 public class Booking {
     private int bookingId;
-    private int userId;
+    private Integer userId;
+    private Integer receptionistId;
+    private String guestName;
+    private int roomId;
     private LocalDateTime checkinTime;
     private LocalDateTime checkoutTime;
-    private double durationHours;
-    private String status; // pending / confirmed / cancelled
+    private int guestCount;
+    private String specialRequest;
+    private String status; // pending / confirmed / checked-in / checked-out / cancelled
     private double totalPrice;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

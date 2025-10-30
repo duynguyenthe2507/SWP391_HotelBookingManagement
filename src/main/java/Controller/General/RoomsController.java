@@ -101,11 +101,13 @@ public class RoomsController extends HttpServlet {
             request.setAttribute("minPrice", minPrice);
             request.setAttribute("maxPrice", maxPrice);
             request.setAttribute("minCapacity", minCapacity);
-            request.setAttribute("checkInDate", checkInDate);
-            request.setAttribute("checkOutDate", checkOutDate);
+            request.setAttribute("checkInDate", checkInDate); 
+            request.setAttribute("checkOutDate", checkOutDate); 
             request.setAttribute("statusFilter", statusFilter);
 
-            // 6. FORWARD ĐẾN JSP
+            request.setAttribute("pageTitle", "Our Rooms");
+            request.setAttribute("currentPage", "Rooms");
+
             request.getRequestDispatcher("/pages/general/rooms.jsp").forward(request, response);
 
         } catch (NumberFormatException e) {

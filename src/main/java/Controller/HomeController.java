@@ -23,15 +23,12 @@ public class HomeController extends HttpServlet {
         CategoryDao categoryDao = new CategoryDao();
         // Gọi hàm để lấy danh sách 3 loại phòng
         List<Category> categories = categoryDao.getAll();
-        // Log
-        System.out.println("So luong category lay duoc: " + categories.size());
         // Đặt list vào request attribute để JSP có thể truy cập
         request.setAttribute("categories", categories);
 
         // Lấy data services
         ServicesDao servicesDao = new ServicesDao();
         List<Services> services = servicesDao.getAll();
-        System.out.println("So luong service lay duoc: " + services.size());
         request.setAttribute("services", services);
 
         request.getRequestDispatcher("/index.jsp").forward(request, response);
