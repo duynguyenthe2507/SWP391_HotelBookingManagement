@@ -1,4 +1,4 @@
-package Utility;
+package Utils;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -44,7 +44,8 @@ public class VnPayConfig {
      * URL Return (Client) trỏ đến trang kết quả JSP.
      * Đảm bảo file này tồn tại ở /pages/user/paymentResult.jsp
      */
-    public static final String VNP_RETURN_URL = NGROK_URL + CONTEXT_PATH + "/pages/user/paymentResult.jsp"; 
+    public static final String VNP_RETURN_URL = NGROK_URL + CONTEXT_PATH + "/paymentReturn";
+
 
     // --- Các hàm tiện ích ---
 

@@ -355,53 +355,6 @@
     </style>
 </head>
 <body>
-    <div id="preloder">
-        <div class="loader"></div>
-    </div>
-
-    <div class="offcanvas-menu-overlay"></div>
-    <div class="canvas-open">
-        <i class="icon_menu"></i>
-    </div>
-    <div class="offcanvas-menu-wrapper">
-        <div class="canvas-close">
-            <i class="icon_close"></i>
-        </div>
-        <div class="search-icon search-switch">
-            <i class="icon_search"></i>
-        </div>
-        <nav class="mainmenu mobile-menu">
-            <ul>
-                <li class="${(requestScope.activeMenu == 'home') ? 'active' : ''}">
-                    <c:url value="/home" var="homeUrl"/>
-                    <a href="${homeUrl}">Home</a>
-                </li>
-                <li class="${(requestScope.activeMenu == 'rooms') ? 'active' : ''}">
-                    <c:url value="/rooms" var="roomsUrl"/>
-                    <a href="${roomsUrl}">Rooms</a>
-                </li>
-                <li class="${(requestScope.activeMenu == 'contact') ? 'active' : ''}">
-                    <c:url value="/contact" var="contactUrl"/>
-                    <a href="${contactUrl}">Contact</a>
-                </li>
-                <li class="${(requestScope.activeMenu == 'rules') ? 'active' : ''}">
-                    <c:url value="/rules" var="rulesUrl"/>
-                    <a href="${rulesUrl}">Rules</a>
-                </li>
-            </ul>
-        </nav>
-        <div id="mobile-menu-wrap"></div>
-        <div class="top-social">
-            <a href="https://only-fans.me/highaileri"><i class="fa fa-facebook"></i></a>
-            <a href="https://only-fans.me/highaileri"><i class="fa fa-twitter"></i></a>
-            <a href="https://only-fans.me/highaileri"><i class="fa fa-tripadvisor"></i></a>
-            <a href="https://only-fans.me/highaileri"><i class="fa fa-instagram"></i></a>
-        </div>
-        <ul class="top-widget">
-            <li><i class="fa fa-phone"></i> (84) 359 797 703</li>
-            <li><i class="fa fa-envelope"></i> 36hotel@gmail.com</li>
-        </ul>
-    </div>
 
     <jsp:include page="/common/header.jsp"/>
 

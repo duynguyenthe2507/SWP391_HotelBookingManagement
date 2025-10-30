@@ -1,6 +1,6 @@
 package Controller.General;
 
-import Utility.VnPayConfig; // Đảm bảo import đúng
+import Utils.VnPayConfig; // Đảm bảo import đúng
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;

@@ -13,9 +13,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @WebServlet(name = "RoomDetailsServlet", urlPatterns = {"/room-details"})
-public class RoomDetailsServlet extends HttpServlet {
+public class RoomDetailsController extends HttpServlet {
 
-    private static final Logger LOGGER = Logger.getLogger(RoomDetailsServlet.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(RoomDetailsController.class.getName());
     private RoomDao roomDao;
 
     @Override
