@@ -1,6 +1,7 @@
 package Controller.General;
 
 import Dao.RoomDao;
+import Models.Booking;
 import Models.BookingDetail;
 import Models.Room;
 import Services.BookingService;
@@ -12,6 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -34,22 +36,19 @@ public class BookingController extends HttpServlet {
         this.roomDao = new RoomDao();
     }
 
-    /** 
-     * Trả về LocalDateTime sau khi parse với nhiều định dạng phổ biến 
-     * Hỗ trợ cả dd/MM/yyyy, dd-MM-yyyy, d MMMM, yyyy (English).
-     */
+    /** Parse nhiều định dạng ngày linh hoạt **/
     private LocalDateTime parseFlexibleDate(String dateStr, String defaultTime) throws DateTimeParseException {
         if (dateStr == null || dateStr.trim().isEmpty()) {
             throw new DateTimeParseException("Date string is empty", dateStr, 0);
         }
 
         List<String> formats = List.of(
-            "dd/MM/yyyy HH:mm",
-            "d/M/yyyy HH:mm",
-            "dd-MM-yyyy HH:mm",
-            "d-M-yyyy HH:mm",
-            "d MMMM, yyyy HH:mm",   // e.g. 1 November, 2025
-            "d MMM yyyy HH:mm"      // e.g. 1 Nov 2025
+                "dd/MM/yyyy HH:mm",
+                "d/M/yyyy HH:mm",
+                "dd-MM-yyyy HH:mm",
+                "d-M-yyyy HH:mm",
+                "d MMMM, yyyy HH:mm",
+                "d MMM yyyy HH:mm"
         );
 
         for (String fmt : formats) {
@@ -59,7 +58,6 @@ public class BookingController extends HttpServlet {
             } catch (Exception ignored) {}
         }
 
-        // Nếu tất cả định dạng đều fail
         throw new DateTimeParseException("Unsupported date format", dateStr, 0);
     }
 
@@ -99,19 +97,16 @@ public class BookingController extends HttpServlet {
             }
 
         } catch (NumberFormatException e) {
-            LOGGER.log(Level.WARNING, "Invalid input (roomId/numGuests)", e);
             session.setAttribute("cartMessage", "Room ID or number of guests is invalid.");
             session.setAttribute("cartMessageType", "ERROR");
             response.sendRedirect(redirectOnErrorUrl);
             return;
         } catch (DateTimeParseException e) {
-            LOGGER.log(Level.WARNING, "Invalid date format: " + checkInDateStr + " / " + checkOutDateStr, e);
             session.setAttribute("cartMessage", "Invalid date format. Please use calendar (dd/mm/yyyy).");
             session.setAttribute("cartMessageType", "ERROR");
             response.sendRedirect(redirectOnErrorUrl);
             return;
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Validation error: " + e.getMessage());
             session.setAttribute("cartMessage", e.getMessage());
             session.setAttribute("cartMessageType", "ERROR");
             response.sendRedirect(redirectOnErrorUrl);
@@ -120,7 +115,6 @@ public class BookingController extends HttpServlet {
 
         // Check availability
         if (!bookingService.isRoomAvailable(roomId, checkIn, checkOut)) {
-            LOGGER.log(Level.WARNING, "Room not available: " + roomId);
             session.setAttribute("cartMessage", "Room is not available for selected dates.");
             session.setAttribute("cartMessageType", "WARNING");
             response.sendRedirect(redirectOnErrorUrl);
@@ -130,7 +124,6 @@ public class BookingController extends HttpServlet {
         // Get room info
         Room room = roomDao.getById(roomId);
         if (room == null) {
-            LOGGER.log(Level.SEVERE, "Room not found in DB: " + roomId);
             session.setAttribute("cartMessage", "Error retrieving room info.");
             session.setAttribute("cartMessageType", "ERROR");
             response.sendRedirect(request.getContextPath() + "/rooms");
@@ -144,21 +137,42 @@ public class BookingController extends HttpServlet {
             return;
         }
 
-        // Add to cart
-        BookingDetail cartItem = new BookingDetail(
+        // ✅ Không insert DB ở đây — chỉ lưu booking tạm trong session
+        BookingDetail bookingDetail = new BookingDetail(
                 roomId, room.getPrice(), numGuests, room.getName(), room.getImgUrl()
         );
 
-        List<BookingDetail> cart = new ArrayList<>();
-        cart.add(cartItem);
+        // Nếu giỏ hàng chưa tồn tại thì tạo mới
+        List<BookingDetail> cart = (List<BookingDetail>) session.getAttribute("cart");
+        if (cart == null) {
+            cart = new ArrayList<>();
+        }
+        cart.add(bookingDetail);
 
+        // ✅ Tính tổng tiền chính xác theo số giờ / ngày
+        long totalHours = Duration.between(checkIn, checkOut).toHours();
+        double durationHours = (double) totalHours;
+        double nights = durationHours / 24.0;
+        double roomsSum = cart.stream()
+                .mapToDouble(BookingDetail::getPriceAtBooking)
+                .sum();
+        double totalPrice = roomsSum * nights;
+
+        // Lưu thông tin booking tổng (thời gian, trạng thái tạm)
+        Booking tempBooking = new Booking();
+        tempBooking.setCheckinTime(checkIn);
+        tempBooking.setCheckoutTime(checkOut);
+        tempBooking.setDurationHours(durationHours);
+        tempBooking.setTotalPrice(totalPrice);
+        tempBooking.setStatus("PENDING");
+
+        // Lưu session
+        session.setAttribute("tempBooking", tempBooking);
         session.setAttribute("cart", cart);
         session.setAttribute("cartCheckIn", checkIn);
         session.setAttribute("cartCheckOut", checkOut);
-        session.setAttribute("cartMessage", "Room '" + room.getName() + "' added to your booking.");
-        session.setAttribute("cartMessageType", "SUCCESS");
 
-        LOGGER.info("Room " + roomId + " added to booking cart → Redirect to /checkout");
-        response.sendRedirect(request.getContextPath() + "/checkout");
+        LOGGER.info("✅ Temporary booking saved in session → Redirect to VNPay page");
+        response.sendRedirect(request.getContextPath() + "/createPayment");
     }
 }
