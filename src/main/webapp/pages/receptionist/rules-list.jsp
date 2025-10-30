@@ -85,7 +85,6 @@
 </head>
 
 <body>
-<jsp:include page="/common/header.jsp"/>
 
 <div class="container mt-5 mb-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -119,8 +118,9 @@
                           onclick="openPanel('edit', ${r.ruleId}, '${r.title}', '${r.description}', '${r.status}', '${r.createdAt}', '${r.updatedAt}')">
                         <i class="fa fa-pencil"></i> Edit
                     </span>
-                    |
-                    <a href="${pageContext.request.contextPath}/rules/delete?id=${r.ruleId}" class="text-danger">
+                    <a href="javascript:void(0);"
+                       class="text-danger"
+                       onclick="confirmDelete('${pageContext.request.contextPath}/rules/delete?id=${r.ruleId}')">
                         <i class="fa fa-trash"></i> Delete
                     </a>
                 </td>
@@ -177,9 +177,6 @@
         </div>
     </form>
 </div>
-
-<jsp:include page="/common/footer.jsp"/>
-
 <script>
     const panel = document.getElementById("sidePanel");
     const ruleIdField = document.getElementById("ruleId");
@@ -229,5 +226,42 @@
 </script>
 
 <script src="${pageContext.request.contextPath}/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Khi submit form thêm/sửa rule -> reload lại sau khi lưu thành công
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector("form[action*='save']");
+        if (form) {
+            form.addEventListener("submit", function (e) {
+                e.preventDefault(); // Ngăn gửi form mặc định
+                const formData = new FormData(form);
+
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData
+                }).then(response => {
+                    if (response.ok) {
+                        alert("Lưu thành công!");
+                        window.location.reload(); // Tự reload lại trang
+                    } else {
+                        alert("Có lỗi xảy ra khi lưu!");
+                    }
+                }).catch(err => alert("Lỗi: " + err));
+            });
+        }
+    });
+</script>
+    <script>
+        // Xác nhận khi xóa
+        function confirmDelete(url) {
+        const confirmed = confirm("Bạn có chắc chắn muốn xóa không?");
+        if (confirmed) {
+        window.location.href = url;
+    }
+    }
+</script>
+
+
+
 </body>
 </html>

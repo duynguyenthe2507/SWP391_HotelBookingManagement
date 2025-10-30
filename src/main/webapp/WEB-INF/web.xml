@@ -29,6 +29,10 @@
         <url-pattern>/forgot-password</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
+       <servlet-name>RoomDetailsServlet</servlet-name>
+       <url-pattern>/room-details</url-pattern>
+   </servlet-mapping>
+    <servlet-mapping>
         <servlet-name>OTPController</servlet-name>
         <url-pattern>/otp-confirm</url-pattern>
     </servlet-mapping>
