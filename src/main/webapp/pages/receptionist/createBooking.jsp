@@ -33,7 +33,7 @@
 <jsp:include page="/common/employee-header.jsp"/>
 
 <div class="dashboard-wrapper">
-    <jsp:include page="/common/sidebar.jsp"/>
+    <jsp:include page="/common/SideBar.jsp"/>
 
     <div class="dashboard-content">
         <section class="booking-section">

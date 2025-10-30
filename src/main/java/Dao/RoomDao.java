@@ -540,4 +540,67 @@ public class RoomDao extends DBContext {
         }
         return list;
     }
+    public int createRoom(Room r) {
+        final String sql = "INSERT INTO Room(name, categoryId, price, capacity, status, description, imgUrl) VALUES (?,?,?,?,?,?,?)";
+        try (PreparedStatement ps = this.connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, r.getName());
+            ps.setInt(2, r.getCategoryId());
+            ps.setDouble(3, r.getPrice());
+            ps.setInt(4, r.getCapacity());
+            ps.setString(5, r.getStatus());
+            ps.setString(6, r.getDescription());
+            ps.setString(7, r.getImgUrl()); // LƯU URL ẢNH CLOUDINARY
+
+
+            int affected = ps.executeUpdate();
+            if (affected > 0) {
+                try (ResultSet rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        int newId = rs.getInt(1);
+                        LOGGER.log(Level.INFO, "createRoom OK, newId={0}", newId);
+                        return newId;
+                    }
+                }
+            }
+            LOGGER.log(Level.WARNING, "createRoom executed but no key returned");
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error in RoomDao.createRoom()", e);
+        }
+        return -1;
+    }
+
+
+    // Update (bao gồm cả imgUrl)
+    public void updateRoom(Room r) {
+        final String sql = "UPDATE Room SET name=?, categoryId=?, price=?, capacity=?, status=?, description=?, imgUrl=? WHERE roomId=?";
+        try (PreparedStatement ps = this.connection.prepareStatement(sql)) {
+            ps.setString(1, r.getName());
+            ps.setInt(2, r.getCategoryId());
+            ps.setDouble(3, r.getPrice());
+            ps.setInt(4, r.getCapacity());
+            ps.setString(5, r.getStatus());
+            ps.setString(6, r.getDescription());
+            ps.setString(7, r.getImgUrl());
+            ps.setInt(8, r.getRoomId());
+            int affected = ps.executeUpdate();
+            LOGGER.log(Level.INFO, "updateRoom affected={0} for roomId={1}", new Object[]{affected, r.getRoomId()});
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error in RoomDao.updateRoom() for roomId=" + r.getRoomId(), e);
+        }
+    }
+    public boolean updateWithImage(Room r) {
+        String sql = "UPDATE Room SET name=?, categoryId=?, price=?, capacity=?, status=?, description=?, imgUrl=? WHERE roomId=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, r.getName());
+            ps.setInt(2, r.getCategoryId());
+            ps.setDouble(3, r.getPrice());
+            ps.setInt(4, r.getCapacity());
+            ps.setString(5, r.getStatus());
+            ps.setString(6, r.getDescription());
+            ps.setString(7, r.getImgUrl());
+            ps.setInt(8, r.getRoomId());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) { e.printStackTrace(); }
+        return false;
+    }
 }

@@ -231,7 +231,7 @@ public class BookingService {
         newBooking.setUserId(userId);
         newBooking.setCheckinTime(checkIn);
         newBooking.setCheckoutTime(checkOut);
-        newBooking.setDurationHours(durationHours);
+        //newBooking.setDurationHours(durationHours);
         newBooking.setStatus(initialStatus);
         newBooking.setTotalPrice(finalTotalPrice);
 

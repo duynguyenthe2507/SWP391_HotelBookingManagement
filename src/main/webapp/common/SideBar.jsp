@@ -1,204 +1,431 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Receptionist Dashboard</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/font-awesome.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <c:url var="baseUrl" value="/"/>
+    <link rel="stylesheet" href="${baseUrl}css/bootstrap.min.css">
+    <link rel="stylesheet" href="${baseUrl}css/font-awesome.min.css">
 
     <style>
-        /* Style cho sidebar header */
-        .sidebar-header {
-            text-align: center; /* Canh giữa */
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: #f8f9fa; /* Màu nền nhẹ */
-            border-bottom: 2px solid #ccc; /* Viền dưới để phân cách */
+        :root {
+            --primary-color: #f39c12; /* Màu cam chính */
+            --sidebar-bg: #222d32; /* Màu nền sidebar */
+            --sidebar-text: #b8c7ce; /* Màu chữ sidebar */
+            --sidebar-hover: #1a2226; /* Màu khi hover */
+            --content-bg: #f4f6f9; /* Màu nền nội dung */
+            --card-border: #dee2e6;
+            --text-dark: #343a40;
         }
 
-        /* Style cho tên hotel */
-        .sidebar-header h3 {
-            font-family: 'Arial', sans-serif; /* Font chữ đẹp */
-            color: #343a40; /* Màu chữ tối */
-            font-size: 24px;
-            font-weight: bold;
-            letter-spacing: 2px; /* Khoảng cách giữa các chữ */
-            margin: 0; /* Loại bỏ margin mặc định */
-        }
-
-        /* Các item khác trong sidebar */
-        .sidebar-item {
-            padding: 10px;
-            font-size: 18px;
-            color: #495057;
-            display: flex;
-            align-items: center;
-        }
-
-        .sidebar-item i {
-            margin-right: 10px; /* Khoảng cách giữa icon và chữ */
-        }
-
-        .sidebar-item:hover {
-            background-color: #e9ecef; /* Nền màu xám khi hover */
-            color: #007bff; /* Màu chữ khi hover */
-        }
-
-        /* General background and layout settings */
         body {
-            background-color: #f4f7fc;
+            background-color: var(--content-bg);
             font-family: 'Arial', sans-serif;
             margin: 0;
-            padding: 0;
         }
 
-        /* Sidebar styling */
+        .wrapper {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* --- Sidebar --- */
         .sidebar-wrapper {
-            background-color: #222;
-            padding: 25px;
             width: 260px;
-            height: 100vh;
+            background: var(--sidebar-bg);
+            transition: all .3s ease;
             position: fixed;
-            top: 0;
-            left: 0;
-            border-radius: 10px;
-            box-shadow: 4px 0px 15px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease-in-out;
+            height: 100%;
+            overflow-y: auto;
+            z-index: 1000;
         }
 
-        .sidebar-wrapper:hover {
-            width: 280px;
+        .sidebar-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #4b545c;
+        }
+
+        .sidebar-header h3 {
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-nav {
+            padding: 15px;
         }
 
         .sidebar-item {
-            padding: 15px;
-            color: #fff;
-            font-size: 18px;
-            text-decoration: none;
-            margin-bottom: 18px;
             display: flex;
             align-items: center;
-            border-radius: 8px;
-            transition: background-color 0.3s ease, padding-left 0.3s ease;
-        }
-
-        .sidebar-item:hover {
-            background-color: #f39c12;
-            padding-left: 25px;
+            padding: 12px 15px;
+            color: var(--sidebar-text);
+            font-size: 16px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            transition: background-color .3s, color .3s;
         }
 
         .sidebar-item i {
             margin-right: 15px;
-        }
-
-        /* Sub-items (Room Edit, Room Fees) */
-        .sub-item {
-            display: none; /* Initially hide the sub-items */
-            padding-left: 30px;
-        }
-
-        /* Content Area styling */
-        .content-area {
-            margin-left: 280px; /* Adjust for sidebar */
-            padding: 50px;
-            font-size: 18px;
-            color: #333;
-            max-width: 80%;
-        }
-
-        .welcome-message {
-            font-size: 30px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 25px;
-        }
-
-        .dashboard-description {
-            font-size: 20px;
-            color: #666;
-            line-height: 1.7;
-            font-weight: 300;
-        }
-
-        .footer {
-            background-color: #2d2d2d;
-            padding: 20px;
+            width: 20px;
             text-align: center;
+        }
+
+        .sidebar-item:hover,
+        .sidebar-item.active {
+            background: var(--primary-color);
             color: #fff;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
+            text-decoration: none;
+        }
+
+        /* Submenu */
+        .submenu {
+            padding-left: 20px;
+        }
+
+        .submenu .sidebar-item {
+            font-size: 15px;
+            padding: 10px 15px;
+            background: var(--sidebar-hover);
+        }
+
+        .submenu .sidebar-item:hover,
+        .submenu .sidebar-item.active {
+            background: var(--primary-color);
+        }
+
+        /* --- Main Content Area --- */
+        .main-content {
+            flex-grow: 1;
+            margin-left: 260px; /* Bằng chiều rộng sidebar */
+            display: flex;
+            flex-direction: column;
+            transition: all .3s ease;
+        }
+
+        /* --- Top Navbar --- */
+        .top-navbar {
+            background: #fff;
+            padding: 10px 30px;
+            border-bottom: 1px solid var(--card-border);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .user-info {
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .user-info a {
+            color: #dc3545; /* Màu đỏ cho logout */
+            text-decoration: none;
+            margin-left: 15px;
+            font-weight: bold;
+        }
+
+        .user-info a:hover {
+            text-decoration: underline;
+        }
+
+        /* --- Content Area --- */
+        .content-area {
+            padding: 30px;
+            flex-grow: 1;
+        }
+
+        /* --- Dashboard Stats Cards --- */
+        .stat-card {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .stat-card .card-body {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stat-card .stat-icon {
+            font-size: 45px;
+            opacity: 0.3;
+        }
+
+        .stat-card .stat-info h5 {
+            font-size: 16px;
+            color: #6c757d;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .stat-card .stat-info h3 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        /* Màu cho các thẻ */
+        .card-primary .stat-icon { color: #007bff; }
+        .card-success .stat-icon { color: #28a745; }
+        .card-warning .stat-icon { color: #ffc107; }
+        .card-danger .stat-icon { color: #dc3545; }
+
+        /* --- Footer --- */
+        .footer {
+            background: #fff;
+            border-top: 1px solid var(--card-border);
+            padding: 20px 30px;
+            text-align: center;
+            color: #6c757d;
             font-size: 14px;
+            margin-top: auto; /* Đẩy footer xuống dưới cùng */
         }
 
         .footer a {
-            color: #f39c12;
+            color: var(--primary-color);
             text-decoration: none;
-            margin: 0 15px;
         }
-
         .footer a:hover {
             text-decoration: underline;
         }
 
-        .footer p {
-            margin: 8px 0;
-        }
     </style>
 </head>
 <body>
+<c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
-<!-- Sidebar -->
-<div class="sidebar-wrapper">
-    <div class="sidebar-header">
-        <h3>36 Hotel</h3>
+<div class="wrapper">
+    <div class="sidebar-wrapper">
+        <div class="sidebar-header">
+            <h3>36 Hotel</h3>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="${ctx}/receptionist/dashboard" class="sidebar-item js-load active"
+               data-url="${ctx}/receptionist/dashboard-content">
+                <i class="fa fa-dashboard"></i> Dashboard
+            </a>
+
+            <a href="${ctx}/rules" class="sidebar-item js-load"
+               data-url="${ctx}/rules">
+                <i class="fa fa-book"></i> Rules
+            </a>
+
+            <!-- Rooms Toggle -->
+            <a href="#rooms-submenu" class="sidebar-item" data-toggle="collapse" aria-expanded="false">
+                <i class="fa fa-bed"></i> Rooms <i class="fa fa-angle-down float-right"></i>
+            </a>
+            <div class="collapse submenu" id="rooms-submenu">
+
+                <a href="${ctx}/receptionist/rooms" class="sidebar-item js-load"
+                   data-url="${ctx}/receptionist/rooms">
+                    <i class="fa fa-list"></i> Room Edit
+                </a>
+                <a href="${ctx}/receptionist/room-fees" class="sidebar-item"
+                   data-url="${ctx}/receptionist/room-fees">
+                    <i class="fa fa-dollar"></i> Room Fees
+                </a>
+            </div>
+            <!-- Bills -->
+            <a href="${ctx}/receptionist/bills" class="sidebar-item">
+                <i class="fa fa-file-text-o"></i> Bills
+            </a>
+        </nav>
     </div>
-    <a href="javascript:void(0);" class="sidebar-item" id="rules-link"><i class="fa fa-book"></i> Rules</a>
-    <a href="javascript:void(0);" class="sidebar-item" id="rooms-link"><i class="fa fa-bed"></i> Rooms</a>
-    <div class="sub-item" id="room-edit">
-        <a href="${pageContext.request.contextPath}/room/edit" class="sidebar-item"><i class="fa fa-edit"></i> Room Edit</a>
+
+    <div class="main-content">
+
+        <nav class="top-navbar">
+            <div class="user-info">
+                Welcome, <strong>Receptionist</strong>!
+                <a href="${ctx}/login">
+                    <i class="fa fa-sign-out"></i> Logout
+                </a>
+            </div>
+        </nav>
+
+        <main class="content-area" id="content-area">
+
+            <h2>Dashboard Overview</h2>
+            <p class="text-muted">Welcome to the 36 Hotel Management System.</p>
+
+            <div class="row mt-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="card stat-card card-primary">
+                        <div class="card-body">
+                            <div class="stat-info">
+                                <h5>New Bookings</h5>
+                                <h3>12</h3>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="fa fa-calendar-check-o"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="card stat-card card-success">
+                        <div class="card-body">
+                            <div class="stat-info">
+                                <h5>Available Rooms</h5>
+                                <h3>45</h3>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="fa fa-bed"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="card stat-card card-warning">
+                        <div class="card-body">
+                            <div class="stat-info">
+                                <h5>Check-ins Today</h5>
+                                <h3>8</h3>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="fa fa-sign-in"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="card stat-card card-danger">
+                        <div class="card-body">
+                            <div class="stat-info">
+                                <h5>Today's Revenue</h5>
+                                <h3>$1,250</h3>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="fa fa-money"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Bookings</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Guest Name</th>
+                            <th>Room</th>
+                            <th>Check-in</th>
+                            <th>Status</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>B-1001</td>
+                            <td>Nguyen Van Hung</td>
+                            <td>Deluxe 201</td>
+                            <td>2025-10-30 14:00</td>
+                            <td><span class="badge badge-success">Confirmed</span></td>
+                        </tr>
+                        <tr>
+                            <td>B-1002</td>
+                            <td>Tran Thi Linh</td>
+                            <td>Family 102</td>
+                            <td>2025-10-30 15:00</td>
+                            <td><span class="badge badge-warning">Pending</span></td>
+                        </tr>
+                        <tr>
+                            <td>B-1003</td>
+                            <td>Le Van A</td>
+                            <td>Double 301</td>
+                            <td>2025-10-31 12:00</td>
+                            <td><span class="badge badge-success">Confirmed</span></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p class="mb-0">Contact Us: (84) 359 797 703 | <a href="mailto:36hotel@gmail.com">36hotel@gmail.com</a></p>
+            <p class="mb-0">Thanh Hoa, Vietnam ©2025 36 Hotel</p>
+        </footer>
     </div>
-    <div class="sub-item" id="room-fees">
-        <a href="${pageContext.request.contextPath}/room/fees" class="sidebar-item"><i class="fa fa-dollar-sign"></i> Room Fees</a>
-    </div>
-    <a href="${pageContext.request.contextPath}/receptionist/bills" class="sidebar-item"><i class="fa fa-file-invoice"></i> Bills</a>
-    <a href="${pageContext.request.contextPath}/login" class="sidebar-item"><i class="fa fa-sign-out-alt"></i> Logout</a>
 </div>
 
-<!-- Content Area -->
-<div class="content-area" id="content-area">
-    <div class="welcome-message">
-        Welcome, Receptionist!
-    </div>
-    <p class="dashboard-description">
-        This is your Receptionist Dashboard — manage hotel rules, rooms, and bookings easily. You can also view and update room fees, edit room details, and more. It's your all-in-one hub for hotel management.
-    </p>
-</div>
-
-<!-- Footer -->
-<div class="footer">
-    <p>Contact Us: (84) 359 797 703 | <a href="mailto:36hotel@gmail.com">36hotel@gmail.com</a></p>
-    <p>Thanh Hoa, Vietnam</p>
-    <p>Copyright ©2025 All rights reserved by 36 Hotel</p>
-</div>
-
-<!-- jQuery Script for AJAX -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 <script>
-    $(document).ready(function() {
-        // Tải nội dung khi nhấn vào liên kết "Rules"
-        $('#rules-link').on('click', function() {
-            $('#content-area').load("${pageContext.request.contextPath}/rules");  // Tải nội dung từ rules-list.jsp vào khu vực nội dung
+    $(function () {
+
+        // MỚI: Xử lý trạng thái "active" cho sidebar
+        $('.sidebar-item').on('click', function () {
+            // Xóa active khỏi tất cả các item
+            $('.sidebar-item').removeClass('active');
+
+            // Thêm active cho item được click
+            $(this).addClass('active');
+
+            // Xử lý cho submenu
+            if ($(this).closest('.submenu').length) {
+                // Nếu click vào submenu, active cả (cha) của nó
+                $(this).closest('.submenu').prev('.sidebar-item').addClass('active');
+            }
         });
 
-        // Toggle sub-items when "Rooms" is clicked
-        $('#rooms-link').on('click', function() {
-            $('#room-edit, #room-fees').toggle();  // Hiện/Ẩn các mục con
+        // Load content động (AJAX)
+        // Lưu ý: data-url của Dashboard nên trỏ đến một trang/servlet
+        // chỉ trả về phần nội dung dashboard (không phải toàn bộ trang)
+        $(document).on('click', '.js-load', function (e) {
+            e.preventDefault();
+            const url = $(this).data('url');
+
+            // Giả lập URL cho dashboard nếu chưa có
+            if (url === '${ctx}/receptionist/dashboard-content') {
+                // Tải lại nội dung dashboard (ví dụ)
+                // Trong thực tế, bạn sẽ gọi một servlet trả về HTML fragment
+                $('#content-area').load(url, function (res, status, xhr) {
+                    if (status === "error") {
+                        $('#content-area').html('<div class="alert alert-danger">Cannot load dashboard content. (' + xhr.status + ')</div>');
+                    }
+                });
+                // Tạm thời chỉ hiển thị lại nội dung đã có
+                // Bỏ dòng dưới nếu bạn đã có servlet 'dashboard-content'
+                console.log("Đang tải dashboard...");
+                return;
+            }
+
+            if (!url || url === '#') return;
+
+            $('#content-area').html('<div class="text-center p-5"><i class="fa fa-spinner fa-spin fa-3x"></i></div>'); // Hiệu ứng loading
+
+            $('#content-area').load(url, function (res, status, xhr) {
+                if (status === 'error') {
+                    $('#content-area').html('<div class="alert alert-danger">Cannot load content. (' + xhr.status + ')</div>');
+                }
+            });
         });
+
+        // MỚI: Đảm bảo submenu của Bootstrap hoạt động
+        // Mã 'slideToggle' cũ của bạn đã được thay thế bằng
+        // thuộc tính 'data-toggle="collapse"' của Bootstrap.
     });
 </script>
-
 </body>
 </html>

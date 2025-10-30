@@ -271,7 +271,7 @@ public class BookingDao extends DBContext {
                 psInsertBooking.setInt(1, booking.getUserId());
                 psInsertBooking.setTimestamp(2, Timestamp.valueOf(booking.getCheckinTime()));
                 psInsertBooking.setTimestamp(3, Timestamp.valueOf(booking.getCheckoutTime()));
-                psInsertBooking.setDouble(4, booking.getDurationHours());
+                //psInsertBooking.setDouble(4, booking.getDurationHours());
                 psInsertBooking.setString(5, booking.getStatus());
                 psInsertBooking.setDouble(6, booking.getTotalPrice());
                 psInsertBooking.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
