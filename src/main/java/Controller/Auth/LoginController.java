@@ -2,7 +2,7 @@ package Controller.Auth;
 
 import Dao.UsersDao;
 import Models.Users;
-import Utils.PasswordUtil;
+import Utils.PasswordUtil; // Đảm bảo bạn có file này
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -11,9 +11,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-@WebServlet("/login")
-public class LoginController extends HttpServlet {
+@WebServlet(name = "LoginController", urlPatterns = {"/login"}) // Đổi tên class
+public class LoginController extends HttpServlet { // Đổi tên class
+
+    private static final Logger LOGGER = Logger.getLogger(LoginController.class.getName());
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -24,36 +28,39 @@ public class LoginController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
         String phone = request.getParameter("phone");
         String password = request.getParameter("password");
+        HttpSession session = request.getSession(); // Lấy session ngay từ đầu
 
-        // Kiểm tra dữ liệu đầu vào
-        if (phone == null || phone.trim().isEmpty() || password == null || password.trim().isEmpty()) {
-            request.setAttribute("error", "Please fill both of your phone number and password!");
-            request.getRequestDispatcher("/pages/auth/login.jsp").forward(request, response);
-            return;
-        }
+        try {
+            if (phone == null || phone.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+                request.setAttribute("error", "Please fill both of your phone number and password!");
+                request.getRequestDispatcher("/pages/auth/login.jsp").forward(request, response);
+                return;
+            }
 
-        UsersDao usersDao = new UsersDao();
-        Users u = usersDao.getByMobilePhone(phone);
+            UsersDao usersDao = new UsersDao();
+            Users u = usersDao.getByMobilePhone(phone.trim()); // Trim phone
 
-        if (u == null) {
-            // Số điện thoại không tồn tại
-            request.setAttribute("error", "Phone number does not exist!");
-            request.setAttribute("phone", phone); // Giữ lại số điện thoại đã nhập
-            request.getRequestDispatcher("/pages/auth/login.jsp").forward(request, response);
-        } else if (u.getPassword() == null) {
-            request.setAttribute("error", "Wrong password!");
-            request.setAttribute("phone", phone);
-            request.getRequestDispatcher("/pages/auth/login.jsp").forward(request, response);
-        } else {
-            // Check if password is hashed (starts with $2a$) or plain text
-            boolean passwordMatch;
+            if (u == null) {
+                request.setAttribute("error", "Phone number does not exist!");
+                request.setAttribute("phone", phone);
+                request.getRequestDispatcher("/pages/auth/login.jsp").forward(request, response);
+                return;
+            }
+
+            if (u.getPassword() == null) {
+                 request.setAttribute("error", "Wrong password!");
+                 request.setAttribute("phone", phone);
+                 request.getRequestDispatcher("/pages/auth/login.jsp").forward(request, response);
+                 return;
+            }
+            
+            boolean passwordMatch = false;
             if (u.getPassword().startsWith("$2a$")) {
-                // Password is hashed, use BCrypt verification
                 passwordMatch = PasswordUtil.verifyPassword(password, u.getPassword());
             } else {
-                // Password is plain text, use direct comparison
                 passwordMatch = password.equals(u.getPassword());
             }
 
@@ -64,26 +71,36 @@ public class LoginController extends HttpServlet {
                 return;
             }
 
-            // Password is correct, proceed to login
-            HttpSession session = request.getSession();
-            session.setAttribute("loggedInUser", u);
+            LOGGER.log(Level.INFO, "User {0} (ID: {1}) logged in successfully.", new Object[]{u.getMobilePhone(), u.getUserId()});
+            
+            session.setAttribute("user", u); 
+            session.setAttribute("loggedInUser", u); 
             session.setAttribute("role", u.getRole());
-        }
-        // Kiểm tra role và điều hướng
-        String role = (u.getRole() != null) ? u.getRole().trim() : "";
 
-        if ("Receptionist".equalsIgnoreCase(role)) {
-            // Nếu là lễ tân → vào trang dashboard riêng
-            response.sendRedirect(request.getContextPath() + "/common/SideBar.jsp");
-            return;
-        } else {
-            // User thường → vào home
-            response.sendRedirect(request.getContextPath() + "/home");
-            return;
+            String redirectUrl = (String) session.getAttribute("redirectUrl");
+            if (redirectUrl != null && !redirectUrl.isEmpty()) {
+                LOGGER.log(Level.INFO, "Redirecting user to saved URL: {0}", redirectUrl);
+                session.removeAttribute("redirectUrl"); 
+                response.sendRedirect(redirectUrl); 
+                return;
+            }
+
+            String role = (u.getRole() != null) ? u.getRole().trim() : "";
+
+            if ("Receptionist".equalsIgnoreCase(role) || "Admin".equalsIgnoreCase(role)) { 
+                LOGGER.log(Level.INFO, "Redirecting Admin/Receptionist to dashboard.");
+                response.sendRedirect(request.getContextPath() + "/pages/Receptionist/dashboard.jsp"); 
+            } else {
+                LOGGER.log(Level.INFO, "Redirecting Customer to home page.");
+                response.sendRedirect(request.getContextPath() + "/home");
+            }
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error during login process for phone: " + phone, e);
+            e.printStackTrace(); 
+            request.setAttribute("error", "An unexpected error occurred. Please try again.");
+            request.getRequestDispatcher("/pages/auth/login.jsp").forward(request, response);
         }
-    }
-    @Override
-    public String getServletInfo() {
-        return "Login Servlet - Handles user authentication";
     }
 }
+
