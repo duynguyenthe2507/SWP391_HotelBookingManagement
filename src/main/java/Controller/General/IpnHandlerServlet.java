@@ -4,7 +4,7 @@ import Dao.PaymentDao;
 import Models.Booking;
 import Models.Payment;
 import Services.BookingService;
-import Utility.VnPayConfig; // Đảm bảo import đúng
+import Utils.VnPayConfig; // Đảm bảo import đúng
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
