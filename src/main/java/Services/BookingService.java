@@ -17,7 +17,6 @@ import java.util.logging.Logger;
 
 public class BookingService {
     private static final Logger LOGGER = Logger.getLogger(BookingService.class.getName());
-    // Định dạng ngày "dd/MM/yyyy" mà RoomsServlet (bộ lọc) gửi
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private BookingDao bookingDao;
@@ -30,10 +29,6 @@ public class BookingService {
         this.bookingDetailDao = new BookingDetailDao();
     }
 
-    /**
-     * Tạo một booking mới bao gồm các chi tiết phòng và cập nhật trạng thái phòng.
-     * Đã thêm log SEVERE để debug lỗi.
-     */
     public int createBooking(int userId, List<Integer> roomIds, LocalDateTime checkIn, LocalDateTime checkOut,
                            List<Integer> quantities, List<String> specialRequests, String initialStatus) {
 
@@ -57,26 +52,21 @@ public class BookingService {
             LOGGER.log(Level.WARNING, "Invalid check-in ({0}) or check-out ({1}) dates.", new Object[]{checkIn, checkOut});
             return -1;
         }
-         // Có thể thêm kiểm tra checkIn.isBefore(LocalDateTime.now().minusMinutes(5)) nếu cần
 
-
-        // 1. Check room availability and gather price information
         List<Room> selectedRooms = new ArrayList<>();
         double baseTotalPrice = 0;
 
         for (int i = 0; i < roomIds.size(); i++) {
             Integer roomId = roomIds.get(i);
-            Integer quantity = quantities.get(i); // This is guestCount
+            Integer quantity = quantities.get(i);
 
             try {
-                // Kiểm tra lại phòng trống (quan trọng, chống race condition)
                  if (!isRoomAvailable(roomId, checkIn, checkOut)) {
                     System.out.println("!!! BOOKING SERVICE LỖI: Room " + roomId + " is NOT available !!!");
                     LOGGER.log(Level.SEVERE, ">>> CREATE_BOOKING_FAILED: isRoomAvailable() returned false for RoomID {0}", roomId);
                     return -1;
                  }
 
-                // Lấy thông tin phòng
                 Room room = roomDao.getById(roomId);
                 if (room == null) {
                     System.out.println("!!! BOOKING SERVICE LỖI: Room " + roomId + " is NULL in DB !!!");
@@ -84,14 +74,12 @@ public class BookingService {
                     return -1;
                 }
 
-                // Kiểm tra trạng thái phòng
                 if (!"available".equalsIgnoreCase(room.getStatus())) {
                      System.out.println("!!! BOOKING SERVICE LỖI: Room " + roomId + " status is " + room.getStatus() + " !!!");
                      LOGGER.log(Level.SEVERE, ">>> CREATE_BOOKING_FAILED: Room {0} status is ''{1}'', not ''available''.", new Object[]{roomId, room.getStatus()});
                      return -1;
                 }
 
-                // Kiểm tra sức chứa
                 if (quantity <= 0 || quantity > room.getCapacity()) {
                      System.out.println("!!! BOOKING SERVICE LỖI: Room " + roomId + " capacity exceeded (Qty: " + quantity + ", Cap: " + room.getCapacity() + ") !!!");
                      LOGGER.log(Level.SEVERE, ">>> CREATE_BOOKING_FAILED: Guest count {0} exceeds capacity {1} for RoomID {2}", new Object[]{quantity, room.getCapacity(), roomId});
@@ -111,7 +99,6 @@ public class BookingService {
         
         System.out.println(">>> [BookingService] All rooms are available. Proceeding to DAO insert...");
 
-        // 2. Calculate Duration and Final Price
         Duration duration = Duration.between(checkIn, checkOut);
         double durationHours = duration.toMinutes() / 60.0;
 
@@ -122,39 +109,30 @@ public class BookingService {
         }
 
         double finalTotalPrice = baseTotalPrice * durationNights;
-         // TODO: Áp dụng giảm giá theo Rank (RankDiscount) ở đây
-         // Ví dụ: Lấy discount % từ User, tính toán finalTotalPrice
-
-
-        // 3. Create Booking object
         Booking newBooking = new Booking();
         newBooking.setUserId(userId);
         newBooking.setCheckinTime(checkIn);
         newBooking.setCheckoutTime(checkOut);
         newBooking.setDurationHours(durationHours);
         newBooking.setStatus(initialStatus);
-        newBooking.setTotalPrice(finalTotalPrice); // Giá cuối cùng sau khi tính số đêm (và discount nếu có)
-
-        // 4. Create list of BookingDetail objects
+        newBooking.setTotalPrice(finalTotalPrice); 
         List<BookingDetail> bookingDetails = new ArrayList<>();
         for (int i = 0; i < selectedRooms.size(); i++) {
             Room room = selectedRooms.get(i);
             Integer quantity = quantities.get(i);
             String specialRequest = (specialRequests != null && i < specialRequests.size()) ? specialRequests.get(i) : null;
 
-            // Dùng constructor khớp với Model
             BookingDetail detail = new BookingDetail(
                 room.getRoomId(),
-                room.getPrice(), // Giá tại thời điểm đặt
-                quantity,        // Số khách
-                null,            // roomName (transient)
-                null             // roomImgUrl (transient)
+                room.getPrice(),
+                quantity,        
+                null,           
+                null         
             );
             detail.setSpecialRequest(specialRequest);
             bookingDetails.add(detail);
         }
 
-        // 5. Call BookingDao
         System.out.println(">>> [BookingService] Calling bookingDao.insertBookingWithDetails...");
         boolean success = bookingDao.insertBookingWithDetails(newBooking, bookingDetails);
 
@@ -171,10 +149,6 @@ public class BookingService {
     }
 
 
-    /**
-     * Overload method (không có quantities/special requests).
-     * Mặc định 1 khách.
-     */
     public int createBooking(int userId, List<Integer> roomIds, LocalDateTime checkIn,
                            LocalDateTime checkOut, String initialStatus) {
         List<Integer> defaultQuantities = new ArrayList<>();
@@ -185,9 +159,6 @@ public class BookingService {
     }
 
 
-    /**
-     * Cập nhật trạng thái booking.
-     */
     public boolean updateBookingStatus(int bookingId, String newStatus) {
         if (newStatus == null || !List.of("pending", "confirmed", "cancelled", "completed").contains(newStatus.toLowerCase())) {
              LOGGER.log(Level.WARNING, "Attempted to update booking {0} with invalid status: {1}", new Object[]{bookingId, newStatus});
@@ -203,9 +174,7 @@ public class BookingService {
         return success;
     }
 
-    /**
-     * Hủy booking.
-     */
+
     public boolean cancelBooking(int bookingId) {
         Booking booking = getBookingById(bookingId);
         if (booking != null && ("completed".equalsIgnoreCase(booking.getStatus()) )) {
@@ -216,22 +185,17 @@ public class BookingService {
         return updateBookingStatus(bookingId, "cancelled");
     }
 
-    /**
-     * Xác nhận booking (sau khi thanh toán).
-     */
+
     public boolean confirmBooking(int bookingId) {
        Booking booking = getBookingById(bookingId);
        if (booking != null && !"pending".equalsIgnoreCase(booking.getStatus())) {
              LOGGER.log(Level.WARNING, "Booking {0} cannot be confirmed because its status is {1}.",
                        new Object[]{bookingId, booking.getStatus()});
-             // Vẫn cho phép cập nhật, phòng trường hợp IPN gọi lại
        }
        return updateBookingStatus(bookingId, "confirmed");
     }
 
-    /**
-     * Hoàn thành booking (sau khi khách check-out).
-     */
+
     public boolean completeBooking(int bookingId) {
          Booking booking = getBookingById(bookingId);
         if (booking != null) {
@@ -247,8 +211,6 @@ public class BookingService {
         return updateBookingStatus(bookingId, "completed");
     }
 
-
-    // --- Các hàm Read (Đọc) ---
 
     public List<Booking> getAllBookings() {
         try {
@@ -269,8 +231,6 @@ public class BookingService {
             return null;
         }
     }
-    
-    // Thêm hàm lấy Room bằng ID (để RoomDetailsServlet dùng)
     public Room getRoomById(int roomId) {
         try {
             return roomDao.getById(roomId);
@@ -281,7 +241,6 @@ public class BookingService {
         }
     }
     
-    // Thêm hàm lấy Categories (để RoomsServlet dùng)
     public List<Category> getAllCategories() {
          try {
             return roomDao.getAllCategories();
@@ -317,8 +276,6 @@ public class BookingService {
         }
     }
 
-    // --- Các hàm Kiểm tra Khả dụng (Availability) ---
-
     public List<Room> getAvailableRooms(LocalDateTime checkIn, LocalDateTime checkOut, String searchKeyword,
                                       Integer categoryId, Double minPrice, Double maxPrice,
                                       Integer minCapacity, int pageNumber, int pageSize) {
@@ -328,7 +285,6 @@ public class BookingService {
          }
 
         try {
-            // Gửi định dạng dd/MM/yyyy sang DAO (khớp với RoomDao)
             String checkInDateStr = checkIn.format(DATE_FORMATTER);
             String checkOutDateStr = checkOut.format(DATE_FORMATTER);
 
@@ -400,7 +356,6 @@ public class BookingService {
         }
     }
 
-    // --- Các hàm đọc/utility còn lại ---
     public List<Booking> getUpcomingBookings() {
         try {
             return bookingDao.getUpcomingBookings();
@@ -430,7 +385,5 @@ public class BookingService {
             return new ArrayList<>();
         }
     }
-    
-
 }
 

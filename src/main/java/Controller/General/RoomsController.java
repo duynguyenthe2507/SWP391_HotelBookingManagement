@@ -30,7 +30,6 @@ public class RoomsController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            // 1. LẤY THAM SỐ FILTER
             String searchKeyword = request.getParameter("search");
             String categoryIdParam = request.getParameter("categoryId");
             String minPriceParam = request.getParameter("minPrice");
@@ -39,17 +38,14 @@ public class RoomsController extends HttpServlet {
             String checkInDate = request.getParameter("checkInDate");
             String checkOutDate = request.getParameter("checkOutDate");
             String statusFilter = request.getParameter("statusFilter");
-
             String pageParam = request.getParameter("page");
             String pageSizeParam = request.getParameter("pageSize");
 
-            // 2. CHUYỂN ĐỔI THAM SỐ
             Integer categoryId = parseInteger(categoryIdParam);
             Double minPrice = parseDouble(minPriceParam);
             Double maxPrice = parseDouble(maxPriceParam);
             Integer minCapacity = parseInteger(minCapacityParam);
 
-            // 3. PHÂN TRANG
             int pageNumber = 1;
             if (pageParam != null && !pageParam.isEmpty()) {
                 try {
@@ -61,7 +57,7 @@ public class RoomsController extends HttpServlet {
                 }
             }
 
-            int pageSize = 6;
+            int pageSize = 6; 
             if (pageSizeParam != null && !pageSizeParam.isEmpty()) {
                 try {
                     pageSize = Integer.parseInt(pageSizeParam);
@@ -71,7 +67,6 @@ public class RoomsController extends HttpServlet {
                 }
             }
 
-            // 4. LẤY DỮ LIỆU TỪ SERVICE
             List<Room> rooms = roomService.findAllRooms(
                 searchKeyword, categoryId, minPrice, maxPrice, minCapacity,
                 checkInDate, checkOutDate, statusFilter,
@@ -83,19 +78,16 @@ public class RoomsController extends HttpServlet {
                 checkInDate, checkOutDate, statusFilter
             );
 
-            // Tính số trang (tránh chia cho 0)
             int noOfPages = totalRooms == 0 ? 1 : (int) Math.ceil((double) totalRooms / pageSize);
 
             List<Category> categories = roomService.getAllCategories();
 
-            // 5. ĐẶT DỮ LIỆU VÀO REQUEST
             request.setAttribute("rooms", rooms);
             request.setAttribute("categories", categories);
             request.setAttribute("currentPage", pageNumber);
-            request.setAttribute("noOfPages", noOfPages);  // ĐÚNG TÊN CHO JSP
+            request.setAttribute("noOfPages", noOfPages);
             request.setAttribute("pageSize", pageSize);
 
-            // Giữ lại filter để hiển thị lại trên form
             request.setAttribute("search", searchKeyword);
             request.setAttribute("categoryId", categoryId);
             request.setAttribute("minPrice", minPrice);
@@ -105,7 +97,9 @@ public class RoomsController extends HttpServlet {
             request.setAttribute("checkOutDate", checkOutDate);
             request.setAttribute("statusFilter", statusFilter);
 
-            // 6. FORWARD ĐẾN JSP
+            System.out.println("📄 RoomsController -> totalRooms: " + totalRooms +
+                               ", pageSize: " + pageSize + ", noOfPages: " + noOfPages);
+
             request.getRequestDispatcher("/pages/general/rooms.jsp").forward(request, response);
 
         } catch (NumberFormatException e) {
@@ -125,7 +119,6 @@ public class RoomsController extends HttpServlet {
         doGet(request, response);
     }
 
-    // === HÀM HỖ TRỢ CHUYỂN ĐỔI AN TOÀN ===
     private Integer parseInteger(String value) {
         if (value == null || value.trim().isEmpty()) return null;
         try {

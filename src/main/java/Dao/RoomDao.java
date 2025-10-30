@@ -141,7 +141,7 @@ public class RoomDao extends DBContext {
     public int getTotalRoomsCount(String searchKeyword, Integer categoryId, Double minPrice, Double maxPrice,
             Integer minCapacity, String checkInDate, String checkOutDate, String statusFilter) {
         int total = 0;
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Rooms r WHERE 1=1");
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Room r WHERE 1=1");
 
         List<Object> params = new ArrayList<>();
 
@@ -149,25 +149,46 @@ public class RoomDao extends DBContext {
             sql.append(" AND r.name LIKE ?");
             params.add("%" + searchKeyword.trim() + "%");
         }
-        if (categoryId != null) {
-            sql.append(" AND r.category_id = ?");
+        if (categoryId != null && categoryId > 0) {
+            sql.append(" AND r.categoryId = ?");
             params.add(categoryId);
         }
-        if (minPrice != null) {
+        if (minPrice != null && minPrice >= 0) {
             sql.append(" AND r.price >= ?");
             params.add(minPrice);
         }
-        if (maxPrice != null) {
+        if (maxPrice != null && maxPrice >= 0) {
             sql.append(" AND r.price <= ?");
             params.add(maxPrice);
         }
-        if (minCapacity != null) {
+        if (minCapacity != null && minCapacity > 0) {
             sql.append(" AND r.capacity >= ?");
             params.add(minCapacity);
         }
-        if (statusFilter != null && !statusFilter.isEmpty()) {
+        if (statusFilter != null && !statusFilter.trim().isEmpty()) {
             sql.append(" AND r.status = ?");
             params.add(statusFilter);
+        }
+
+        // ✅ Nếu có lọc theo ngày, cần loại trừ phòng đã được booking (giống trong findAllRooms)
+        if (checkInDate != null && !checkInDate.trim().isEmpty()
+                && checkOutDate != null && !checkOutDate.trim().isEmpty()) {
+            try {
+                LocalDateTime checkInLDT = LocalDateTime.parse(checkInDate + " 14:00", DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+                LocalDateTime checkOutLDT = LocalDateTime.parse(checkOutDate + " 12:00", DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+
+                sql.append(" AND r.roomId NOT IN (");
+                sql.append("   SELECT bd.roomId FROM BookingDetail bd ");
+                sql.append("   JOIN Booking b ON bd.bookingId = b.bookingId ");
+                sql.append("   WHERE b.status IN ('pending', 'confirmed') ");
+                sql.append("   AND (b.checkinTime < ? AND b.checkoutTime > ?)");
+                sql.append(" )");
+
+                params.add(Timestamp.valueOf(checkOutLDT));
+                params.add(Timestamp.valueOf(checkInLDT));
+            } catch (DateTimeParseException e) {
+                LOGGER.log(Level.WARNING, "Invalid date format for checkInDate or checkOutDate: " + checkInDate + " - " + checkOutDate, e);
+            }
         }
 
         try (Connection con = new DBContext().getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
@@ -182,9 +203,9 @@ public class RoomDao extends DBContext {
             }
 
         } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error in getTotalRoomsCount()", e);
             e.printStackTrace();
         }
-
         return total;
     }
 
