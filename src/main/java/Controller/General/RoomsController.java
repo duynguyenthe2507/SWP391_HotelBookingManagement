@@ -23,13 +23,14 @@ public class RoomsController extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-        this.roomService = new RoomService(); 
+        this.roomService = new RoomService();
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
+            // 1. LẤY THAM SỐ FILTER
             String searchKeyword = request.getParameter("search");
             String categoryIdParam = request.getParameter("categoryId");
             String minPriceParam = request.getParameter("minPrice");
@@ -42,18 +43,21 @@ public class RoomsController extends HttpServlet {
             String pageParam = request.getParameter("page");
             String pageSizeParam = request.getParameter("pageSize");
 
-            Integer categoryId = (categoryIdParam != null && !categoryIdParam.isEmpty()) ? Integer.parseInt(categoryIdParam) : null;
-            Double minPrice = (minPriceParam != null && !minPriceParam.isEmpty()) ? Double.parseDouble(minPriceParam) : null;
-            Double maxPrice = (maxPriceParam != null && !maxPriceParam.isEmpty()) ? Double.parseDouble(maxPriceParam) : null;
-            Integer minCapacity = (minCapacityParam != null && !minCapacityParam.isEmpty()) ? Integer.parseInt(minCapacityParam) : null;
-            
+            // 2. CHUYỂN ĐỔI THAM SỐ
+            Integer categoryId = parseInteger(categoryIdParam);
+            Double minPrice = parseDouble(minPriceParam);
+            Double maxPrice = parseDouble(maxPriceParam);
+            Integer minCapacity = parseInteger(minCapacityParam);
+
+            // 3. PHÂN TRANG
             int pageNumber = 1;
             if (pageParam != null && !pageParam.isEmpty()) {
                 try {
                     pageNumber = Integer.parseInt(pageParam);
                     if (pageNumber < 1) pageNumber = 1;
                 } catch (NumberFormatException e) {
-                    LOGGER.log(Level.WARNING, "Invalid page number format: " + pageParam, e);
+                    LOGGER.log(Level.WARNING, "Invalid page number: {0}", pageParam);
+                    pageNumber = 1;
                 }
             }
 
@@ -61,55 +65,84 @@ public class RoomsController extends HttpServlet {
             if (pageSizeParam != null && !pageSizeParam.isEmpty()) {
                 try {
                     pageSize = Integer.parseInt(pageSizeParam);
-                    if (pageSize < 1) pageSize = 6; 
+                    if (pageSize < 1) pageSize = 6;
                 } catch (NumberFormatException e) {
-                    LOGGER.log(Level.WARNING, "Invalid page size format: " + pageSizeParam, e);
+                    LOGGER.log(Level.WARNING, "Invalid page size: {0}", pageSizeParam);
                 }
             }
+
+            // 4. LẤY DỮ LIỆU TỪ SERVICE
             List<Room> rooms = roomService.findAllRooms(
                 searchKeyword, categoryId, minPrice, maxPrice, minCapacity,
-                checkInDate, checkOutDate, statusFilter, 
+                checkInDate, checkOutDate, statusFilter,
                 pageNumber, pageSize
             );
-            
+
             int totalRooms = roomService.getTotalRoomsCount(
                 searchKeyword, categoryId, minPrice, maxPrice, minCapacity,
-                checkInDate, checkOutDate, statusFilter 
+                checkInDate, checkOutDate, statusFilter
             );
-            
-            int noOfPages = (int) Math.ceil((double) totalRooms / pageSize); 
-            if (noOfPages == 0 && totalRooms > 0) noOfPages = 1; 
+
+            // Tính số trang (tránh chia cho 0)
+            int noOfPages = totalRooms == 0 ? 1 : (int) Math.ceil((double) totalRooms / pageSize);
 
             List<Category> categories = roomService.getAllCategories();
 
-            request.setAttribute("rooms", rooms); 
+            // 5. ĐẶT DỮ LIỆU VÀO REQUEST
+            request.setAttribute("rooms", rooms);
             request.setAttribute("categories", categories);
             request.setAttribute("currentPage", pageNumber);
-            request.setAttribute("noOfPages", noOfPages); 
+            request.setAttribute("noOfPages", noOfPages);  // ĐÚNG TÊN CHO JSP
+            request.setAttribute("pageSize", pageSize);
+
+            // Giữ lại filter để hiển thị lại trên form
             request.setAttribute("search", searchKeyword);
-            request.setAttribute("categoryId", categoryId); 
+            request.setAttribute("categoryId", categoryId);
             request.setAttribute("minPrice", minPrice);
             request.setAttribute("maxPrice", maxPrice);
             request.setAttribute("minCapacity", minCapacity);
-            request.setAttribute("checkInDate", checkInDate); 
-            request.setAttribute("checkOutDate", checkOutDate); 
-            request.setAttribute("statusFilter", statusFilter); 
+            request.setAttribute("checkInDate", checkInDate);
+            request.setAttribute("checkOutDate", checkOutDate);
+            request.setAttribute("statusFilter", statusFilter);
+
+            // 6. FORWARD ĐẾN JSP
             request.getRequestDispatcher("/pages/general/rooms.jsp").forward(request, response);
-            
+
         } catch (NumberFormatException e) {
             LOGGER.log(Level.WARNING, "Invalid number format in request parameters", e);
-            request.setAttribute("errorMessage", "Vui lòng nhập định dạng số hợp lệ cho giá, sức chứa hoặc số trang.");
+            request.setAttribute("errorMessage", "Vui lòng nhập định dạng số hợp lệ.");
             request.getRequestDispatcher("/pages/general/rooms.jsp").forward(request, response);
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error in RoomsController", e);
-            request.setAttribute("errorMessage", "Đã xảy ra lỗi hệ thống khi tải danh sách phòng.");
-            request.getRequestDispatcher("/pages/general/rooms.jsp").forward(request, response); 
+            LOGGER.log(Level.SEVERE, "Unexpected error in RoomsController", e);
+            request.setAttribute("errorMessage", "Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau.");
+            request.getRequestDispatcher("/pages/general/rooms.jsp").forward(request, response);
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        doGet(request, response); 
+        doGet(request, response);
+    }
+
+    // === HÀM HỖ TRỢ CHUYỂN ĐỔI AN TOÀN ===
+    private Integer parseInteger(String value) {
+        if (value == null || value.trim().isEmpty()) return null;
+        try {
+            return Integer.parseInt(value.trim());
+        } catch (NumberFormatException e) {
+            LOGGER.log(Level.WARNING, "Invalid integer format: {0}", value);
+            return null;
+        }
+    }
+
+    private Double parseDouble(String value) {
+        if (value == null || value.trim().isEmpty()) return null;
+        try {
+            return Double.parseDouble(value.trim());
+        } catch (NumberFormatException e) {
+            LOGGER.log(Level.WARNING, "Invalid double format: {0}", value);
+            return null;
+        }
     }
 }
