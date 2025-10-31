@@ -288,7 +288,7 @@
                 if (data.success) {
                     closePanel();
                     // Reload the content in #content-area
-                    // (Just like how SideBar.jsp loads pages)
+                    // (Just like how sidebar.jsp loads pages)
                     // This will also trigger the success message (param.created/updated)
                     $('#content-area').load(
                         '${pageContext.request.contextPath}/receptionist/rooms?' + data.action + '=true'

@@ -121,7 +121,7 @@ public class RoomEditController extends HttpServlet {
                     LOGGER.log(Level.SEVERE, "Delete room error", e);
                 }
             }
-            resp.sendRedirect(req.getContextPath()+"/common/SideBar.jsp");
+            resp.sendRedirect(req.getContextPath()+"/common/sidebar.jsp");
             return;
         }
 

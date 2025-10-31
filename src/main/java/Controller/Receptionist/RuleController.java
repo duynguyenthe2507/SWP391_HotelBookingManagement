@@ -45,7 +45,7 @@ public class RuleController extends HttpServlet {
                     request.getRequestDispatcher("/pages/receptionist/rules-edit.jsp").forward(request, response);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    response.sendRedirect(request.getContextPath() + "/common/SideBar.jsp");
+                    response.sendRedirect(request.getContextPath() + "/common/sidebar.jsp");
                 }
                 break;
 
@@ -56,10 +56,10 @@ public class RuleController extends HttpServlet {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                response.sendRedirect(request.getContextPath() + "/common/SideBar.jsp");
+                response.sendRedirect(request.getContextPath() + "/common/sidebar.jsp");
                 break;
             default:
-                response.sendRedirect(request.getContextPath() + "/common/SideBar.jsp");
+                response.sendRedirect(request.getContextPath() + "/common/sidebar.jsp");
         }
     }
 
@@ -113,8 +113,8 @@ public class RuleController extends HttpServlet {
 
                 ruleDao.updateRule(rule);
             }
-            // Sau khi lưu thành công, chuyển sang trang SideBar.jsp
-            response.sendRedirect(request.getContextPath() + "/common/SideBar.jsp");
+            // Sau khi lưu thành công, chuyển sang trang sidebar.jsp
+            response.sendRedirect(request.getContextPath() + "/common/sidebar.jsp");
 
 
         } catch (Exception e) {
