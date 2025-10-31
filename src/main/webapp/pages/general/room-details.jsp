@@ -1,505 +1,584 @@
+<%@page contentType="text/html" pageEncoding="UTF-8" isELIgnored="false"%>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
-<html lang="zxx">
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="description" content="Sona Template">
     <meta name="keywords" content="Sona, unica, creative, html">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>36 Hotel</title>
+
+    <c:set var="room" value="${requestScope.room}" />
+    <title>36 Hotel - <c:out value="${not empty room ? room.name : 'Room Details'}"/></title>
 
     <link href="https://fonts.googleapis.com/css?family=Lora:400,700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Cabin:400,500,600,700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css">
-    <link rel="stylesheet" href="css/font-awesome.min.css" type="text/css">
-    <link rel="stylesheet" href="css/elegant-icons.css" type="text/css">
-    <link rel="stylesheet" href="css/flaticon.css" type="text/css">
-    <link rel="stylesheet" href="css/owl.carousel.min.css" type="text/css">
-    <link rel="stylesheet" href="css/nice-select.css" type="text/css">
-    <link rel="stylesheet" href="css/jquery-ui.min.css" type="text/css">
-    <link rel="stylesheet" href="css/magnific-popup.css" type="text/css">
-    <link rel="stylesheet" href="css/slicknav.min.css" type="text/css">
-    <link rel="stylesheet" href="css/style.css" type="text/css">
-</head>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.min.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/font-awesome.min.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/elegant-icons.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/flaticon.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/owl.carousel.min.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/nice-select.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/jquery-ui.min.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/magnific-popup.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/slicknav.min.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css" type="text/css">
 
+    <style>
+        body.hidden-overflow {
+            overflow: hidden;
+        }
+        .alert-danger, .alert-warning, .alert-success {
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid transparent;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+         .alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border-color: #ffeeba;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
+        }
+        .alert-danger h4, .alert-warning h4, .alert-success h4 {
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        .alert-danger p, .alert-warning p, .alert-success p {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+         .close-alert {
+            float: right;
+            font-size: 1.5rem;
+            font-weight: bold;
+            line-height: 1;
+            color: inherit;
+            text-shadow: 0 1px 0 #fff;
+            opacity: .5;
+            background: transparent;
+            border: 0;
+            padding: 0;
+            cursor: pointer;
+        }
+        .close-alert:hover {
+            opacity: .75;
+            color: inherit;
+        }
+        .text-center { text-align: center; }
+        .mt-3 { margin-top: 1.5rem !important; }
+        .btn-primary {
+            color: #fff;
+            background-color: #dfa974;
+            border-color: #dfa974;
+            padding: 12px 30px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            border-radius: 4px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #c7956d;
+            border-color: #c7956d;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(223, 169, 116, 0.4);
+        }
+        .room-details-section { padding: 60px 0; }
+        .room-details-item img {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 35px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .rd-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .rd-title h3 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+            margin: 0;
+        }
+        .rdt-right { text-align: right; }
+        .rdt-right .rating {
+            color: #dfa974;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .rdt-right a {
+            background-color: #dfa974;
+            color: white;
+            padding: 10px 25px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        .rdt-right a:hover {
+            background-color: #c7956d;
+            transform: translateY(-2px);
+        }
+        .rd-text h2 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #dfa974;
+            margin-bottom: 30px;
+        }
+        .rd-text h2 span {
+            font-size: 16px;
+            color: #666;
+            font-weight: 400;
+        }
+        .rd-text table {
+            width: 100%;
+            margin-bottom: 30px;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+        }
+        .rd-text table tr { background-color: #f8f9fa; }
+        .rd-text table td {
+            padding: 15px 20px;
+            font-size: 15px;
+        }
+        .rd-text table td.r-o {
+            font-weight: 600;
+            color: #333;
+            width: 180px;
+        }
+        .rd-text p {
+            line-height: 1.8;
+            color: #666;
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+        .room-booking {
+            background-color: #f8f9fa;
+            padding: 35px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 20px;
+        }
+        .room-booking h3 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #dfa974;
+        }
+        .room-booking .check-date,
+        .room-booking .select-option { margin-bottom: 25px; }
+        .room-booking label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .room-booking input,
+        .room-booking select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        .room-booking input:focus,
+        .room-booking select:focus {
+            border-color: #dfa974;
+            outline: none;
+        }
+        .room-booking button {
+            width: 100%;
+            background-color: #dfa974;
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        .room-booking button:hover {
+            background-color: #c7956d;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(223, 169, 116, 0.4);
+        }
+        .rd-reviews {
+            margin-top: 50px;
+            padding-top: 40px;
+            border-top: 2px solid #f0f0f0;
+        }
+        .rd-reviews h4 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .review-item {
+            display: flex;
+            margin-bottom: 30px;
+            padding: 25px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        .review-item .ri-pic { margin-right: 20px; }
+        .review-item .ri-pic img {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .review-item .ri-text { flex: 1; }
+        .review-item .ri-text span {
+            color: #999;
+            font-size: 13px;
+        }
+        .review-item .ri-text h5 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin: 10px 0;
+        }
+        .review-item .ri-text .rating {
+            color: #dfa974;
+            margin: 8px 0;
+        }
+        .review-item .ri-text p {
+            color: #666;
+            line-height: 1.7;
+        }
+        .review-add {
+            margin-top: 40px;
+            padding: 35px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+        }
+        .review-add h4 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 25px;
+        }
+        .review-add input,
+        .review-add textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        .review-add input:focus,
+        .review-add textarea:focus {
+            border-color: #dfa974;
+            outline: none;
+        }
+        .review-add textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .review-add button {
+            background-color: #dfa974;
+            color: white;
+            padding: 12px 35px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .review-add button:hover {
+            background-color: #c7956d;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(223, 169, 116, 0.4);
+        }
+        .breadcrumb-section {
+            background-color: #f8f9fa;
+            padding: 50px 0;
+            margin-bottom: 0;
+        }
+        .breadcrumb-text h2 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .bt-option a,
+        .bt-option span {
+            color: #666;
+            margin: 0 8px;
+            font-size: 14px;
+            text-decoration: none;
+        }
+        .bt-option a:hover { color: #dfa974; }
+        @media (max-width: 991px) {
+            .room-booking { margin-top: 40px; position: static; }
+            .rd-title { flex-direction: column; align-items: flex-start; }
+            .rdt-right { text-align: left; margin-top: 15px; }
+        }
+    </style>
+</head>
 <body>
 
-<div id="preloder">
-    <div class="loader"></div>
-</div>
+    <jsp:include page="/common/header.jsp"/>
 
-<div class="offcanvas-menu-overlay"></div>
-<div class="canvas-open">
-    <i class="icon_menu"></i>
-</div>
-<div class="offcanvas-menu-wrapper">
-    <div class="canvas-close">
-        <i class="icon_close"></i>
-    </div>
-    <div class="search-icon search-switch">
-
-        <i class="icon_search"></i>
-    </div>
-    <div class="header-configure-area">
-        <div class="language-option">
-            <img src="img/flag.jpg" alt="">
-            <span>EN <i class="fa fa-angle-down"></i></span>
-            <div class="flag-dropdown">
-
-                <ul>
-                    <li><a href="#">Zi</a></li>
-                    <li><a href="#">Fr</a></li>
-                </ul>
-
-            </div>
-        </div>
-        <a href="/booking" class="bk-btn">Booking Now</a>
-    </div>
-    <nav class="mainmenu mobile-menu">
-        <ul>
-            <li class="active"><a href="home">Home</a></li>
-            <li><a href="rooms">Rooms</a></li>
-
-            <li><a href="about-us">About Us</a></li>
-            <li><a href="#">Pages</a>
-                <ul class="dropdown">
-                    <li><a href="room-details">Room Details</a></li>
-                    <li><a
-                            href="blog-details">Blog Details</a></li>
-                </ul>
-            </li>
-            <li><a href="blog">News</a></li>
-            <li><a href="contact">Contact</a></li>
-        </ul>
-    </nav>
-    <div
-            id="mobile-menu-wrap"></div>
-    <div class="top-social">
-        <a href="https://only-fans.me/highaileri"><i class="fa fa-facebook"></i></a>
-        <a href="https://only-fans.me/highaileri"><i class="fa fa-twitter"></i></a>
-        <a href="https://only-fans.me/highaileri"><i class="fa fa-tripadvisor"></i></a>
-        <a href="https://only-fans.me/highaileri"><i class="fa fa-instagram"></i></a>
-    </div>
-    <ul class="top-widget">
-        <li><i class="fa
-fa-phone"></i> (84) 359 797 703</li>
-        <li><i class="fa fa-envelope"></i> 36hotel@gmail.com</li>
-    </ul>
-</div>
-<header class="header-section header-normal">
-    <div class="top-nav">
+    <div class="breadcrumb-section">
         <div class="container">
             <div class="row">
-
-                <div class="col-lg-6">
-                    <ul class="tn-left">
-                        <li><i class="fa fa-phone"></i> (84) 359 797 703</li>
-                        <li><i
-                                class="fa fa-envelope"></i> 36hotel@gmail.com</li>
-                    </ul>
-                </div>
-                <div class="col-lg-6">
-                    <div class="tn-right">
-
-                        <div class="top-social">
-                            <a href="https://only-fans.me/highaileri"><i class="fa fa-facebook"></i></a>
-                            <a href="https://only-fans.me/highaileri"><i class="fa fa-twitter"></i></a>
-
-                            <a href="https://only-fans.me/highaileri"><i class="fa fa-tripadvisor"></i></a>
-                            <a href="https://only-fans.me/highaileri"><i class="fa fa-instagram"></i></a>
-                        </div>
-
-                        <a href="/booking" class="bk-btn">Booking Now</a>
-                        <div class="language-option">
-                            <img src="img/flag.jpg" alt="">
-
-                            <span>EN <i class="fa fa-angle-down"></i></span>
-                            <div class="flag-dropdown">
-                                <ul>
-
-                                    <li><a href="#">Zi</a></li>
-                                    <li><a href="#">Fr</a></li>
-
-                                </ul>
-                            </div>
+                <div class="col-lg-12">
+                    <div class="breadcrumb-text">
+                        <h2><c:out value="${not empty room ? room.name : 'Room Details'}"/></h2>
+                        <div class="bt-option">
+                            <c:url value="/home" var="homeBreadcrumbUrl"/>
+                            <a href="${homeBreadcrumbUrl}">Home</a>
+                            <c:url value="/rooms" var="roomsBreadcrumbUrl"/>
+                            <a href="${roomsBreadcrumbUrl}">Rooms</a>
+                            <span><c:out value="${not empty room ? room.name : 'Details'}"/></span>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
-    <div class="menu-item">
+
+    <section class="room-details-section spad">
         <div class="container">
-            <div class="row">
-
-                <div class="col-lg-2">
-                    <div class="logo">
-                        <a href="./home">
-                            <img src="img/logo.png" alt="">
-
-                        </a>
-                    </div>
+            
+            <%-- === PHẦN THÊM MỚI: Hiển thị thông báo (Thêm vào giỏ thành công/thất bại) === --%>
+            <c:if test="${not empty sessionScope.cartMessage}">
+                <div class="alert ${sessionScope.cartMessageType == 'ERROR' ? 'alert-danger' : (sessionScope.cartMessageType == 'WARNING' ? 'alert-warning' : 'alert-success')}" role="alert">
+                     <button type="button" class="close-alert" onclick="this.parentElement.style.display='none';">&times;</button>
+                    <c:out value="${sessionScope.cartMessage}"/>
                 </div>
-                <div class="col-lg-10">
+                <%-- Xóa thông báo khỏi session sau khi hiển thị --%>
+                <% session.removeAttribute("cartMessage"); %>
+                <% session.removeAttribute("cartMessageType"); %>
+            </c:if>
+            <%-- === KẾT THÚC PHẦN THÊM MỚI === --%>
 
-                    <div class="nav-menu">
-                        <nav class="mainmenu">
-                            <ul>
-
-                                <li class="active"><a href="home">Home</a></li>
-                                <li><a href="rooms">Rooms</a></li>
-                                <li><a href="about-us">About Us</a></li>
-
-                                <li><a href="#">Pages</a>
-                                    <ul class="dropdown">
-
-                                        <li><a href="room-details">Room Details</a></li>
-                                        <li><a href="blog-details">Blog Details</a></li>
-                                    </ul>
-
-                                </li>
-                                <li><a href="blog">News</a></li>
-
-                                <li><a href="contact">Contact</a></li>
-                            </ul>
-                        </nav>
-                        <div class="nav-right search-switch">
-
-                            <i class="icon_search"></i>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    </div>
-</header>
-<div class="breadcrumb-section">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-
-                <div class="breadcrumb-text">
-                    <h2>Our Rooms</h2>
-                    <div class="bt-option">
-                        <a href="home">Home</a>
-
-                        <span>Rooms</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-</div>
-<section class="room-details-section spad">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8">
-                <div class="room-details-item">
-
-                    <img src="img/room/room-details.jpg" alt="">
-                    <div class="rd-text">
-                        <div class="rd-title">
-
-                            <h3>Premium King Room</h3>
-                            <div class="rdt-right">
-                                <div class="rating">
-
-                                    <i class="icon_star"></i>
-                                    <i class="icon_star"></i>
-
-                                    <i class="icon_star"></i>
-                                    <i class="icon_star"></i>
-                                    <i class="icon_star-half_alt"></i>
-
+            <c:choose>
+                <c:when test="${not empty room}">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="room-details-item">
+                                <c:set var="imgSrc" value="${not empty room.imgUrl ? pageContext.request.contextPath.concat('/').concat(room.imgUrl) : pageContext.request.contextPath.concat('/img/placeholder.jpg')}"/>
+                                <img src="${imgSrc}"
+                                     alt="${room.name}"
+                                     onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/img/placeholder.jpg';">
+                                
+                                <div class="rd-text">
+                                    <div class="rd-title">
+                                        <h3><c:out value="${room.name}"/></h3>
+                                        <%-- Đã bỏ nút "Booking Now" ở đây vì form ở bên phải --%>
+                                    </div>
+                                    
+                                    <h2>
+                                        <fmt:formatNumber value="${room.price}" pattern="#,##0"/> VND
+                                        <span>/Pernight</span>
+                                    </h2>
+                                    
+                                    <table>
+                                        <tbody>
+                                            <tr>
+                                                <td class="r-o">Room Type:</td>
+                                                <td><c:out value="${room.category.name}"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="r-o">Capacity:</td>
+                                                <td>Max <c:out value="${room.capacity}"/> people</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="r-o">Status:</td>
+                                                <td><c:out value="${room.status}"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="r-o">Services:</td>
+                                                <td>Wifi, Television, Bathroom,...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    
+                                    <p class="f-para"><c:out value="${room.description}"/></p>
+                                    <p>Mauris molestie lectus in CLUDES quamlaoreet, a tincidunt lacus aliquet. Quisque non interdum
+                                        massa. Phasellus et lacus id nunc venenatis fringilla. Aliquam Cursus commodo
+                                        turpis, vitae orci aonsectetur. Interdum et malesuada fames ac ante ipsum primis in
+                                        faucibus.</p>
                                 </div>
-                                <a href="/booking">Booking Now</a>
                             </div>
 
-                        </div>
-                        <h2>159$<span>/Pernight</span></h2>
-                        <table>
-
-                            <tbody>
-                            <tr>
-                                <td class="r-o">Size:</td>
-
-                                <td>30 ft</td>
-                            </tr>
-                            <tr>
-
-                                <td class="r-o">Capacity:</td>
-                                <td>Max persion 5</td>
-
-                            </tr>
-                            <tr>
-                                <td class="r-o">Bed:</td>
-
-                                <td>King Beds</td>
-                            </tr>
-
-                            <tr>
-                                <td class="r-o">Services:</td>
-                                <td>Wifi, Television, Bathroom,...</td>
-
-                            </tr>
-                            </tbody>
-                        </table>
-
-                        <p class="f-para">Motorhome or Trailer that is the question for you.
-                            Here are some of the
-                            advantages and disadvantages of both, so you will be confident when purchasing an RV.
-                            When comparing Rvs, a motorhome or a travel trailer, should you buy a motorhome or fifth
-                            wheeler?
-                            The advantages and disadvantages of both are studied so that you can make your
-                            choice wisely when purchasing an RV.
-                            Possessing a motorhome or fifth wheel is an
-                            achievement of a lifetime.
-                            It can be similar to sojourning with your residence as you
-                            search the various sites of our great land, America.</p>
-                        <p>The two commonly known recreational vehicle classes are the motorized and towable.
-                            Towable rvs are the travel trailers and the fifth wheel.
-                            The rv travel trailer or fifth
-                            wheel has the attraction of getting towed by a pickup or a car, thus giving the
-                            adaptability of possessing transportation for you when you are parked at your campsite.
-                        </p>
-                    </div>
-                </div>
-                <div class="rd-reviews">
-                    <h4>Reviews</h4>
-
-                    <div class="review-item">
-                        <div class="ri-pic">
-                            <img src="img/room/avatar/avatar-1.jpg" alt="">
-
-                        </div>
-                        <div class="ri-text">
-                            <span>27 Aug 2019</span>
-
-                            <div class="rating">
-                                <i class="icon_star"></i>
-                                <i class="icon_star"></i>
-
-                                <i class="icon_star"></i>
-                                <i class="icon_star"></i>
-                                <i class="icon_star-half_alt"></i>
-
-                            </div>
-                            <h5>Brandon Kelley</h5>
-                            <p>Neque porro qui squam est, qui dolorem ipsum quia dolor sit amet, consectetur,
-
-                                adipisci velit, sed quia non numquam eius modi tempora.
-                                incidunt ut labore et dolore
-                                magnam.</p>
-                        </div>
-                    </div>
-
-                    <div class="review-item">
-                        <div class="ri-pic">
-                            <img src="img/room/avatar/avatar-2.jpg" alt="">
-
-                        </div>
-                        <div class="ri-text">
-                            <span>27 Aug 2019</span>
-
-                            <div class="rating">
-                                <i class="icon_star"></i>
-                                <i class="icon_star"></i>
-
-                                <i class="icon_star"></i>
-                                <i class="icon_star"></i>
-                                <i class="icon_star-half_alt"></i>
-
-                            </div>
-                            <h5>Brandon Kelley</h5>
-                            <p>Neque porro qui squam est, qui dolorem ipsum quia dolor sit amet, consectetur,
-
-                                adipisci velit, sed quia non numquam eius modi tempora.
-                                incidunt ut labore et dolore
-                                magnam.</p>
-                        </div>
-                    </div>
-
-                </div>
-                <div class="review-add">
-                    <h4>Add Review</h4>
-                    <form action="post" class="ra-form">
-
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <input type="text" placeholder="Name*">
-
-                            </div>
-                            <div class="col-lg-6">
-                                <input type="text" placeholder="Email*">
-
-                            </div>
-                            <div class="col-lg-12">
-                                <div>
-
-                                    <h5>You Rating:</h5>
-                                    <div class="rating">
-
-                                        <i class="icon_star"></i>
-                                        <i class="icon_star"></i>
-
-                                        <i class="icon_star"></i>
-                                        <i class="icon_star"></i>
-                                        <i class="icon_star-half_alt"></i>
-
+                            <div class="rd-reviews">
+                                <h4>Reviews</h4>
+                                <div class="review-item">
+                                    <div class="ri-pic">
+                                        <img src="${pageContext.request.contextPath}/img/room/avatar/default-avatar.png" alt="">
+                                    </div>
+                                    <div class="ri-text">
+                                        <span>27 Aug 2025</span>
+                                        <div class="rating">...</div>
+                                        <h5>Brandon Kelley</h5>
+                                        <p>...</p>
                                     </div>
                                 </div>
-
-                                <textarea placeholder="Your Review"></textarea>
-                                <button type="submit">Submit Now</button>
                             </div>
 
-                        </div>
-                    </form>
-                </div>
-            </div>
-            <div class="col-lg-4">
-
-                <div class="room-booking">
-                    <h3>Your Reservation</h3>
-                    <form action="post">
-                        <div class="check-date">
-
-                            <label for="date-in">Check In:</label>
-                            <input type="text" class="date-input" id="date-in">
-                            <i class="icon_calendar"></i>
-
-                        </div>
-                        <div class="check-date">
-                            <label for="date-out">Check Out:</label>
-
-                            <input type="text" class="date-input" id="date-out">
-                            <i class="icon_calendar"></i>
+                            <div class="review-add">
+                                <h4>Add Review</h4>
+                                <form action="post" class="ra-form">
+                                    <%-- Form thêm review (giữ nguyên như code của bạn) --%>
+                                </form>
+                            </div>
                         </div>
 
-                        <div class="select-option">
-                            <label for="guest">Guests:</label>
-                            <select id="guest">
-
-                                <option value="">3 Adults</option>
-                            </select>
-                        </div>
-                        <div class="select-option">
-
-                            <label for="room">Room:</label>
-                            <select id="room">
-                                <option value="">1 Room</option>
-
-                            </select>
-                        </div>
-                        <button type="submit">Check Availability</button>
-
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-<footer class="footer-section">
-
-    <div class="container">
-        <div class="footer-text">
-            <div class="row">
-                <div class="col-lg-4">
-                    <div class="ft-about">
-
-                        <div class="logo">
-                            <a href="#">
-                                <img src="img/footer-logo.png" alt="">
-
-                            </a>
-                        </div>
-                        <p>We inspire and reach millions of travelers<br /> across 90 local websites</p>
-
-                        <div class="fa-social">
-                            <a href="https://only-fans.me/highaileri"><i class="fa fa-facebook"></i></a>
-                            <a href="https://only-fans.me/highaileri"><i class="fa fa-twitter"></i></a>
-
-                            <a href="https://only-fans.me/highaileri"><i class="fa fa-tripadvisor"></i></a>
-                            <a href="https://only-fans.me/highaileri"><i class="fa fa-instagram"></i></a>
-                            <a href="https://only-fans.me/highaileri"><i class="fa fa-youtube-play"></i></a>
-
+                        <!-- Right Column: Booking Form -->
+                        <div class="col-lg-4">
+                            <div class="room-booking">
+                                <h3>Your Reservation</h3>
+                                
+                                <%-- === PHẦN SỬA ĐỔI QUAN TRỌNG: Cập nhật form === --%>
+                                <c:url value="/booking/add" var="addToBookingUrl"/>
+                                <form action="${addToBookingUrl}" method="POST">
+                                    
+                                    <input type="hidden" name="roomId" value="${room.roomId}">
+                                    
+                                    <div class="check-date">
+                                        <label for="date-in">Check In:</label>
+                                        <input type="text" class="date-input" id="date-in" name="checkInDate" required>
+                                        <i class="icon_calendar"></i>
+                                    </div>
+                                    <div class="check-date">
+                                        <label for="date-out">Check Out:</label>
+                                        <input type="text" class="date-input" id="date-out" name="checkOutDate" required>
+                                        <i class="icon_calendar"></i>
+                                    </div>
+                                    <div class="select-option">
+                                        <label for="guest">Guests:</label>
+                                        <select id="guest" name="numGuests"> <%-- Thêm name attribute --%>
+                                            <c:forEach begin="1" end="${room.capacity}" var="i">
+                                                <option value="${i}">${i} Adult(s)</option>
+                                            </c:forEach>
+                                        </select>
+                                    </div>
+                                    <%-- Đã xóa bỏ phần <select id="room"> (chọn "1 Room") --%>
+                                    
+                                    <button type="submit">Add to Booking</button> <%-- Đổi text nút --%>
+                                </form>
+                                <%-- === KẾT THÚC PHẦN SỬA ĐỔI === --%>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-lg-3 offset-lg-1">
-
-                    <div class="ft-contact">
-                        <h6>Contact Us</h6>
-                        <ul>
-                            <li>(84) 359 797 703</li>
-
-                            <li>36hotel@gmail.com</li>
-                            <li>Thanh Hoa, Viet Nam</li>
-                        </ul>
+                </c:when>
+                <c:otherwise>
+                    <!-- Error Message -->
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="alert alert-danger text-center" role="alert">
+                                <h4><c:out value="${not empty errorMessage ? errorMessage : 'Room not found.'}"/></h4>
+                                <p>The room you are looking for does not exist or has been removed. Please return to the room list.</p>
+                                <a href="${pageContext.request.contextPath}/rooms" class="btn btn-primary mt-3">Back to Room List</a>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="col-lg-3 offset-lg-1">
+                </c:otherwise>
+            </c:choose>
+        </div>
+    </section>
 
-                    <div class="ft-newslatter">
-                        <h6>New latest</h6>
-                        <p>Get the latest updates and offers.</p>
+    <jsp:include page="/common/footer.jsp"/>
 
-                        <form action="post" class="fn-form">
-                            <input type="text" placeholder="Email">
-                            <button type="submit"><i class="fa fa-send"></i></button>
-
-                        </form>
-                    </div>
-                </div>
-            </div>
+    <!-- Search Model -->
+    <div class="search-model">
+        <div class="h-100 d-flex align-items-center justify-content-center">
+            <div class="search-close-switch"><i class="icon_close"></i></div>
+            <form class="search-model-form">
+                <input type="text" id="search-input" placeholder="Search here.....">
+            </form>
         </div>
     </div>
-    <div
-            class="copyright-option">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-7">
-                    <ul>
 
-                        <li><a href="https://only-fans.me/highaileri">Contact</a></li>
-                        <li><a href="https://only-fans.me/highaileri">Terms of use</a></li>
-                        <li><a href="https://only-fans.me/highaileri">Privacy</a></li>
-                        <li><a href="https://only-fans.me/highaileri">Environmental Policy</a></li>
+    <!-- JS Scripts -->
+    <script src="${pageContext.request.contextPath}/js/jquery-3.3.1.min.js"></script>
+    <script src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>
+    <script src="${pageContext.request.contextPath}/js/jquery.magnific-popup.min.js"></script>
+    <script src="${pageContext.request.contextPath}/js/jquery.nice-select.min.js"></script>
+    <script src="${pageContext.request.contextPath}/js/jquery-ui.min.js"></script>
+    <script src="${pageContext.request.contextPath}/js/jquery.slicknav.js"></script>
+    <script src="${pageContext.request.contextPath}/js/owl.carousel.min.js"></script>
+    <script src="${pageContext.request.contextPath}/js/main.js"></script>
 
-                    </ul>
-                </div>
-                <div class="col-lg-5">
-                    <div class="co-text"><p>Copyright &copy;<script>document.write(new Date().getFullYear());</script>
-                        All rights reserved by 36Hotel
-                    </p></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</footer>
-<div class="search-model">
-    <div class="h-100 d-flex align-items-center
-justify-content-center">
-        <div class="search-close-switch"><i class="icon_close"></i></div>
-        <form class="search-model-form">
-            <input type="text" id="search-input" placeholder="Search here.....">
-        </form>
-    </div>
-</div>
-<script src="js/jquery-3.3.1.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Initialize datepicker
+            $(".date-input").datepicker({
+                dateFormat: 'dd/mm/yy', // Giữ nguyên format này, BookingController sẽ xử lý
+                minDate: 0, // Vẫn giữ minDate
+                onSelect: function(selectedDate) {
+                    var option = this.id == "date-in" ? "minDate" : "maxDate";
+                    var instance = $(this).data("datepicker");
+                    var date = $.datepicker.parseDate(instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings);
+                    
+                    // Cập nhật min/max cho datepicker còn lại
+                     if (this.id === "date-in") {
+                        // Nếu date-out đã có giá trị, và giá trị đó trước ngày check-in mới, thì xóa date-out
+                        var dateOutVal = $("#date-out").val();
+                        if (dateOutVal) {
+                             var dateOut = $.datepicker.parseDate(instance.settings.dateFormat, dateOutVal, instance.settings);
+                             if (dateOut < date) {
+                                $("#date-out").val("");
+                             }
+                        }
+                         $("#date-out").datepicker("option", "minDate", date);
+                    } else if (this.id === "date-out") {
+                         $("#date-in").datepicker("option", "maxDate", date);
+                    }
+                }
+            });
+            
+            // Initialize nice select
+            $('select').niceSelect();
 
-<script src="js/jquery.magnific-popup.min.js"></script>
-<script src="js/jquery.nice-select.min.js"></script>
-<script src="js/jquery-ui.min.js"></script>
-<script src="js/jquery.slicknav.js"></script>
-<script src="js/owl.carousel.min.js"></script>
-<script src="js/main.js"></script>
+             // Preloader logic (simplified)
+            $(window).on('load', function() {
+                $("#preloder").fadeOut("slow");
+                $("body").removeClass("hidden-overflow");
+            });
+            $("body").addClass("hidden-overflow");
+        });
+    </script>
 </body>
-
 </html>

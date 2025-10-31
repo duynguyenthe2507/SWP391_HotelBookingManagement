@@ -11,5 +11,6 @@ public class Services {
     private String name;
     private double price;
     private String description;
+    private String iconClass;
     private LocalDateTime updatedAt;
 }
