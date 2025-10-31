@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <header class="header-section">
     <div class="top-nav">
@@ -12,23 +13,17 @@
                 </div>
                 <div class="col-lg-6">
                     <div class="tn-right">
-                        <div class="top-social">
-                            <a href="#"><i class="fa fa-facebook"></i></a>
-                            <a href="#"><i class="fa fa-twitter"></i></a>
-                            <a href="#"><i class="fa fa-tripadvisor"></i></a>
-                            <a href="#"><i class="fa fa-instagram"></i></a>
-                        </div>
                         <% if (session.getAttribute("loggedInUser") == null) { %>
                         <a href="${pageContext.request.contextPath}/login" class="bk-btn">Login</a>
                         <a href="${pageContext.request.contextPath}/register" class="bk-btn">Be our member</a>
                         <% } else { %>
                         <div class="dropdown" style="display: inline-block; position: relative">
-                            <a href="${pageContext.request.contextPath}/profile" class="bk-btn" style="padding: -1px 0px">
+                            <a href="${pageContext.request.contextPath}/profile" class="bk-btn" style="padding: 5px 15px">
                                 Profile
                             </a>
                         </div>
-                        <a href="${pageContext.request.contextPath}/cart" class="bk-btn" style="padding: -1px 0px; margin-left: 5px;">Cart</a>
-                        <a href="${pageContext.request.contextPath}/wishlist" class="bk-btn" style="padding: -1px 0px; margin-left: 5px;">Wishlist</a>
+                        <a href="${pageContext.request.contextPath}/cart" class="bk-btn" style="padding: 5px 15px; margin-left: 5px;">Cart</a>
+                        <a href="${pageContext.request.contextPath}/wishlist" class="bk-btn" style="padding: 5px 15px; margin-left: 5px;">Wishlist</a>
                         <% } %>
                     </div>
                 </div>
@@ -52,39 +47,43 @@
                     <div class="nav-menu">
                         <nav class="mainmenu">
                             <c:choose>
-                              <c:when test="${not empty pageActive}">
-                                <ul>
-                                  <li <c:if test="${pageActive eq 'dashboard'}">class="active"</c:if>>
-                                    <a href="${pageContext.request.contextPath}/pages/receptionist/receptionist-dashboard.jsp">Dashboard</a>
-                                  </li>
-                                  <li <c:if test="${pageActive eq 'bills'}">class="active"</c:if>>
-                                    <a href="${pageContext.request.contextPath}/receptionist/bills">Bills</a>
-                                  </li>
-                                  <li <c:if test="${pageActive eq 'room-fees'}">class="active"</c:if>>
-                                    <a href="${pageContext.request.contextPath}/receptionist/room-fees">Room Fees</a>
-                                  </li>
-                                  <li <c:if test="${pageActive eq 'bookings'}">class="active"</c:if>>
-                                    <a href="${pageContext.request.contextPath}/receptionist/bookings">Bookings</a>
-                                  </li>
-                                  <li <c:if test="${pageActive eq 'penalties'}">class="active"</c:if>>
-                                    <a href="${pageContext.request.contextPath}/receptionist/penalties">Penalties</a>
-                                  </li>
-                                  <li <c:if test="${pageActive eq 'feedback'}">class="active"</c:if>>
-                                    <a href="${pageContext.request.contextPath}/receptionist/feedback">Feedback</a>
-                                  </li>
-                                  <li <c:if test="${pageActive eq 'room-list'}">class="active"</c:if>>
-                                    <a href="${pageContext.request.contextPath}/receptionist/rooms">Room List</a>
-                                  </li>
-                                </ul>
-                              </c:when>
-                              <c:otherwise>
-                                <ul>
-                                  <li class="active"><a href="${pageContext.request.contextPath}/home">Home</a></li>
-                                  <li><a href="${pageContext.request.contextPath}/rooms">Rooms</a></li>
-                                  <li><a href="${pageContext.request.contextPath}/contact">Contact</a></li>
-                                  <li><a href="${pageContext.request.contextPath}/rules">Rules</a></li>
-                                </ul>
-                              </c:otherwise>
+                                <%-- Menu for Receptionist --%>
+                                <c:when test="${not empty pageActive}">
+                                    <ul>
+                                        <li <c:if test="${pageActive eq 'booking-list'}">class="active"</c:if>>
+                                            <a href="${pageContext.request.contextPath}/receptionist/booking-list">Booking List</a>
+                                        </li>
+                                        <li <c:if test="${pageActive eq 'create-booking'}">class="active"</c:if>>
+                                            <a href="${pageContext.request.contextPath}/receptionist/create-booking">Create Booking</a>
+                                        </li>
+                                        <li <c:if test="${pageActive eq 'room-fees'}">class="active"</c:if>>
+                                            <a href="${pageContext.request.contextPath}/receptionist/room-fees">Room Fees</a>
+                                        </li>
+                                        <li <c:if test="${pageActive eq 'bills'}">class="active"</c:if>>
+                                            <a href="${pageContext.request.contextPath}/receptionist/bills">Bills</a>
+                                        </li>
+                                        <li <c:if test="${pageActive eq 'rules'}">class="active"</c:if>>
+                                            <a href="${pageContext.request.contextPath}/receptionist/rules">Rules</a>
+                                        </li>
+                                        <li <c:if test="${pageActive eq 'rooms'}">class="active"</c:if>>
+                                            <a href="${pageContext.request.contextPath}/receptionist/rooms">Rooms</a>
+                                        </li>
+                                    </ul>
+                                </c:when>
+                                <%-- Menu for Customer/Guest --%>
+                                <c:otherwise>
+                                    <ul>
+                                        <li <c:if test="${pageContext.request.servletPath eq '/home' or pageContext.request.servletPath eq '/index.jsp'}">class="active"</c:if>>
+                                            <a href="${pageContext.request.contextPath}/home">Home</a>
+                                        </li>
+                                        <li <c:if test="${pageContext.request.servletPath eq '/rooms'}">class="active"</c:if>>
+                                            <a href="${pageContext.request.contextPath}/rooms">Rooms</a>
+                                        </li>
+                                        <li <c:if test="${pageContext.request.servletPath eq '/rules'}">class="active"</c:if>>
+                                            <a href="${pageContext.request.contextPath}/rules">Rules</a>
+                                        </li>
+                                    </ul>
+                                </c:otherwise>
                             </c:choose>
                         </nav>
                     </div>
@@ -93,20 +92,87 @@
         </div>
     </div>
 </header>
+
 <style>
-  .mainmenu ul li a {
-    border-bottom: none !important;
-    background: none;
-    color: #222;
-    font-weight: 500;
-    transition: color 0.2s;
-  }
-  .mainmenu ul li.active a {
-    border-bottom: 2.5px solid #dfa974 !important;
-    border-radius: 2px;
-    color: #dfa974;
-  }
-  .mainmenu ul li a:hover {
-    color: #dfa974;
-  }
+    .mainmenu ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        gap: 20px;
+    }
+
+    .mainmenu ul li {
+        display: inline-block;
+    }
+
+    .mainmenu ul li a {
+        display: block;
+        padding: 10px 15px;
+        border-bottom: 2.5px solid transparent !important;
+        background: none;
+        color: #222;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border-radius: 2px;
+    }
+
+    .mainmenu ul li.active a {
+        border-bottom: 2.5px solid #dfa974 !important;
+        color: #dfa974;
+    }
+
+    .mainmenu ul li a:hover {
+        color: #dfa974;
+        border-bottom-color: #dfa974 !important;
+    }
+
+    /* Fix button padding issue */
+    .bk-btn {
+        padding: 8px 20px !important;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+    .top-nav {
+        background-color: #f8f9fa;
+        padding: 10px 0;
+    }
+
+    .tn-left {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .tn-left li {
+        display: inline-block;
+        margin-right: 20px;
+        color: #666;
+        font-size: 14px;
+    }
+
+    .tn-left li i {
+        margin-right: 5px;
+        color: #dfa974;
+    }
+
+    .tn-right {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 15px;
+    }
+
+    .top-social a {
+        display: inline-block;
+        margin-right: 10px;
+        color: #666;
+        transition: color 0.3s;
+    }
+
+    .top-social a:hover {
+        color: #dfa974;
+    }
 </style>

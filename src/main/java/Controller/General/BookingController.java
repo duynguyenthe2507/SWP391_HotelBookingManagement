@@ -162,7 +162,7 @@ public class BookingController extends HttpServlet {
         Booking tempBooking = new Booking();
         tempBooking.setCheckinTime(checkIn);
         tempBooking.setCheckoutTime(checkOut);
-        tempBooking.setDurationHours(durationHours);
+//        tempBooking.setDurationHours(durationHours);
         tempBooking.setTotalPrice(totalPrice);
         tempBooking.setStatus("PENDING");
 
