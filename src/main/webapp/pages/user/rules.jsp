@@ -58,6 +58,7 @@
         .rule-desc {
             margin-top: 10px;
             color: #555;
+            white-space: pre-line;
         }
         .rule-date {
             font-size: 14px;

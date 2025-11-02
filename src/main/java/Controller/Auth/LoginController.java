@@ -99,7 +99,7 @@ public class LoginController extends HttpServlet {
 
             if ("Receptionist".equalsIgnoreCase(role)) {
                 LOGGER.log(Level.INFO, "Redirecting Admin/Receptionist to dashboard.");
-                response.sendRedirect(request.getContextPath() + "/pages/receptionist/booking-list.jsp");
+                response.sendRedirect(request.getContextPath() + "/common/SideBar.jsp");
             } else {
                 LOGGER.log(Level.INFO, "Redirecting Customer to home page.");
                 response.sendRedirect(request.getContextPath() + "/home");
