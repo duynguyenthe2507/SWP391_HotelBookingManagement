@@ -1,430 +1,328 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
+<%-- Lấy đường dẫn context và servlet path để xác định trang hiện tại --%>
+<c:set var="contextPath" value="${pageContext.request.contextPath}"/>
+<c:set var="currentPath"
+       value="${requestScope['jakarta.servlet.forward.servlet_path'] != null ? requestScope['jakarta.servlet.forward.servlet_path'] : request.servletPath}"/>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Receptionist Dashboard</title>
-    <c:url var="baseUrl" value="/"/>
-    <link rel="stylesheet" href="${baseUrl}css/bootstrap.min.css">
-    <link rel="stylesheet" href="${baseUrl}css/font-awesome.min.css">
+
+    <link rel="stylesheet" href="${contextPath}/css/bootstrap.min.css">
+    <link rel="stylesheet" href="${contextPath}/css/font-awesome.min.css">
 
     <style>
-        :root {
-            --primary-color: #f39c12; /* Màu cam chính */
-            --sidebar-bg: #222d32; /* Màu nền sidebar */
-            --sidebar-text: #b8c7ce; /* Màu chữ sidebar */
-            --sidebar-hover: #1a2226; /* Màu khi hover */
-            --content-bg: #f4f6f9; /* Màu nền nội dung */
-            --card-border: #dee2e6;
-            --text-dark: #343a40;
-        }
-
         body {
-            background-color: var(--content-bg);
-            font-family: 'Arial', sans-serif;
+            font-family: "Segoe UI", Arial, sans-serif;
             margin: 0;
+            background-color: #f4f7fc;
         }
 
-        .wrapper {
-            display: flex;
-            width: 100%;
-            min-height: 100vh;
-        }
-
-        /* --- Sidebar --- */
-        .sidebar-wrapper {
-            width: 260px;
-            background: var(--sidebar-bg);
-            transition: all .3s ease;
+        /* SIDEBAR */
+        .sidebar {
             position: fixed;
-            height: 100%;
-            overflow-y: auto;
-            z-index: 1000;
+            top: 0;
+            left: 0;
+            width: 220px;
+            height: 100vh;
+            background-color: #336699;
+            color: white;
+            padding-top: 20px;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+            z-index: 100;
         }
 
-        .sidebar-header {
-            padding: 20px;
+        .sidebar h3 {
             text-align: center;
-            border-bottom: 1px solid #4b545c;
-        }
-
-        .sidebar-header h3 {
-            color: #fff;
-            font-size: 24px;
             font-weight: bold;
-            margin: 0;
-            letter-spacing: 1px;
+            margin-bottom: 30px;
         }
 
-        .sidebar-nav {
-            padding: 15px;
-        }
-
-        .sidebar-item {
+        .sidebar a {
             display: flex;
             align-items: center;
-            padding: 12px 15px;
-            color: var(--sidebar-text);
-            font-size: 16px;
-            text-decoration: none;
-            border-radius: 5px;
-            margin-bottom: 8px;
-            transition: background-color .3s, color .3s;
-        }
-
-        .sidebar-item i {
-            margin-right: 15px;
-            width: 20px;
-            text-align: center;
-        }
-
-        .sidebar-item:hover,
-        .sidebar-item.active {
-            background: var(--primary-color);
             color: #fff;
             text-decoration: none;
+            font-size: 16px;
+            padding: 10px 20px;
+            border-radius: 6px;
+            transition: background 0.3s;
+            margin: 5px 10px;
         }
 
-        /* Submenu */
-        .submenu {
-            padding-left: 20px;
+        .sidebar a i {
+            margin-right: 10px;
+            font-size: 17px;
         }
 
-        .submenu .sidebar-item {
-            font-size: 15px;
-            padding: 10px 15px;
-            background: var(--sidebar-hover);
+        .sidebar a:hover {
+            background-color: #2d5986;
         }
 
-        .submenu .sidebar-item:hover,
-        .submenu .sidebar-item.active {
-            background: var(--primary-color);
+        .sidebar a.active {
+            background-color: #254d73;
+            font-weight: bold;
         }
 
-        /* --- Main Content Area --- */
-        .main-content {
-            flex-grow: 1;
-            margin-left: 260px; /* Bằng chiều rộng sidebar */
+        /* TOP-NAV (HEADER) */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 220px;
+            width: calc(100% - 220px);
+            height: 60px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e3e6f0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             display: flex;
-            flex-direction: column;
-            transition: all .3s ease;
-        }
-
-        /* --- Top Navbar --- */
-        .top-navbar {
-            background: #fff;
-            padding: 10px 30px;
-            border-bottom: 1px solid var(--card-border);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-            display: flex;
-            justify-content: flex-end;
             align-items: center;
+            justify-content: flex-end;
+            padding: 0 40px;
+            z-index: 99;
         }
 
         .user-info {
-            color: var(--text-dark);
-            font-weight: 600;
+            color: #19191a;
+            font-weight: 500;
+            font-size: 16px;
         }
 
-        .user-info a {
-            color: #dc3545; /* Màu đỏ cho logout */
-            text-decoration: none;
-            margin-left: 15px;
+        .user-info span {
+            color: #dfa974;
             font-weight: bold;
         }
 
-        .user-info a:hover {
+        .user-info a {
+            text-decoration: none;
+            margin-left: 10px;
+        }
+
+        .user-info .profile-btn {
+            background: #336699;
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .user-info .profile-btn:hover {
+            background: #2d5986;
+        }
+
+        .user-info .logout-link {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .user-info .logout-link:hover {
             text-decoration: underline;
         }
 
-        /* --- Content Area --- */
-        .content-area {
+        /* CONTENT (ĐÃ ĐIỀU CHỈNH) */
+        .content {
+            margin-left: 220px;
+            margin-top: 60px; /* Đẩy xuống dưới top-nav */
+            padding: 40px;
+            /* THAY ĐỔI: Thêm đệm dưới để không bị footer che */
+            padding-bottom: 100px;
+        }
+
+        .welcome-box {
+            background: white;
+            border-radius: 10px;
             padding: 30px;
-            flex-grow: 1;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
 
-        /* --- Dashboard Stats Cards --- */
-        .stat-card {
-            border: none;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
+        .welcome-box h2 {
+            color: #222;
+            font-weight: 600;
         }
 
-        .stat-card .card-body {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        .welcome-box p {
+            color: #666;
         }
 
-        .stat-card .stat-icon {
-            font-size: 45px;
-            opacity: 0.3;
-        }
-
-        .stat-card .stat-info h5 {
-            font-size: 16px;
-            color: #6c757d;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-        }
-
-        .stat-card .stat-info h3 {
-            font-size: 28px;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        /* Màu cho các thẻ */
-        .card-primary .stat-icon { color: #007bff; }
-        .card-success .stat-icon { color: #28a745; }
-        .card-warning .stat-icon { color: #ffc107; }
-        .card-danger .stat-icon { color: #dc3545; }
-
-        /* --- Footer --- */
+        /* FOOTER (ĐÃ ĐIỀU CHỈNH) */
         .footer {
-            background: #fff;
-            border-top: 1px solid var(--card-border);
-            padding: 20px 30px;
+            /* THAY ĐỔI: Cố định footer */
+            position: fixed;
+            bottom: 0;
+            left: 220px;
+            width: calc(100% - 220px);
+            z-index: 99;
+
             text-align: center;
-            color: #6c757d;
+            color: #333;
+            padding: 15px;
+            background: #f8f9fc;
+            border-top: 1px solid #e3e6f0;
             font-size: 14px;
-            margin-top: auto; /* Đẩy footer xuống dưới cùng */
+            /* Bỏ margin-top vì đã cố định */
         }
 
         .footer a {
-            color: var(--primary-color);
+            color: #1a73e8;
             text-decoration: none;
         }
+
         .footer a:hover {
             text-decoration: underline;
         }
 
+        /* MEDIA QUERY (ĐÃ ĐIỀU CHỈNH) */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+
+            .top-nav {
+                position: relative;
+                left: 0;
+                width: 100%;
+                height: auto;
+                padding: 15px;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .content {
+                margin-left: 0;
+                margin-top: 0;
+                padding: 40px; /* Đặt lại padding */
+            }
+
+            /* THAY ĐỔI: Cho footer cuộn bình thường */
+            .footer {
+                position: relative;
+                left: 0;
+                width: 100%;
+                margin-top: 40px; /* Thêm lại margin-top */
+            }
+        }
     </style>
 </head>
 <body>
-<c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
-<div class="wrapper">
-    <div class="sidebar-wrapper">
-        <div class="sidebar-header">
-            <h3>36 Hotel</h3>
-        </div>
-        <nav class="sidebar-nav">
-            <a href="${ctx}/receptionist/dashboard" class="sidebar-item js-load active"
-               data-url="${ctx}/receptionist/dashboard-content">
-                <i class="fa fa-dashboard"></i> Dashboard
-            </a>
+<div class="sidebar">
+    <h3>Receptionist Panel</h3>
 
-            <a href="${ctx}/rules" class="sidebar-item js-load"
-               data-url="${ctx}/rules">
-                <i class="fa fa-book"></i> Rules
-            </a>
+    <a href="${contextPath}/receptionist/booking-list"
+       class="${currentPath == '/receptionist/booking-list' ? 'active' : ''}">
+        <i class="fa fa-home"></i> Booking List
+    </a>
 
-            <!-- Rooms Toggle -->
-            <a href="#rooms-submenu" class="sidebar-item" data-toggle="collapse" aria-expanded="false">
-                <i class="fa fa-bed"></i> Rooms <i class="fa fa-angle-down float-right"></i>
-            </a>
-            <div class="collapse submenu" id="rooms-submenu">
+    <a href="${contextPath}/receptionist/create-booking"
+       class="${currentPath == '/receptionist/create-booking' ? 'active' : ''}">
+        <i class="fa fa-calendar-plus-o"></i> Create Booking
+    </a>
 
-                <a href="${ctx}/receptionist/rooms" class="sidebar-item js-load"
-                   data-url="${ctx}/receptionist/rooms">
-                    <i class="fa fa-list"></i> Room Edit
+    <a href="${contextPath}/receptionist/room-fees"
+       class="${currentPath == '/receptionist/room-fees' ? 'active' : ''}">
+        <i class="fa fa-bed"></i> Room Fees
+    </a>
+
+    <a href="${contextPath}/receptionist/bills"
+       class="${currentPath == '/receptionist/bills' ? 'active' : ''}">
+        <i class="fa fa-file-text-o"></i> Bills
+    </a>
+    <a href="${contextPath}/receptionist/rooms" class="sidebar-item js-load" data-url="${contextPath}/receptionist/rooms">
+        <i class="fa fa-list"></i> Room Edit
+    </a>
+    <a href="${contextPath}/rules" class="sidebar-item js-load"
+       data-url="${contextPath}/rules">
+        <i class="fa fa-book"></i> Rules
+    </a>
+</div>
+
+<div class="top-nav">
+    <div class="user-info">
+        Welcome,
+        <c:choose>
+            <c:when test="${not empty sessionScope.loggedInUser}">
+                <span>${sessionScope.loggedInUser.firstName} ${sessionScope.loggedInUser.lastName}</span>
+                <a href="${pageContext.request.contextPath}/profile" class="profile-btn">
+                    Profile
                 </a>
-                <a href="${ctx}/receptionist/room-fees" class="sidebar-item"
-                   data-url="${ctx}/receptionist/room-fees">
-                    <i class="fa fa-dollar"></i> Room Fees
-                </a>
-            </div>
-            <!-- Bills -->
-            <a href="${ctx}/receptionist/bills" class="sidebar-item">
-                <i class="fa fa-file-text-o"></i> Bills
-            </a>
-        </nav>
-    </div>
-
-    <div class="main-content">
-
-        <nav class="top-navbar">
-            <div class="user-info">
-                Welcome, <strong>Receptionist</strong>!
-                <a href="${ctx}/login">
-                    <i class="fa fa-sign-out"></i> Logout
-                </a>
-            </div>
-        </nav>
-
-        <main class="content-area" id="content-area">
-
-            <h2>Dashboard Overview</h2>
-            <p class="text-muted">Welcome to the 36 Hotel Management System.</p>
-
-            <div class="row mt-4">
-                <div class="col-lg-3 col-md-6">
-                    <div class="card stat-card card-primary">
-                        <div class="card-body">
-                            <div class="stat-info">
-                                <h5>New Bookings</h5>
-                                <h3>12</h3>
-                            </div>
-                            <div class="stat-icon">
-                                <i class="fa fa-calendar-check-o"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-3 col-md-6">
-                    <div class="card stat-card card-success">
-                        <div class="card-body">
-                            <div class="stat-info">
-                                <h5>Available Rooms</h5>
-                                <h3>45</h3>
-                            </div>
-                            <div class="stat-icon">
-                                <i class="fa fa-bed"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-3 col-md-6">
-                    <div class="card stat-card card-warning">
-                        <div class="card-body">
-                            <div class="stat-info">
-                                <h5>Check-ins Today</h5>
-                                <h3>8</h3>
-                            </div>
-                            <div class="stat-icon">
-                                <i class="fa fa-sign-in"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-3 col-md-6">
-                    <div class="card stat-card card-danger">
-                        <div class="card-body">
-                            <div class="stat-info">
-                                <h5>Today's Revenue</h5>
-                                <h3>$1,250</h3>
-                            </div>
-                            <div class="stat-icon">
-                                <i class="fa fa-money"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card mt-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Recent Bookings</h5>
-                </div>
-                <div class="card-body">
-                    <table class="table table-hover">
-                        <thead>
-                        <tr>
-                            <th>Booking ID</th>
-                            <th>Guest Name</th>
-                            <th>Room</th>
-                            <th>Check-in</th>
-                            <th>Status</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td>B-1001</td>
-                            <td>Nguyen Van Hung</td>
-                            <td>Deluxe 201</td>
-                            <td>2025-10-30 14:00</td>
-                            <td><span class="badge badge-success">Confirmed</span></td>
-                        </tr>
-                        <tr>
-                            <td>B-1002</td>
-                            <td>Tran Thi Linh</td>
-                            <td>Family 102</td>
-                            <td>2025-10-30 15:00</td>
-                            <td><span class="badge badge-warning">Pending</span></td>
-                        </tr>
-                        <tr>
-                            <td>B-1003</td>
-                            <td>Le Van A</td>
-                            <td>Double 301</td>
-                            <td>2025-10-31 12:00</td>
-                            <td><span class="badge badge-success">Confirmed</span></td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </main>
-
-        <footer class="footer">
-            <p class="mb-0">Contact Us: (84) 359 797 703 | <a href="mailto:36hotel@gmail.com">36hotel@gmail.com</a></p>
-            <p class="mb-0">Thanh Hoa, Vietnam ©2025 36 Hotel</p>
-        </footer>
+                | <a href="${pageContext.request.contextPath}/login" class="logout-link">Logout</a>
+            </c:when>
+            <c:otherwise>
+                Guest | <a href="${pageContext.request.contextPath}/login" class="logout-link">Login</a>
+            </c:otherwise>
+        </c:choose>
     </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+<div class="content">
+    <div class="welcome-box">
+        <h2>Welcome, Receptionist!</h2>
+        <p>Click menu items on the left to manage bookings, rooms, fees, and rules.
+            The page will load here beside the sidebar.</p>
+    </div>
+
+</div>
+
+<div class="footer">
+    <p>Contact Us: (84) 359 797 703 |
+        <a href="mailto:36hotel@gmail.com">36hotel@gmail.com</a></p>
+    <p>Thanh Hoa, Vietnam ©2025 36 Hotel</p>
+</div>
+
 <script>
-    $(function () {
-
-        // MỚI: Xử lý trạng thái "active" cho sidebar
-        $('.sidebar-item').on('click', function () {
-            // Xóa active khỏi tất cả các item
-            $('.sidebar-item').removeClass('active');
-
-            // Thêm active cho item được click
-            $(this).addClass('active');
-
-            // Xử lý cho submenu
-            if ($(this).closest('.submenu').length) {
-                // Nếu click vào submenu, active cả (cha) của nó
-                $(this).closest('.submenu').prev('.sidebar-item').addClass('active');
-            }
-        });
-
-        // Load content động (AJAX)
-        // Lưu ý: data-url của Dashboard nên trỏ đến một trang/servlet
-        // chỉ trả về phần nội dung dashboard (không phải toàn bộ trang)
-        $(document).on('click', '.js-load', function (e) {
-            e.preventDefault();
-            const url = $(this).data('url');
-
-            // Giả lập URL cho dashboard nếu chưa có
-            if (url === '${ctx}/receptionist/dashboard-content') {
-                // Tải lại nội dung dashboard (ví dụ)
-                // Trong thực tế, bạn sẽ gọi một servlet trả về HTML fragment
-                $('#content-area').load(url, function (res, status, xhr) {
-                    if (status === "error") {
-                        $('#content-area').html('<div class="alert alert-danger">Cannot load dashboard content. (' + xhr.status + ')</div>');
-                    }
+    document.addEventListener("DOMContentLoaded", function () {
+        const contentContainer = document.querySelector(".content");
+        document.querySelectorAll(".sidebar a").forEach(link => {
+            if (link.classList.contains("js-load")) {
+                link.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    const url = this.getAttribute("data-url");
+                    if (!url) return;
+                    updateActiveLink(this);
+                    loadContent(url, contentContainer);
                 });
-                // Tạm thời chỉ hiển thị lại nội dung đã có
-                // Bỏ dòng dưới nếu bạn đã có servlet 'dashboard-content'
-                console.log("Đang tải dashboard...");
-                return;
             }
-
-            if (!url || url === '#') return;
-
-            $('#content-area').html('<div class="text-center p-5"><i class="fa fa-spinner fa-spin fa-3x"></i></div>'); // Hiệu ứng loading
-
-            $('#content-area').load(url, function (res, status, xhr) {
-                if (status === 'error') {
-                    $('#content-area').html('<div class="alert alert-danger">Cannot load content. (' + xhr.status + ')</div>');
-                }
-            });
         });
 
-        // MỚI: Đảm bảo submenu của Bootstrap hoạt động
-        // Mã 'slideToggle' cũ của bạn đã được thay thế bằng
-        // thuộc tính 'data-toggle="collapse"' của Bootstrap.
+        function loadContent(url, container) {
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Lỗi mạng khi tải nội dung.");
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    container.innerHTML = html;
+                    container.querySelectorAll("script").forEach(oldScript => {
+                        const newScript = document.createElement("script");
+                        Array.from(oldScript.attributes).forEach(attr => {
+                            newScript.setAttribute(attr.name, attr.value);
+                        });
+                        if (oldScript.innerHTML) {
+                            newScript.innerHTML = oldScript.innerHTML;
+                        }
+                        document.head.appendChild(newScript);
+                        oldScript.parentNode.removeChild(oldScript);
+                    });
+                })
+                .catch(error => {
+                    container.innerHTML = `<div class="welcome-box" style="border: 1px solid red;"><p>Lỗi: ${error.message}</p></div>`;
+                    console.error("Không thể tải nội dung:", error);
+                });
+        }
+
+        function updateActiveLink(activeLink) {
+            document.querySelectorAll(".sidebar a").forEach(a => a.classList.remove("active"));
+            activeLink.classList.add("active");
+        }
+
     });
 </script>
 </body>
