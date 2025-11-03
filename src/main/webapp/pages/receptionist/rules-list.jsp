@@ -1,503 +1,317 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Quản lý Rules | 36 Hotel</title>
-
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/font-awesome.min.css">
-
+    <meta name="description" content="Sona Template">
+    <meta name="keywords" content="Sona, unica, creative, html">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Rule Management - 36 Hotel</title>
+    <link href="https://fonts.googleapis.com/css?family=Lora:400,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Cabin:400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.min.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/font-awesome.min.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/elegant-icons.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/flaticon.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/owl.carousel.min.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/nice-select.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/jquery-ui.min.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/magnific-popup.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/slicknav.min.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/receptionist-bills.css" type="text/css">
     <style>
-        /* RE-STYLED THEME (Dựa trên sidebar.jsp)*/
-        :root {
-            --primary-blue: #336699;
-            --primary-blue-dark: #2d5986;
-            --accent-gold: #dfa974;
-            --accent-gold-dark: #b67b4b;
-            --bg-main: #f4f7fc;
-            --border-color: #e3e6f0;
-
-            /* Màu trạng thái */
-            --success: #28a745;
-            --success-bg: rgba(40, 167, 69, 0.1);
-            --success-text: #1a682c;
-            --danger: #dc3545;
-            --danger-bg: rgba(220, 53, 69, 0.1);
-            --danger-text: #8c1c27;
-            --panel-width: 480px;
-        }
-
-        body {
-            background: var(--bg-main);
-            font-family: "Segoe UI", Arial, sans-serif;
-        }
-
-        .topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            margin: 30px 0;
-        }
-
-        h2 {
-            margin: 0;
-            font-weight: 700;
-            color: #2b2b2b;
-        }
-
-        .btn-add {
-            background: var(--primary-blue);
-            color: #fff;
-            border: 0;
-            padding: 10px 18px;
-            border-radius: 6px;
-            box-shadow: 0 4px 12px rgba(51, 102, 153, 0.2);
-            font-weight: 600;
-            transition: background 0.3s;
-        }
-
-        .btn-add:hover {
-            background: var(--primary-blue-dark);
-        }
-
-        .controls {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .search-input {
-            min-width: 240px;
-        }
-
-        .card-table {
-            padding: 18px;
-            border-radius: 10px;
-            /* Đồng bộ shadow và border từ sidebar.jsp */
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-            background: #fff;
-            border: 1px solid var(--border-color);
-        }
-
-        table.table {
-            margin-bottom: 0;
-        }
-
-        .table thead th {
-            background: var(--primary-blue);
-            color: #fff;
+        .action-link.delete-btn {
+            background: none;
             border: none;
-            text-align: center;
-            vertical-align: middle;
-            font-weight: 600;
-            padding-top: 12px;
-            padding-bottom: 12px;
-        }
-
-        .table td {
-            vertical-align: middle;
-            color: #444;
-        }
-        .badge {
-            font-size: 0.8rem;
-            font-weight: 600;
-            padding: .35em .7em;
-            border-radius: 50rem; /* Dạng viên thuốc */
-        }
-
-        .badge-active {
-            background-color: var(--success-bg);
-            color: var(--success-text);
-        }
-
-        .badge-inactive {
-            background-color: var(--danger-bg);
-            color: var(--danger-text);
-        }
-        .action-link {
-            color: var(--accent-gold);
+            padding: 0;
+            color: #dc3545;
             cursor: pointer;
-            font-weight: 600;
-            margin-right: 10px;
-            text-decoration: none;
-            transition: color 0.3s;
+            font-weight: 500;
+            font-family: "Cabin", sans-serif;
+            font-size: 14px;
         }
-        .action-link:hover {
-            color: var(--accent-gold-dark);
-        }
-
-        .text-danger {
-            transition: color 0.3s;
-        }
-
-        .small-muted {
-            color: #6b6b6b;
-            font-size: 0.9rem;
+        .action-link.delete-btn:hover {
+            color: #a71d2a;
         }
         .side-panel {
             position: fixed;
             top: 0;
-            right: -999px;
-            width: var(--panel-width);
+            right: -600px;
+            width: 500px;
             height: 100%;
-            background: #fff;
-            z-index: 1100;
-            box-shadow: -10px 0 30px rgba(30, 30, 30, 0.12);
-            transition: right .35s ease;
+            background-color: #fff;
+            box-shadow: -4px 0 10px rgba(0,0,0,0.15);
+            z-index: 9999;
+            transition: right 0.4s ease;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
-            border-left: 1px solid var(--border-color);
         }
-
         .side-panel.active {
             right: 0;
         }
-
         .panel-header {
-            padding: 20px 24px;
-            background: var(--primary-blue);
-            color: #fff;
+            background-color: #dfa974;
+            color: white;
+            padding: 20px 25px;
+            font-size: 18px;
+            font-weight: 700;
             display: flex;
-            align-items: center;
             justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
         }
-        .panel-header strong {
-            font-size: 1.2rem;
-            font-weight: 600;
+        .panel-close {
+            cursor: pointer;
+            font-size: 24px;
+            font-weight: 700;
         }
-
         .panel-body {
-            padding: 24px;
-            overflow: auto;
-            flex: 1;
-        }
-
-        .panel-footer {
-            padding: 14px 24px;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            gap: 10px;
-            justify-content: space-between;
-            background: #fafafa;
-        }
-
-        .form-control, .form-select, textarea {
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-            box-shadow: none;
-        }
-        .form-control:focus, .form-select:focus, textarea:focus {
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 3px rgba(51, 102, 153, 0.15);
-        }
-
-        .muted-note {
-            font-size: .85rem;
-            color: #7a7a7a;
-            margin-top: 8px;
-        }
-        .controls-bar {
-            display: flex;
-            justify-content: space-between; /* Đẩy 2 nhóm ra 2 bên */
-            align-items: center;
-            flex-wrap: wrap;     /* Cho phép xuống hàng trên màn hình nhỏ */
-            gap: 15px;           /* Khoảng cách nếu bị xuống hàng */
-            margin-bottom: 20px;
-        }
-
-        .search-group {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: nowrap;   /* Giữ nhóm tìm kiếm trên 1 hàng */
-            flex-grow: 1;        /* Cho phép nhóm này co giãn */
-        }
-
-        .search-input {
-            min-width: 200px;
+            padding: 25px;
             flex-grow: 1;
-            flex-shrink: 1;
+            overflow-y: auto;
         }
-        .filter-select {
-            width: 150px;
+        .panel-body .form-control {
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+        .panel-footer {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 25px;
+            border-top: 1px solid #eee;
+            background-color: #f8f8f8;
             flex-shrink: 0;
         }
-
-        .controls-bar .btn {
-            flex-shrink: 0;
+        .btn-cancel, .btn-save {
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
-        /* Responsive */
-        @media (max-width: 768px) {
-            .side-panel {
-                width: 100%;
-            }
-            .search-input {
-                min-width: 140px;
-            }
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-cancel:hover {
+            background: #5a6268;
+        }
+        .btn-save {
+            background: #28a745;
+            color: white;
+        }
+        .btn-save:hover {
+            background: #218838;
+        }
+        .status-badge.status-active {
+            color: #ffffff;
+            background: #28a745;
+        }
+        .status-badge.status-inactive {
+            color: #ffffff;
+            background: #6c757d;
+        }
+        .col-description {
+            white-space: pre-line;
+            text-align: left;
+            font-size: 13px;
+            max-width: 350px;
+            overflow-wrap: break-word;
+            line-height: 1.4;
         }
     </style>
 </head>
+
 <body>
-
-<div class="container">
-    <div class="topbar">
-        <div>
-            <h2>Rules Receptionist</h2>
-            <div class="small-muted">Quản lý các quy định/hướng dẫn cho receptionist</div>
+<c:set var="pageActive" value="rules"/>
+<div class="dashboard-wrapper">
+    <jsp:include page="/common/sidebar.jsp"/>
+    <div class="dashboard-content">
+        <div id="preloder">
+            <div class="loader"></div>
         </div>
-
-    </div>
-
-
-    <div class="controls-bar">
-        <div class="search-group">
-            <input id="searchBox" class="form-control search-input" placeholder="Tìm theo tiêu đề / mô tả..." oninput="filterTable()" />
-
-            <select id="statusFilter" class="form-select filter-select" onchange="filterTable()">
-                <option value="all">Tất cả</option>
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-            </select>
-
-            <button class="btn btn-outline-secondary" onclick="refreshPage()" title="Tải lại trang">
-                <i class="fa fa-refresh"></i>
-            </button>
-        </div>
-
-        <div>
-            <button class="btn-add" onclick="openPanel('add')">
-                <i class="fa fa-plus"></i> Thêm rule
-            </button>
-        </div>
-    </div>
-    <div class="card-table">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle text-center" id="rulesTable">
-                <thead>
-                <tr>
-                    <th style="width:48px">#</th>
-                    <th>Title</th>
-                    <th style="width:36%;">Description</th>
-                    <th style="width:110px">Status</th>
-                    <th style="width:140px">Created At</th>
-                    <th style="width:140px">Updated At</th>
-                    <th style="width:150px">Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                <c:forEach var="r" items="${rules}" varStatus="i">
-                    <tr
-                            data-id="${r.ruleId}"
-                            data-title="${fn:escapeXml(r.title)}"
-                            data-desc="${fn:escapeXml(r.description)}"
-                            data-status="${r.status}"
-                            data-created="${r.createdAt}"
-                            data-updated="${r.updatedAt}">
-                        <td>${i.index + 1}</td>
-                        <td class="text-start px-3" style="font-weight: 500;">${r.title}</td>
-                        <td class="text-start" style="max-width: 36%;white-space: pre-line; word-wrap: break-word;">${r.description}</td>
-                        <td>
-                            <c:choose>
-                                <c:when test="${r.status}">
-                                    <span class="badge badge-active">Active</span>
-                                </c:when>
-                                <c:otherwise>
-                                    <span class="badge badge-inactive">Inactive</span>
-                                </c:otherwise>
-                            </c:choose>
-                        </td>
-                        <td>${r.createdAt}</td>
-                        <td>${r.updatedAt}</td>
-                        <td>
-                                <%-- THAY ĐỔI: Sử dụng class .action-link cho Edit --%>
-                            <a href="javascript:void(0)" class="action-link" onclick="openEditFromRow(this)"><i class="fa fa-pencil"></i> Edit</a>
-                            <a href="javascript:void(0)" class="text-danger" onclick="confirmDelete('${pageContext.request.contextPath}/rules/delete?id=${r.ruleId}')"><i class="fa fa-trash"></i> Delete</a>
-                        </td>
-                    </tr>
-                </c:forEach>
-                </tbody>
-            </table>
-        </div>
-        <div class="mt-3 small-muted">Hiển thị ${fn:length(rules)} rule(s).</div>
-    </div>
-</div>
-
-<div class="side-panel" id="sidePanel">
-    <form action="${pageContext.request.contextPath}/rules/save" method="post" id="ruleForm">
-        <div class="panel-header">
-            <strong id="panelTitle">Add New Rule</strong>
-            <div style="display:flex; gap:8px; align-items:center;">
-                <button type="button" class="btn btn-sm btn-light" title="Đóng" onclick="closePanel()">&times;</button>
-            </div>
-        </div>
-
-        <div class="panel-body">
-            <input type="hidden" id="ruleId" name="ruleId">
-
-            <div class="mb-3">
-                <label class="form-label">Rule Title <span class="text-danger">*</span></label>
-                <input type="text" id="title" name="title" class="form-control" required maxlength="150" />
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Description <span class="text-danger">*</span></label>
-                <textarea id="description" name="description" rows="4" class="form-control" required maxlength="1000"></textarea>
-                <div class="muted-note">Tối đa 1000 ký tự.</div>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Status</label>
-                <select id="status" name="status" class="form-select">
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
-                </select>
-            </div>
-
-            <div class="row">
-                <div class="col-12 mb-3">
-                    <label class="form-label">Created At (manual)</label>
-                    <input type="datetime-local" id="createdAt" name="createdAt" class="form-control" />
+        <section class="main-content">
+            <div class="container-fluid">
+                <c:if test="${not empty param.success}">
+                    <div class="alert alert-success">
+                        <i class="fa fa-check-circle"></i> Operation saved successfully!
+                    </div>
+                </c:if>
+                <c:if test="${not empty error}">
+                    <div class="alert alert-danger">
+                        <i class="fa fa-times-circle"></i> ${error}
+                    </div>
+                </c:if>
+                <div class="search-section">
+                    <form action="${pageContext.request.contextPath}/rules" method="get" class="search-form">
+                        <input type="text" name="search" class="search-input" placeholder="Search by rule title..." value="${search}">
+                        <button type="submit" class="search-btn">
+                            <i class="fa fa-search"></i> Filter
+                        </button>
+                        <c:if test="${not empty search}">
+                            <a href="${pageContext.request.contextPath}/rules" class="action-btn secondary">
+                                <i class="fa fa-times"></i> Clear
+                            </a>
+                        </c:if>
+                    </form>
                 </div>
-                <div class="col-12 mb-3">
-                    <label class="form-label">Updated At (manual)</label>
-                    <input type="datetime-local" id="updatedAt" name="updatedAt" class="form-control" />
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="openPanel('add')">
+                        <i class="fa fa-plus"></i> Add New Rule
+                    </button>
+                </div>
+                <div class="bills-table">
+                    <div class="table-header">
+                        <h4><i class="fa fa-book"></i> Rules List</h4>
+                    </div>
+                    <c:choose>
+                        <c:when test="${not empty rules}">
+                            <table class="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Description</th>
+                                    <th>Status</th>
+                                    <th>Created At</th>
+                                    <th>Updated At</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <c:forEach var="r" items="${rules}" varStatus="loop">
+                                    <fmt:formatDate value="${r.createdAt}" pattern="yyyy-MM-dd'T'HH:mm" var="fmtCreatedAt" />
+                                    <fmt:formatDate value="${r.updatedAt}" pattern="yyyy-MM-dd'T'HH:mm" var="fmtUpdatedAt" />
+                                    <tr data-rule-id="${r.ruleId}" data-title="${fn:escapeXml(r.title)}" data-description="${fn:escapeXml(r.description)}" data-status="${r.status ? 'Active' : 'Inactive'}" data-created-at="${fmtCreatedAt}" data-updated-at="${fmtUpdatedAt}">
+                                        <td><div class="bill-id">${loop.count}</div></td>
+                                        <td><div class="customer-name">${r.title}</div></td>
+                                        <td class="col-description">${r.description}</td>
+                                        <td><span class="status-badge ${r.status ? 'status-active' : 'status-inactive'}">${r.status ? 'Active' : 'Inactive'}</span></td>
+                                        <td><div class="bill-date"><fmt:formatDate value="${r.createdAt}" pattern="dd/MM/yyyy HH:mm"/></div></td>
+                                        <td><div class="bill-date"><fmt:formatDate value="${r.updatedAt}" pattern="dd/MM/yyyy HH:mm"/></div></td>
+                                        <td>
+                                            <div class="action-links">
+                                                <span class="action-link edit" onclick="openPanel('edit', this)">
+                                                    <i class="fa fa-edit"></i> Edit
+                                                </span>
+                                                <form action="${pageContext.request.contextPath}/rules/delete" method="get" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this rule?');">
+                                                    <input type="hidden" name="id" value="${r.ruleId}">
+                                                    <button type="submit" class="action-link delete-btn">
+                                                        <i class="fa fa-trash"></i> Delete
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                                </tbody>
+                            </table>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="empty-state">
+                                <i class="fa fa-book"></i>
+                                <h4>No Rules Found</h4>
+                                <p>
+                                    <c:if test="${not empty search}">No rules found matching your filter.</c:if>
+                                    <c:if test="${empty search}">No rules have been created yet.</c:if>
+                                </p>
+                                <button class="action-btn" onclick="openPanel('add')">
+                                    <i class="fa fa-plus"></i> Create First Rule
+                                </button>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
             </div>
-
-            <div class="mt-2 small-muted">Lưu ý: nếu không nhập Created/Updated, server sẽ gán thời gian hiện tại.</div>
-
+        </section>
+        <div class="side-panel" id="sidePanel">
+            <form method="post" id="ruleForm" action="${pageContext.request.contextPath}/rules/save">
+                <div class="panel-header">
+                    <span id="panelTitle">Add New Rule</span>
+                    <span class="panel-close" onclick="closePanel()">&times;</span>
+                </div>
+                <div class="panel-body">
+                    <input type="hidden" id="ruleId" name="ruleId">
+                    <div class="mb-3">
+                        <label for="title">Rule Title</label>
+                        <input type="text" id="title" name="title" class="form-control" required maxlength="255">
+                    </div>
+                    <div class="mb-3">
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description" rows="5" class="form-control" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="status">Status</label>
+                        <select id="status" name="status" class="form-control" required>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="createdAt">Created At</label>
+                        <input type="datetime-local" id="createdAt" name="createdAt" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label for="updatedAt">Updated At</label>
+                        <input type="datetime-local" id="updatedAt" name="updatedAt" class="form-control">
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    <button type="button" class="btn-cancel" onclick="closePanel()">Cancel</button>
+                    <button type="submit" class="btn-save">Save Changes</button>
+                </div>
+            </form>
         </div>
-
-        <div class="panel-footer">
-            <div>
-                <button type="button" class="btn btn-outline-secondary" onclick="closePanel()">Hủy</button>
-            </div>
-            <div style="display:flex; gap:8px;">
-                <button type="button" class="btn btn-light" onclick="fillNow()">Set Now</button>
-                <button type="submit" class="btn btn-success">Lưu</button>
-            </div>
-        </div>
-    </form>
+    </div>
 </div>
-
+<script src="${pageContext.request.contextPath}/js/jquery-3.3.1.min.js"></script>
+<script src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>
+<script src="${pageContext.request.contextPath}/js/jquery.magnific-popup.min.js"></script>
+<script src="${pageContext.request.contextPath}/js/jquery.nice-select.min.js"></script>
+<script src="${pageContext.request.contextPath}/js/jquery-ui.min.js"></script>
+<script src="${pageContext.request.contextPath}/js/jquery.slicknav.js"></script>
+<script src="${pageContext.request.contextPath}/js/owl.carousel.min.js"></script>
+<script src="${pageContext.request.contextPath}/js/main.js"></script>
 <script>
-    // DOM refs
-    const sidePanel = document.getElementById('sidePanel');
-    const panelTitle = document.getElementById('panelTitle');
-    const ruleForm = document.getElementById('ruleForm');
-    const ruleIdField = document.getElementById('ruleId');
-    const titleField = document.getElementById('title');
-    const descField = document.getElementById('description');
-    const statusField = document.getElementById('status');
-    const createdAtField = document.getElementById('createdAt');
-    const updatedAtField = document.getElementById('updatedAt');
-
-    // Open panel for add
-    function openPanel(mode) {
-        sidePanel.classList.add('active');
+    const panel = document.getElementById("sidePanel");
+    const form = document.getElementById("ruleForm");
+    const panelTitle = document.getElementById("panelTitle");
+    const f_ruleId = document.getElementById('ruleId');
+    const f_title = document.getElementById('title');
+    const f_description = document.getElementById('description');
+    const f_status = document.getElementById('status');
+    const f_createdAt = document.getElementById('createdAt');
+    const f_updatedAt = document.getElementById('updatedAt');
+    function openPanel(mode, button) {
+        form.reset();
         if (mode === 'add') {
-            panelTitle.innerText = 'Thêm rule mới';
-            ruleIdField.value = '';
-            titleField.value = '';
-            descField.value = '';
-            statusField.value = 'Active';
-            createdAtField.value = '';
-            updatedAtField.value = '';
+            panelTitle.innerText = "Add New Rule";
+            f_ruleId.value = "";
+            f_status.value = "Active";
+            f_createdAt.value = "";
+            f_updatedAt.value = "";
+        } else if (mode === 'edit') {
+            panelTitle.innerText = "Edit Rule Information";
+            const row = button.closest('tr');
+            const data = row.dataset;
+            f_ruleId.value = data.ruleId;
+            f_title.value = data.title;
+            f_description.value = data.description;
+            f_status.value = data.status;
+            f_createdAt.value = data.createdAt;
+            f_updatedAt.value = data.updatedAt;
         }
+        panel.classList.add("active");
     }
-
-    // Open panel populated from a table row
-    function openEditFromRow(el) {
-        const tr = el.closest('tr');
-        const dataset = tr.dataset;
-        sidePanel.classList.add('active');
-        panelTitle.innerText = 'Chỉnh sửa rule';
-        ruleIdField.value = dataset.id || '';
-        titleField.value = dataset.title || '';
-        descField.value = dataset.desc || '';
-        statusField.value = (dataset.status === 'true' || dataset.status === 'Active') ? 'Active' : 'Inactive';
-        createdAtField.value = convertToLocalDatetime(dataset.created || '');
-        updatedAtField.value = convertToLocalDatetime(dataset.updated || '');
-    }
-
     function closePanel() {
-        sidePanel.classList.remove('active');
-    }
-
-    // convert various date strings to datetime-local (YYYY-MM-DDTHH:mm)
-    function convertToLocalDatetime(dateStr) {
-        if (!dateStr) return '';
-        // try parse
-        const d = new Date(dateStr);
-        if (isNaN(d)) return '';
-        // get local ISO without seconds
-        const tzOffset = d.getTimezoneOffset() * 60000;
-        const local = new Date(d.getTime() - tzOffset).toISOString().slice(0, 16);
-        return local;
-    }
-
-    // Set created/updated to now
-    function fillNow() {
-        const now = new Date();
-        const tzOffset = now.getTimezoneOffset() * 60000;
-        const local = new Date(now.getTime() - tzOffset).toISOString().slice(0, 16);
-        if (!createdAtField.value) createdAtField.value = local;
-        updatedAtField.value = local;
-    }
-
-    // Submit via Fetch (keep existing behavior)
-    document.addEventListener('DOMContentLoaded', function () {
-        if (ruleForm) {
-            ruleForm.addEventListener('submit', function (e) {
-                e.preventDefault();
-                const formData = new FormData(ruleForm);
-                fetch(ruleForm.action, { method: 'POST', body: formData })
-                    .then(resp => {
-                        if (resp.ok) {
-                            alert('Lưu thành công!');
-                            window.location.reload();
-                        } else {
-                            resp.text().then(t => alert('Lỗi khi lưu: ' + t));
-                        }
-                    }).catch(err => alert('Lỗi: ' + err));
-            });
-        }
-    });
-
-    // Delete confirm
-    function confirmDelete(url) {
-        if (confirm('Bạn có chắc chắn muốn xóa không?')) {
-            window.location.href = url;
-        }
-    }
-
-    // Simple client-side filter
-    function filterTable() {
-        const q = document.getElementById('searchBox').value.trim().toLowerCase();
-        const status = document.getElementById('statusFilter').value;
-        const rows = document.querySelectorAll('#rulesTable tbody tr');
-        rows.forEach(r => {
-            const title = (r.dataset.title || '').toLowerCase();
-            const desc = (r.dataset.desc || '').toLowerCase();
-            const st = (r.dataset.status === 'true' || r.dataset.status === 'Active') ? 'Active' : 'Inactive';
-
-            const matchQ = !q || title.includes(q) || desc.includes(q);
-            const matchStatus = (status === 'all') || (status === st);
-
-            r.style.display = (matchQ && matchStatus) ? '' : 'none';
-        });
-    }
-
-    function refreshPage() {
-        window.location.reload();
+        panel.classList.remove("active");
     }
 </script>
-
-<script src="${pageContext.request.contextPath}/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
