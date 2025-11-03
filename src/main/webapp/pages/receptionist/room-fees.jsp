@@ -970,85 +970,11 @@
 <body>
 <c:set var="pageActive" value="room-fees"/>
 <div class="d-flex" style="min-height:100vh;">
-  <nav class="sidebar d-flex flex-column col-lg-2 col-md-3 col-3 p-0 min-vh-100" style="background-color: #23242a;">
-    <div class="sidebar-sticky flex-grow-1 d-flex flex-column">
-      <div class="text-center mt-4 mb-4">
-        <div style="font-family: 'Lora', serif; font-style:italic; font-weight:bold; font-size:2em; color:#dfa974; letter-spacing:1px;">Sona.</div>
-        <h5 class="font-weight-bold" style="color: #dfa974;">Reception Dashboard</h5>
-      </div>
-      <ul class="nav flex-column flex-grow-1">
-        <li class="nav-item"><a href="${pageContext.request.contextPath}/pages/receptionist/receptionist-dashboard.jsp" class="nav-link text-white"><i class="fa fa-tachometer mr-2"></i> Dashboard</a></li>
-        <li class="nav-item"><a href="${pageContext.request.contextPath}/receptionist/bills" class="nav-link text-white"><i class="fa fa-file-text-o mr-2"></i> Bills</a></li>
-        <li class="nav-item"><a href="${pageContext.request.contextPath}/receptionist/room-fees" class="nav-link text-white active" style="background-color: #dfa974; font-weight: bold;"><i class="fa fa-dollar mr-2"></i> Room Fees</a></li>
-        <li class="nav-item"><a href="${pageContext.request.contextPath}/receptionist/bookings" class="nav-link text-white"><i class="fa fa-calendar mr-2"></i> Bookings</a></li>
-        <li class="nav-item"><a href="${pageContext.request.contextPath}/receptionist/penalties" class="nav-link text-white"><i class="fa fa-gavel mr-2"></i> Penalties</a></li>
-        <li class="nav-item"><a href="${pageContext.request.contextPath}/receptionist/feedback" class="nav-link text-white"><i class="fa fa-comments mr-2"></i> Feedback</a></li>
-        <li class="nav-item"><a href="${pageContext.request.contextPath}/receptionist/rooms" class="nav-link text-white"><i class="fa fa-home mr-2"></i> Room List</a></li>
-        <li class="nav-item"><a href="${pageContext.request.contextPath}/profile" class="nav-link text-white"><i class="fa fa-user mr-2"></i> Profile</a></li>
-        <li class="nav-item"><a href="${pageContext.request.contextPath}/login" class="nav-link text-white"><i class="fa fa-sign-out mr-2"></i> Logout</a></li>
-      </ul>
-      <div class="mt-auto mb-3"></div>
-    </div>
-  </nav>
   <div class="flex-grow-1 d-flex flex-column">
     <!-- Page Preloder -->
     <div id="preloder">
         <div class="loader"></div>
     </div>
-
-    <!-- Offcanvas Menu Section Begin -->
-    <div class="offcanvas-menu-overlay"></div>
-    <div class="canvas-open">
-        <i class="icon_menu"></i>
-    </div>
-    <div class="offcanvas-menu-wrapper">
-        <div class="canvas-close">
-            <i class="icon_close"></i>
-        </div>
-        <div class="search-icon  search-switch">
-            <i class="icon_search"></i>
-        </div>
-        <div class="header-configure-area">
-            <div class="language-option">
-                <img src="${pageContext.request.contextPath}/img/flag.jpg" alt="">
-                <span>EN <i class="fa fa-angle-down"></i></span>
-                <div class="flag-dropdown">
-                    <ul>
-                        <li><a href="#">Zi</a></li>
-                        <li><a href="#">Fr</a></li>
-                    </ul>
-                </div>
-            </div>
-            <a href="${pageContext.request.contextPath}/login" class="bk-btn">Logout</a>
-        </div>
-        <nav class="mainmenu mobile-menu">
-            <ul>
-                <li class="active"><a href="${pageContext.request.contextPath}/home">Home</a></li>
-                <li><a href="${pageContext.request.contextPath}/rooms">Rooms</a></li>
-                <li><a href="${pageContext.request.contextPath}/about-us">About Us</a></li>
-                <li><a href="#">Pages</a>
-                    <ul class="dropdown">
-                        <li><a href="${pageContext.request.contextPath}/room-details">Room Details</a></li>
-                        <li><a href="${pageContext.request.contextPath}/blog-details">Blog Details</a></li>
-                    </ul>
-                </li>
-                <li><a href="${pageContext.request.contextPath}/blog">News</a></li>
-                <li><a href="${pageContext.request.contextPath}/contact">Contact</a></li>
-            </ul>
-        </nav>
-        <div id="mobile-menu-wrap"></div>
-        <div class="top-social">
-            <a href="#"><i class="fa fa-facebook"></i></a>
-            <a href="#"><i class="fa fa-twitter"></i></a>
-            <a href="#"><i class="fa fa-tripadvisor"></i></a>
-            <a href="#"><i class="fa fa-instagram"></i></a>
-        </div>
-        <ul class="top-widget">
-            <li><i class="fa fa-phone"></i> (84) 359 797 703</li>
-            <li><i class="fa fa-envelope"></i> 36hotel@gmail.com</li>
-        </ul>
-    </div>
-    <!-- Offcanvas Menu Section End -->
 
     <!-- Header Section Begin -->
     <header class="header-section">

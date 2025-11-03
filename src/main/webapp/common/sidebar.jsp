@@ -233,41 +233,17 @@
        class="${currentPath == '/receptionist/bills' ? 'active' : ''}">
         <i class="fa fa-file-text-o"></i> Bills
     </a>
+
     <a href="${contextPath}/receptionist/rooms" class="sidebar-item js-load" data-url="${contextPath}/receptionist/rooms">
         <i class="fa fa-list"></i> Room Edit
     </a>
+
     <a href="${contextPath}/rules" class="sidebar-item js-load"
        data-url="${contextPath}/rules">
         <i class="fa fa-book"></i> Rules
     </a>
 </div>
 
-<div class="top-nav">
-    <div class="user-info">
-        Welcome,
-        <c:choose>
-            <c:when test="${not empty sessionScope.loggedInUser}">
-                <span>${sessionScope.loggedInUser.firstName} ${sessionScope.loggedInUser.lastName}</span>
-                <a href="${pageContext.request.contextPath}/profile" class="profile-btn">
-                    Profile
-                </a>
-                | <a href="${pageContext.request.contextPath}/login" class="logout-link">Logout</a>
-            </c:when>
-            <c:otherwise>
-                Guest | <a href="${pageContext.request.contextPath}/login" class="logout-link">Login</a>
-            </c:otherwise>
-        </c:choose>
-    </div>
-</div>
-
-<div class="content">
-    <div class="welcome-box">
-        <h2>Welcome, Receptionist!</h2>
-        <p>Click menu items on the left to manage bookings, rooms, fees, and rules.
-            The page will load here beside the sidebar.</p>
-    </div>
-
-</div>
 
 <div class="footer">
     <p>Contact Us: (84) 359 797 703 |
