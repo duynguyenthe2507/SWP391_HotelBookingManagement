@@ -148,7 +148,7 @@
                     </li>
                     <c:forEach var="i" begin="1" end="${totalPages}">
                         <li class="page-item ${i == page ? 'active' : ''}" style="margin: 2px;">
-                            <a class="page-link" href="${pageContext.request.contextPath}/receptionist/booking-list?page=${i}&size=${size}&status=${statusFilter}&checkInDate=${checkInFilter}&search=${searchKeyword}" style="..."> ${i} </a>
+                            <a class="page-link" href="${pageContext.request.contextPath}/receptionist/booking-list?page=${i}&size=${size}&status=${statusFilter}&checkInDate=${checkInFilter}&search=${searchKeyword}" style=""> ${i} </a>
                         </li>
                     </c:forEach>
                     <li class="page-item ${page == totalPages ? 'disabled' : ''}" style="margin: 2px;">
