@@ -49,7 +49,6 @@
 <c:set var="dtFormatter" value="<%= DateTimeFormatter.ofPattern(\"dd/MM/yy HH:mm\") %>" />
 <div id="preloder"><div class="loader"></div></div>
 
-<jsp:include page="/common/employee-header.jsp"/>
 
 <div class="dashboard-wrapper">
     <jsp:include page="/common/sidebar.jsp"/>
@@ -69,7 +68,7 @@
 
                     <div class="col-md-2">
                         <select name="status" class="form-control">
-                            <option value="">All Statuses</option>
+                            <option value="">All Status</option>
                             <option value="pending" ${statusFilter == 'pending' ? 'selected' : ''}>Pending</option>
                             <option value="confirmed" ${statusFilter == 'confirmed' ? 'selected' : ''}>Confirmed</option>
                             <option value="checked-in" ${statusFilter == 'checked-in' ? 'selected' : ''}>Checked-In</option>
@@ -92,7 +91,7 @@
             <div class="table-responsive">
                 <c:choose>
                     <c:when test="${not empty bookings}">
-                        <table class="table table-striped table-hover" style="margin: 0; width: 100%; min-width: 800px;"> <%-- Thêm min-width --%>
+                        <table class="table table-striped table-hover" style="margin: 0; width: 100%; min-width: 800px;">
                             <thead>
                             <tr>
                                 <th>ID</th>
@@ -149,7 +148,7 @@
                     </li>
                     <c:forEach var="i" begin="1" end="${totalPages}">
                         <li class="page-item ${i == page ? 'active' : ''}" style="margin: 2px;">
-                            <a class="page-link" href="${pageContext.request.contextPath}/receptionist/booking-list?page=${i}&size=${size}&status=${statusFilter}&checkInDate=${checkInFilter}&search=${searchKeyword}" style="..."> ${i} </a>
+                            <a class="page-link" href="${pageContext.request.contextPath}/receptionist/booking-list?page=${i}&size=${size}&status=${statusFilter}&checkInDate=${checkInFilter}&search=${searchKeyword}" style=""> ${i} </a>
                         </li>
                     </c:forEach>
                     <li class="page-item ${page == totalPages ? 'disabled' : ''}" style="margin: 2px;">

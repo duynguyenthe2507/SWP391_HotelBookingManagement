@@ -88,7 +88,7 @@
 
 <div class="container mt-5 mb-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Rules Management</h2>
+        <h2>Rules Receptionist</h2>
         <button class="btn-add" onclick="openPanel('add')"><i class="fa fa-plus"></i> Add New Rule</button>
     </div>
 

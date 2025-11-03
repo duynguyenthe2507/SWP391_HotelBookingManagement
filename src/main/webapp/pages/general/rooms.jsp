@@ -423,37 +423,47 @@
                                 </c:set>
 
                                 <!-- Previous -->
+                                <c:set var="hasParam" value="false" />
+                                <c:url var="basePageUrl" value="/rooms">
+                                    <c:if test="${not empty param.search}"><c:param name="search" value="${param.search}"/><c:set var="hasParam" value="true"/></c:if>
+                                    <c:if test="${not empty param.categoryId}"><c:param name="categoryId" value="${param.categoryId}"/><c:set var="hasParam" value="true"/></c:if>
+                                    <c:if test="${not empty param.minPrice}"><c:param name="minPrice" value="${param.minPrice}"/><c:set var="hasParam" value="true"/></c:if>
+                                    <c:if test="${not empty param.maxPrice}"><c:param name="maxPrice" value="${param.maxPrice}"/><c:set var="hasParam" value="true"/></c:if>
+                                    <c:if test="${not empty param.minCapacity}"><c:param name="minCapacity" value="${param.minCapacity}"/><c:set var="hasParam" value="true"/></c:if>
+                                    <c:if test="${not empty param.checkInDate}"><c:param name="checkInDate" value="${param.checkInDate}"/><c:set var="hasParam" value="true"/></c:if>
+                                    <c:if test="${not empty param.checkOutDate}"><c:param name="checkOutDate" value="${param.checkOutDate}"/><c:set var="hasParam" value="true"/></c:if>
+                                    <c:if test="${not empty param.statusFilter}"><c:param name="statusFilter" value="${param.statusFilter}"/><c:set var="hasParam" value="true"/></c:if>
+                                </c:url>
+                                <c:set var="pageLink">
+                                    <c:choose>
+                                        <c:when test="${hasParam}">${basePageUrl}&page=</c:when>
+                                        <c:otherwise>/hmbs/rooms?page=</c:otherwise> <%-- Hoặc ${cleanBase}?page= --%>
+                                    </c:choose>
+                                </c:set>
+
                                 <c:choose>
-                                    <c:when test="${requestScope.currentPage > 1}">
-                                        <a href="${pageLink}${requestScope.currentPage - 1}">Previous</a>
+                                    <c:when test="${requestScope.pageNumber > 1}">
+                                        <a href="${pageLink}${requestScope.pageNumber - 1}">Previous</a>
                                     </c:when>
                                     <c:otherwise>
                                         <span class="disabled">Previous</span>
                                     </c:otherwise>
                                 </c:choose>
 
-                                <!-- Tính trang hiển thị -->
-                                <c:set var="startPage" value="${requestScope.currentPage - 2}"/>
-                                <c:set var="endPage" value="${requestScope.currentPage + 2}"/>
-                                <c:if test="${startPage < 1}">
-                                    <c:set var="startPage" value="1"/>
-                                    <c:set var="endPage" value="${requestScope.noOfPages >= 5 ? 5 : requestScope.noOfPages}"/>
-                                </c:if>
-                                <c:if test="${endPage > requestScope.noOfPages}">
-                                    <c:set var="endPage" value="${requestScope.noOfPages}"/>
-                                    <c:set var="startPage" value="${requestScope.noOfPages - 4 > 1 ? requestScope.noOfPages - 4 : 1}"/>
-                                </c:if>
+                                <c:set var="startPage" value="${requestScope.pageNumber - 2}"/>
+                                <c:set var="endPage" value="${requestScope.pageNumber + 2}"/>
+                                <%-- (logic tính startPage/endPage giữ nguyên) --%>
+                                <c:if test="${startPage < 1}"><c:set var="startPage" value="1"/><c:set var="endPage" value="${requestScope.noOfPages >= 5 ? 5 : requestScope.noOfPages}"/></c:if>
+                                <c:if test="${endPage > requestScope.noOfPages}"><c:set var="endPage" value="${requestScope.noOfPages}"/><c:set var="startPage" value="${requestScope.noOfPages - 4 > 1 ? requestScope.noOfPages - 4 : 1}"/></c:if>
 
-                                <!-- Trang đầu + ... -->
                                 <c:if test="${startPage > 1}">
                                     <a href="${pageLink}1">1</a>
                                     <c:if test="${startPage > 2}"><span>...</span></c:if>
                                 </c:if>
 
-                                <!-- Các trang chính -->
                                 <c:forEach var="i" begin="${startPage}" end="${endPage}">
                                     <c:choose>
-                                        <c:when test="${i == requestScope.currentPage}">
+                                        <c:when test="${i == requestScope.pageNumber}"> <%-- SỬA Ở ĐÂY --%>
                                             <span class="current-page">${i}</span>
                                         </c:when>
                                         <c:otherwise>
@@ -462,16 +472,14 @@
                                     </c:choose>
                                 </c:forEach>
 
-                                <!-- ... + trang cuối -->
                                 <c:if test="${endPage < requestScope.noOfPages}">
                                     <c:if test="${endPage < requestScope.noOfPages - 1}"><span>...</span></c:if>
                                     <a href="${pageLink}${requestScope.noOfPages}">${requestScope.noOfPages}</a>
                                 </c:if>
 
-                                <!-- Next -->
                                 <c:choose>
-                                    <c:when test="${requestScope.currentPage < requestScope.noOfPages}">
-                                        <a href="${pageLink}${requestScope.currentPage + 1}">Next</a>
+                                    <c:when test="${requestScope.pageNumber < requestScope.noOfPages}"> <%-- SỬA Ở ĐÂY --%>
+                                        <a href="${pageLink}${requestScope.pageNumber + 1}">Next</a>
                                     </c:when>
                                     <c:otherwise>
                                         <span class="disabled">Next</span>
@@ -479,7 +487,6 @@
                                 </c:choose>
                             </c:if>
 
-                            <!-- Không có phòng -->
                             <c:if test="${empty requestScope.rooms}">
                                 <p class="text-center text-muted">No rooms available.</p>
                             </c:if>

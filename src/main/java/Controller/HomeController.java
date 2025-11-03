@@ -18,10 +18,9 @@ public class HomeController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Lấy dữ liệu category
         // Khởi tạo CategoryDao
         CategoryDao categoryDao = new CategoryDao();
-        // Gọi hàm để lấy danh sách 3 loại phòng
+        // Gọi hàm để lấy danh sách loại phòng
         List<Category> categories = categoryDao.getAll();
         // Đặt list vào request attribute để JSP có thể truy cập
         request.setAttribute("categories", categories);

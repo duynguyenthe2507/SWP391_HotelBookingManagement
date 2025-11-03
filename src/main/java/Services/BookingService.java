@@ -141,7 +141,7 @@ public class BookingService {
     // ============ ONLINE BOOKING METHODS (from dev branch) ============
 
     /**
-     * Tạo booking online của customer (có durationHours)
+     * Tạo booking online của customer
      */
     public int createBooking(int userId, List<Integer> roomIds, LocalDateTime checkIn, LocalDateTime checkOut,
                              List<Integer> quantities, List<String> specialRequests, String initialStatus) {
@@ -231,7 +231,9 @@ public class BookingService {
         newBooking.setUserId(userId);
         newBooking.setCheckinTime(checkIn);
         newBooking.setCheckoutTime(checkOut);
-        newBooking.setDurationHours(durationHours);
+        // NOTE: durationHours is calculated but not saved to DB (column doesn't exist)
+        // If needed in future, add migration: ALTER TABLE booking ADD COLUMN duration_hours DECIMAL(10,2);
+        // newBooking.setDurationHours(durationHours);
         newBooking.setStatus(initialStatus);
         newBooking.setTotalPrice(finalTotalPrice);
 
