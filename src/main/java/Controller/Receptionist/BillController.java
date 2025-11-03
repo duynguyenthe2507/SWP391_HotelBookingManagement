@@ -61,8 +61,10 @@ public class BillController extends HttpServlet {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("error", "An error occurred while processing your request.");
-            request.getRequestDispatcher("/pages/receptionist/bills.jsp").forward(request, response);
+            if (!response.isCommitted()) {
+                request.setAttribute("error", "An error occurred while processing your request: " + e.getMessage());
+                request.getRequestDispatcher("/pages/receptionist/bills.jsp").forward(request, response);
+            }
         }
     }
 

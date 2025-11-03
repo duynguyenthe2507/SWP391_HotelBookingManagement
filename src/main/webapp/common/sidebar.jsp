@@ -3,8 +3,10 @@
 
 <%-- Lấy đường dẫn context và servlet path để xác định trang hiện tại --%>
 <c:set var="contextPath" value="${pageContext.request.contextPath}"/>
-<c:set var="currentPath"
-       value="${requestScope['jakarta.servlet.forward.servlet_path'] != null ? requestScope['jakarta.servlet.forward.servlet_path'] : request.servletPath}"/>
+<c:set var="sidebarCurrentPath" value="${requestScope['jakarta.servlet.forward.servlet_path']}"/>
+<c:if test="${empty sidebarCurrentPath}">
+    <c:set var="sidebarCurrentPath" value="${pageContext.request.servletPath}"/>
+</c:if>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -27,7 +29,7 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 220px;
+            width: 250px;
             height: 100vh;
             background-color: #336699;
             color: white;
@@ -40,6 +42,7 @@
             text-align: center;
             font-weight: bold;
             margin-bottom: 30px;
+            color: #dfa974;
         }
 
         .sidebar a {
@@ -72,8 +75,8 @@
         .top-nav {
             position: fixed;
             top: 0;
-            left: 220px;
-            width: calc(100% - 220px);
+            left: 250px;
+            width: calc(100% - 250px);
             height: 60px;
             background-color: #ffffff;
             border-bottom: 1px solid #e3e6f0;
@@ -125,7 +128,7 @@
 
         /* CONTENT (ĐÃ ĐIỀU CHỈNH) */
         .content {
-            margin-left: 220px;
+            margin-left: 250px;
             margin-top: 60px; /* Đẩy xuống dưới top-nav */
             padding: 40px;
             /* THAY ĐỔI: Thêm đệm dưới để không bị footer che */
@@ -153,8 +156,8 @@
             /* THAY ĐỔI: Cố định footer */
             position: fixed;
             bottom: 0;
-            left: 220px;
-            width: calc(100% - 220px);
+            left: 250px;
+            width: calc(100% - 250px);
             z-index: 99;
 
             text-align: center;
@@ -215,22 +218,22 @@
     <h3>Receptionist Panel</h3>
 
     <a href="${contextPath}/receptionist/booking-list"
-       class="${currentPath == '/receptionist/booking-list' ? 'active' : ''}">
+       class="${sidebarCurrentPath == '/receptionist/booking-list' ? 'active' : ''}">
         <i class="fa fa-home"></i> Booking List
     </a>
 
     <a href="${contextPath}/receptionist/create-booking"
-       class="${currentPath == '/receptionist/create-booking' ? 'active' : ''}">
+       class="${sidebarCurrentPath == '/receptionist/create-booking' ? 'active' : ''}">
         <i class="fa fa-calendar-plus-o"></i> Create Booking
     </a>
 
     <a href="${contextPath}/receptionist/room-fees"
-       class="${currentPath == '/receptionist/room-fees' ? 'active' : ''}">
+       class="${sidebarCurrentPath == '/receptionist/room-fees' || sidebarCurrentPath == '/receptionist/room-fee-detail' ? 'active' : ''}">
         <i class="fa fa-bed"></i> Room Fees
     </a>
 
     <a href="${contextPath}/receptionist/bills"
-       class="${currentPath == '/receptionist/bills' ? 'active' : ''}">
+       class="${sidebarCurrentPath == '/receptionist/bills' || sidebarCurrentPath == '/receptionist/bill-detail' ? 'active' : ''}">
         <i class="fa fa-file-text-o"></i> Bills
     </a>
 
