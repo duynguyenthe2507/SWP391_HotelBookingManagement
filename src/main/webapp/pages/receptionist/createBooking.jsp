@@ -24,13 +24,12 @@
         .booking-form .form-control, .booking-form select { border-radius: 8px; border: 1px solid #ced4da; padding: 10px 15px; }
         .booking-form .form-control:focus { border-color: #dfa974; box-shadow: 0 0 0 0.2rem rgba(223, 169, 116, 0.25); }
         .booking-form button[type="submit"] { background-color: #dfa974; border-color: #dfa974; padding: 12px 30px; border-radius: 20px; font-weight: 600; }
-        .booking-form button[type="submit"]:hover { background-color: #c8965a; border-color: #c8965a; }
+        .booking-form button[type="submit"]:hover { background-color: #c8965a; border-color: #c8965a; }}
     </style>
 </head>
+
 <body>
 <div id="preloder"><div class="loader"></div></div>
-
-<jsp:include page="/common/employee-header.jsp"/>
 
 <div class="dashboard-wrapper">
     <jsp:include page="/common/sidebar.jsp"/>
