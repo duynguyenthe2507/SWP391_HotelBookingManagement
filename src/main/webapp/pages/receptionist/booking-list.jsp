@@ -12,13 +12,12 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/font-awesome.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
     <style>
-        body { background-color: #f9f9f9; font-family: 'Cabin', sans-serif; }
-        .dashboard-wrapper { display: flex; min-height: calc(100vh - 70px); }
-        .sidebar { width: 250px; background: #222; color: #fff; padding: 30px 20px; position: fixed; top: 70px; bottom: 0; overflow-y: auto; z-index: 999;}
-        .sidebar h3 { color: #dfa974; text-align: center; margin-bottom: 30px; font-weight: 700; }
-        .sidebar a { display: block; color: #fff; padding: 12px 15px; border-radius: 6px; margin-bottom: 8px; text-decoration: none; transition: all 0.3s ease; }
-        .sidebar a:hover, .sidebar a.active { background: #dfa974; color: #fff; }
+        body { background-color: #f9f9f9; font-family: 'Cabin', sans-serif; } 
+        .dashboard-wrapper { display: flex; min-height: calc(100vh - 70px); } 
         .dashboard-content { flex: 1; margin-left: 250px; padding: 40px; }
+        .sidebar h3 { color: #dfa974; text-align: center; margin-bottom: 30px; font-weight: 700; }
+        .sidebar a { display: block; color: #fff; padding: 12px 15px; border-radius: 6px; margin-bottom: 8px; text-decoration: none; transition: all 0.3s ease;}
+        .sidebar a:hover, .sidebar a.active { background: #dfa974; color: #fff; } 
         .logout-link { color: #dfa974 !important; font-weight: bold; text-decoration: none !important; }
         .logout-link:hover { text-decoration: underline !important; }
         .header-section { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background-color: #ffffff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
@@ -29,26 +28,44 @@
         .table-header h4 { margin: 0; color: white; font-weight: 600; }
         .table thead th { background: #f8f9fa; color: #19191a; border-bottom: 2px solid #e5e5e5; font-weight: 700; text-transform: uppercase; font-size: 12px; }
         .table tbody td { vertical-align: middle; }
-        .status-badge {
-            padding: 6px 12px; border-radius: 15px; color: white; font-weight: bold; font-size: 11px;
-            text-transform: uppercase; text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
-        }
-        .status-pending { background-color: yellow; }
-        .status-confirmed { background-color: blue; }
-        .status-checked-in { background-color: green; }
-        .status-checked-out { background-color: grey; }
-        .status-cancelled { background-color: red; }
         .pagination .page-item.active .page-link { background: linear-gradient(135deg, #dfa974, #c8965a); border-color: #dfa974; color: white; }
-        .pagination .page-link { color: #19191a; border-radius: 8px !important; margin: 0 3px; }
+        .pagination .page-link { color: #19191a; border-radius: 8px !important; margin: 0 3px; } 
         .empty-state { text-align: center; padding: 60px 20px; color: #6b6b6b; }
         .empty-state i { font-size: 4rem; color: #dfa974; margin-bottom: 20px; }
         .empty-state h4 { color: #19191a; margin-bottom: 10px; }
+        .status-badge {
+            padding: 6px 12px; 
+        border-radius: 15px;
+        font-weight: bold;
+        font-size: 11px; 
+        text-transform: uppercase; 
+        text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+        }
+        .status-pending {
+            background-color: #ffc107; 
+            color: #212529;
+        }
+        .status-confirmed {
+            background-color: #007bff;
+            color: white;
+        }
+        .status-checked-in {
+            background-color: #28a745;
+            color: white;
+        }
+        .status-checked-out {
+            background-color: #6c757d;
+            color: white;
+        }
+        .status-cancelled {
+            background-color: #dc3545;
+            color: white;
+        }
     </style>
 </head>
 <body>
 <c:set var="dtFormatter" value="<%= DateTimeFormatter.ofPattern(\"dd/MM/yy HH:mm\") %>" />
 <div id="preloder"><div class="loader"></div></div>
-
 
 <div class="dashboard-wrapper">
     <jsp:include page="/common/sidebar.jsp"/>
@@ -68,7 +85,7 @@
 
                     <div class="col-md-2">
                         <select name="status" class="form-control">
-                            <option value="">All Status</option>
+                            <option value="">All Statuses</option>
                             <option value="pending" ${statusFilter == 'pending' ? 'selected' : ''}>Pending</option>
                             <option value="confirmed" ${statusFilter == 'confirmed' ? 'selected' : ''}>Confirmed</option>
                             <option value="checked-in" ${statusFilter == 'checked-in' ? 'selected' : ''}>Checked-In</option>
@@ -91,7 +108,7 @@
             <div class="table-responsive">
                 <c:choose>
                     <c:when test="${not empty bookings}">
-                        <table class="table table-striped table-hover" style="margin: 0; width: 100%; min-width: 800px;">
+                        <table class="table table-striped table-hover" style="margin: 0; width: 100%; min-width: 800px;"> <%-- Thêm min-width --%>
                             <thead>
                             <tr>
                                 <th>ID</th>
@@ -141,7 +158,6 @@
 
         <c:if test="${totalPages > 1}">
             <nav aria-label="Bookings pagination" style="padding: 10px 0 20px 0;">
-                    <%-- Code pagination giữ nguyên như cũ --%>
                 <ul class="pagination" style="margin:0; display:flex; justify-content:center; flex-wrap: wrap;">
                     <li class="page-item ${page == 1 ? 'disabled' : ''}" style="margin: 2px;">
                         <a class="page-link" href="${pageContext.request.contextPath}/receptionist/booking-list?page=${page - 1}&size=${size}&status=${statusFilter}&checkInDate=${checkInFilter}&search=${searchKeyword}" aria-label="Previous">...</a>

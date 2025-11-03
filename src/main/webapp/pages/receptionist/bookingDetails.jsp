@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ page import="java.time.format.DateTimeFormatter" %>
 
 <!DOCTYPE html>
@@ -10,24 +11,118 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.min.css" type="text/css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css" type="text/css">
     <style>
+        .row-full-height {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .col-flex-column {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        .panel-actions {
+            margin-top: auto; /* Mấu chốt: Đẩy khối này xuống dưới cùng */
+        }
+        .detail-panel {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        .detail-panel h3 {
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 700;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+        .detail-panel p {
+            margin-bottom: 10px;
+            font-size: 1rem;
+            color: #555;
+        }
+        .detail-panel p strong {
+            color: #333;
+            display: inline-block; /* Giúp căn chỉnh tốt hơn nếu text dài */
+            width: 150px; /* Cố định chiều rộng cho label để căn đều */
+        }
+        .room-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 11px;
+            text-transform: uppercase;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+        }
+        .status-pending {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .status-confirmed {
+            background-color: #007bff;
+            color: white;
+        }
+        .status-checked-in {
+            background-color: #28a745;
+            color: white;
+        }
+        .status-checked-out {
+            background-color: #6c757d;
+            color: white;
+        }
+        .status-cancelled {
+            background-color: #dc3545;
+            color: white;
+        }
+        .action-buttons button {
+            margin-right: 10px;
+            min-width: 120px;
+        }
+        .action-buttons a.btn {
+            min-width: 120px;
+        }
         .detail-section { padding: 40px 0; }
         .detail-card { background: #f9f9f9; padding: 30px; border-radius: 5px; margin-bottom: 30px; }
         .detail-card h4 { margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         .detail-card p { margin-bottom: 10px; }
         .detail-card strong { min-width: 150px; display: inline-block; }
         .status-badge { padding: 5px 10px; border-radius: 3px; color: white; font-weight: bold; }
-        .status-pending { background-color: orange; }
-        .status-confirmed { background-color: blue; }
-        .status-checked-in { background-color: green; }
-        .status-checked-out { background-color: grey; }
-        .status-cancelled { background-color: red; }
         .action-buttons form { display: inline-block; margin-right: 10px; }
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap; /* Cho phép rớt hàng nếu không đủ chỗ */
+            align-items: center; /* Căn các nút theo chiều dọc */
+            gap: 10px; /* Thêm khoảng cách */
+            min-height: 80px; /* CỐ ĐỊNH CHIỀU CAO TỐI THIỂU */
+        }
+        .action-buttons form {
+            margin: 0; /* Xóa margin cũ */
+        }
+        .action-buttons a.btn {
+            margin: 0; /* Xóa margin cũ */
+        }
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center; /* Căn các nút ngang hàng nhau */
+            gap: 10px; /* Khoảng cách giữa các nút */
+        }
     </style>
 </head>
 <body>
 <c:set var="dtFormatter" value="<%= DateTimeFormatter.ofPattern(\"dd/MM/yy HH:mm\") %>" />
 <div id="preloder"><div class="loader"></div></div>
-<jsp:include page="/common/header.jsp"/>
+
+<jsp:include page="/common/sidebar.jsp"/>
+
 <jsp:include page="/common/breadcrumb.jsp"/>
 
 <section class="detail-section">
@@ -43,8 +138,7 @@
         </c:if>
 
         <c:if test="${not empty details}">
-            <div class="row">
-                    <%-- Cột Thông tin chính --%>
+            <div class="row row-full-height">
                 <div class="col-lg-8">
                     <div class="detail-card">
                         <h4>Booking Information</h4>
@@ -53,13 +147,12 @@
                         <p><strong>Guest Count:</strong> ${details.booking.guestCount}</p>
                         <p>
                             <strong>Status:</strong>
-                            <span class="status-badge status-${details.booking.status}">${details.booking.status}</span>
-                        </p>
+                            <span class="status-badge status-${fn:toLowerCase(details.booking.status)}">${details.booking.status}</span>                        </p>
                         <p><strong>Check-in Time:</strong> ${details.booking.checkinTime.format(dtFormatter)} </p>
                         <p><strong>Check-out Time:</strong> ${details.booking.checkoutTime.format(dtFormatter)} </p>
                         <p><strong>Total Price:</strong> <fmt:formatNumber value="${details.booking.totalPrice}" type="currency" currencyCode="VND"/></p>
                         <p><strong>Special Request:</strong> ${details.booking.specialRequest}</p>
-                        <p><strong>Created At:</strong> <fmt:formatDate value="${details.booking.createdAt}" pattern="dd/MM/yyyy HH:mm"/> </p>
+                        <p><strong>Created At:</strong> ${details.booking.createdAt.format(dtFormatter)} </p>
                         <c:if test="${not empty details.receptionistName}">
                             <p><strong>Created By (Receptionist):</strong> ${details.receptionistName}</p>
                         </c:if>
@@ -95,41 +188,47 @@
                         <img src="${pageContext.request.contextPath}/${details.room.imgUrl}" alt="${details.room.name}" class="img-fluid mt-3">
                     </div>
 
-                    <div class="detail-card action-buttons">
+                    <div class="detail-panel action-buttons panel-actions">
                         <h4>Actions</h4>
+                        <div class="button-row">
+                                <%-- Nút 1: Check-in --%>
+                            <c:if test="${fn:toLowerCase(details.booking.status) == 'pending' || fn:toLowerCase(details.booking.status) == 'confirmed'}">
+                                <form action="${pageContext.request.contextPath}/receptionist/booking-details" method="post" class="d-inline">
+                                    <input type="hidden" name="action" value="checkin">
+                                    <input type="hidden" name="bookingId" value="${details.booking.bookingId}">
+                                    <input type="hidden" name="roomId" value="${details.room.roomId}">
+                                    <button type="submit" class="btn btn-success">Check-in</button>
+                                </form>
+                            </c:if>
 
-                            <%-- Chỉ hiển thị Check-in khi status là Pending hoặc Confirmed --%>
-                        <c:if test="${details.booking.status == 'pending' || details.booking.status == 'confirmed'}">
-                            <form action="${pageContext.request.contextPath}/receptionist/booking-details" method="post">
-                                <input type="hidden" name="action" value="checkin">
-                                <input type="hidden" name="bookingId" value="${details.booking.bookingId}">
-                                <input type="hidden" name="roomId" value="${details.room.roomId}">
-                                <button type="submit" class="btn btn-success">Check-in Guest</button>
-                            </form>
-                        </c:if>
+                                <%-- Nút 2: Check-out --%>
+                            <c:if test="${fn:toLowerCase(details.booking.status) == 'checked-in'}">
+                                <form action="${pageContext.request.contextPath}/receptionist/booking-details" method="post" class="d-inline">
+                                    <input type="hidden" name="action" value="checkout">
+                                    <input type="hidden" name="bookingId" value="${details.booking.bookingId}">
+                                    <input type="hidden" name="roomId" value="${details.room.roomId}">
+                                    <button type="submit" class="btn btn-warning">Check-out</button>                            </form>
+                            </c:if>
 
-                            <%-- Chỉ hiển thị Check-out khi status là Checked-in --%>
-                        <c:if test="${details.booking.status == 'checked-in'}">
-                            <form action="${pageContext.request.contextPath}/receptionist/booking-details" method="post">
-                                <input type="hidden" name="action" value="checkout">
-                                <input type="hidden" name="bookingId" value="${details.booking.bookingId}">
-                                <input type="hidden" name="roomId" value="${details.room.roomId}">
-                                <button type="submit" class="btn btn-warning">Check-out & Create Bill</button>
-                            </form>
-                        </c:if>
+                                <%-- Nút 3: View Bill (Hiện khi ĐÃ checkout) --%>
+                            <c:if test="${fn:toLowerCase(details.booking.status) == 'checked-out'}">
+                                <c:choose>
+                                    <c:when test="${not empty details.invoiceId}">
+                                     <a href="${pageContext.request.contextPath}/receptionist/bills?action=detailBill&id=${details.invoiceId}" class="btn btn-info">
+                                            <i class="fa fa-eye"></i> View Bill Details
+                                        </a>
+                                    </c:when>
+                                    <c:otherwise>
+                                     <a href="${pageContext.request.contextPath}/receptionist/bills?action=createBill&bookingId=${details.booking.bookingId}" class="btn btn-primary">
+                                            <i class="fa fa-plus"></i> Create Bill
+                                        </a>
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:if>
 
-                            <%-- Nút Create Bill (có thể hiển thị khi đã check-out hoặc bất cứ lúc nào) --%>
-                        <c:if test="${details.booking.status == 'checked-out'}">
-                            <form action="${pageContext.request.contextPath}/receptionist/booking-details" method="post">
-                                <input type="hidden" name="action" value="createBill">
-                                <input type="hidden" name="bookingId" value="${details.booking.bookingId}">
-                                <input type="hidden" name="roomId" value="${details.room.roomId}"> <%-- Vẫn cần roomId nếu trang bill cần --%>
-                                <button type="submit" class="btn btn-info">View/Create Bill</button>
-                            </form>
-                        </c:if>
-
-                            <%-- Nút quay lại danh sách --%>
-                        <a href="${pageContext.request.contextPath}/receptionist/booking-list" class="btn btn-secondary mt-3">Back to List</a>
+                            <%-- Nút 4: Back to List --%>
+                            <a href="${pageContext.request.contextPath}/receptionist/booking-list" class="btn btn-secondary">Back to List</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -141,7 +240,6 @@
     </div>
 </section>
 
-<jsp:include page="/pages/general/footer.jsp"/>
 <script src="${pageContext.request.contextPath}/js/jquery-3.3.1.min.js"></script>
 <script src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>
 <script src="${pageContext.request.contextPath}/js/main.js"></script>

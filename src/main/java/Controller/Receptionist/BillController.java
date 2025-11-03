@@ -40,19 +40,19 @@ public class BillController extends HttpServlet {
         
         try {
             switch (action) {
-                case "list":
+                case "listBill":
                     handleListBills(request, response);
                     break;
-                case "search":
+                case "searchBill":
                     handleSearchBills(request, response);
                     break;
-                case "detail":
+                case "detailBill":
                     handleBillDetail(request, response);
                     break;
-                case "create":
+                case "createBill":
                     handleCreateBillForm(request, response);
                     break;
-                case "edit":
+                case "editBill":
                     handleEditBillForm(request, response);
                     break;
                 default:

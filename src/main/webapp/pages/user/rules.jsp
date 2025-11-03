@@ -123,7 +123,6 @@
     </div>
 </section>
 
-<!-- ✅ Footer -->
 <jsp:include page="/common/footer.jsp"/>
 
 <script src="${pageContext.request.contextPath}/js/bootstrap.bundle.min.js"></script>

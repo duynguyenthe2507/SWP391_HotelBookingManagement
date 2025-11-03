@@ -13,7 +13,6 @@
     <style>
         body { background-color: #f9f9f9; font-family: 'Cabin', sans-serif; }
         .dashboard-wrapper { display: flex; min-height: calc(100vh - 70px);
-        .sidebar { width: 250px; background: #222; color: #fff; padding: 30px 20px; position: fixed; top: 70px; bottom: 0; overflow-y: auto; z-index: 999;}
         .sidebar h3 { color: #dfa974; text-align: center; margin-bottom: 30px; font-weight: 700; }
         .sidebar a { display: block; color: #fff; padding: 12px 15px; border-radius: 6px; margin-bottom: 8px; text-decoration: none; transition: all 0.3s ease; }
         .sidebar a:hover, .sidebar a.active { background: #dfa974; color: #fff; }
