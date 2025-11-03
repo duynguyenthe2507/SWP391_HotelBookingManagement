@@ -492,4 +492,25 @@ public class InvoiceDao extends DBContext {
         } catch (SQLException e) { e.printStackTrace(); }
         return serviceDetails;
     }
+
+    /**
+     * Tìm ID hóa đơn dựa trên ID booking.
+     * @param bookingId ID của booking
+     * @return Integer (Invoice ID) nếu tìm thấy, null nếu không.
+     */
+    public Integer getInvoiceIdByBookingId(int bookingId) {
+        String sql = "SELECT invoiceId FROM Invoice WHERE bookingId = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, bookingId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            // (Thêm logging)
+            e.printStackTrace();
+        }
+        return null; // Không tìm thấy hóa đơn
+    }
 }

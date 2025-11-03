@@ -134,26 +134,73 @@ public class BookingDao extends DBContext {
         params.add((pageNumber - 1) * pageSize);
         params.add(pageSize);
 
+        LOGGER.log(Level.INFO, "Executing SQL: {0}", sql.toString());
+        LOGGER.log(Level.INFO, "Parameters: {0}", params);
+
+        // Kiểm tra connection
+        if (connection == null) {
+            LOGGER.log(Level.SEVERE, "Database connection is NULL!");
+            return list;
+        }
+
+        try {
+            // Test connection
+            if (connection.isClosed()) {
+                LOGGER.log(Level.SEVERE, "Database connection is CLOSED!");
+                return list;
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error checking connection status", e);
+            return list;
+        }
+
         try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
+
             try (ResultSet rs = ps.executeQuery()) {
+                int count = 0;
                 while (rs.next()) {
                     Map<String, Object> map = new HashMap<>();
                     map.put("booking", mapResultSetToBooking(rs));
                     map.put("roomName", rs.getString("roomName"));
-                    map.put("customerName", rs.getString("guestName") != null ? rs.getString("guestName") : rs.getString("guestCustomerName"));
+                    map.put("customerName", rs.getString("guestName") != null ?
+                            rs.getString("guestName") : rs.getString("guestCustomerName"));
                     list.add(map);
+                    count++;
                 }
+                LOGGER.log(Level.INFO, "Found {0} bookings from database", count);
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error finding bookings", e);
+            e.printStackTrace(); // In ra console để debug
         }
+
         return list;
     }
 
     public int countBookings(String status, String checkIn, String keyword) {
+        System.out.println("=== BookingDao.countBookings STARTED ===");
+
+        // Kiểm tra connection
+        if (connection == null) {
+            System.out.println("!!! CRITICAL ERROR: Database connection is NULL in countBookings!");
+            LOGGER.log(Level.SEVERE, "Database connection is NULL in countBookings!");
+            return 0;
+        }
+
+        try {
+            if (connection.isClosed()) {
+                System.out.println("!!! CRITICAL ERROR: Database connection is CLOSED in countBookings!");
+                LOGGER.log(Level.SEVERE, "Database connection is CLOSED in countBookings!");
+                return 0;
+            }
+        } catch (SQLException e) {
+            System.out.println("!!! ERROR checking connection in countBookings: " + e.getMessage());
+            return 0;
+        }
+
         List<Object> params = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
                 "SELECT COUNT(*) " +
@@ -173,24 +220,36 @@ public class BookingDao extends DBContext {
         }
         if (keyword != null && !keyword.isEmpty()) {
             sql.append("AND (b.guestName LIKE ? OR u_guest.firstName LIKE ? OR u_guest.lastName LIKE ? OR r.name LIKE ?) ");
-            params.add("%" + keyword + "%");
-            params.add("%" + keyword + "%");
-            params.add("%" + keyword + "%");
-            params.add("%" + keyword + "%");
+            String searchPattern = "%" + keyword + "%";
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
         }
+
+        System.out.println(">>> COUNT SQL: " + sql.toString());
+        System.out.println(">>> Parameters: " + params);
 
         try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
+
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt(1);
+                    int count = rs.getInt(1);
+                    System.out.println(">>> COUNT result: " + count);
+                    return count;
                 }
             }
         } catch (SQLException e) {
+            System.out.println("!!! SQL EXCEPTION in countBookings!");
+            System.out.println("!!! Error: " + e.getMessage());
+            e.printStackTrace();
             LOGGER.log(Level.SEVERE, "Error counting bookings", e);
         }
+
+        System.out.println("=== BookingDao.countBookings COMPLETED - Returning 0 ===");
         return 0;
     }
 
@@ -204,8 +263,8 @@ public class BookingDao extends DBContext {
                 "FROM Booking b " +
                 "JOIN Room r ON b.roomId = r.roomId " +
                 "JOIN Category c ON r.categoryId = c.categoryId " +
-                "LEFT JOIN [User] u_guest ON b.userId = u_guest.userId " +
-                "LEFT JOIN [User] u_rep ON b.receptionistId = u_rep.userId " +
+                "LEFT JOIN Users u_guest ON b.userId = u_guest.userId " +
+                "LEFT JOIN Users u_rep ON b.receptionistId = u_rep.userId " +
                 "WHERE b.bookingId = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -618,5 +677,34 @@ public class BookingDao extends DBContext {
             e.printStackTrace();
         }
         return list;
+    }
+
+    public boolean updateBookingStatusAndCheckInTime(int bookingId, String newStatus, LocalDateTime checkInTime) {
+        String sql = "UPDATE Booking SET status = ?, checkinTime = ?, updatedAt = GETDATE() WHERE bookingId = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, newStatus);
+            ps.setTimestamp(2, Timestamp.valueOf(checkInTime));
+            ps.setInt(3, bookingId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error updating booking status and check-in time for " + bookingId, e);
+            return false;
+        }
+    }
+
+    /**
+     * [MỚI] Cập nhật status VÀ thời gian check-out thực tế.
+     */
+    public boolean updateBookingStatusAndCheckOutTime(int bookingId, String newStatus, LocalDateTime checkOutTime) {
+        String sql = "UPDATE Booking SET status = ?, checkoutTime = ?, updatedAt = GETDATE() WHERE bookingId = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, newStatus);
+            ps.setTimestamp(2, Timestamp.valueOf(checkOutTime));
+            ps.setInt(3, bookingId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error updating booking status and check-out time for " + bookingId, e);
+            return false;
+        }
     }
 }

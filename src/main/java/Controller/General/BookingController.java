@@ -149,7 +149,7 @@ public class BookingController extends HttpServlet {
         }
         cart.add(bookingDetail);
 
-        // ✅ Tính tổng tiền chính xác theo số giờ / ngày
+        // Tính tổng tiền chính xác theo số giờ / ngày
         long totalHours = Duration.between(checkIn, checkOut).toHours();
         double durationHours = (double) totalHours;
         double nights = durationHours / 24.0;

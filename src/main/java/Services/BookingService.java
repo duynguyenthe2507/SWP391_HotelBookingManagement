@@ -1,9 +1,6 @@
 package Services;
 
-import Dao.BookingDao;
-import Dao.BookingDetailDao;
-import Dao.RoomDao;
-import Dao.ServicesDao;
+import Dao.*;
 import Models.Booking;
 import Models.BookingDetail;
 import Models.BookingDetailsViewModel;
@@ -28,12 +25,14 @@ public class BookingService {
     private RoomDao roomDao;
     private ServicesDao servicesDao;
     private BookingDetailDao bookingDetailDao;
+    private InvoiceDao invoiceDao;
 
     public BookingService() {
         this.bookingDao = new BookingDao();
         this.roomDao = new RoomDao();
         this.servicesDao = new ServicesDao();
         this.bookingDetailDao = new BookingDetailDao();
+        this.invoiceDao = new InvoiceDao();
     }
 
     // ============ OFFLINE BOOKING METHODS (from haitn/pushOfflineBooking) ============
@@ -89,12 +88,15 @@ public class BookingService {
 
         List<Map<String, Object>> servicesUsed = servicesDao.getServicesByBookingId(bookingId);
 
+        Integer invoiceId = invoiceDao.getInvoiceIdByBookingId(bookingId);
+
         BookingDetailsViewModel viewModel = new BookingDetailsViewModel();
         viewModel.setBooking((Booking) basicDetails.get("booking"));
         viewModel.setRoom((Room) basicDetails.get("room"));
         viewModel.setCustomerName((String) basicDetails.get("customerName"));
         viewModel.setReceptionistName((String) basicDetails.get("receptionistName"));
         viewModel.setServices(servicesUsed);
+        viewModel.setInvoiceId(invoiceId);
 
         return viewModel;
     }
@@ -104,7 +106,7 @@ public class BookingService {
      */
     public boolean checkInBooking(int bookingId, int roomId) {
         try {
-            boolean bookingUpdated = bookingDao.updateBookingStatus(bookingId, "checked-in");
+            boolean bookingUpdated = bookingDao.updateBookingStatusAndCheckInTime(bookingId, "checked-in", LocalDateTime.now());
             if (!bookingUpdated) {
                 return false;
             }
@@ -126,8 +128,13 @@ public class BookingService {
      */
     public boolean checkOutBooking(int bookingId, int roomId) {
         try {
-            boolean bookingUpdated = bookingDao.updateBookingStatus(bookingId, "available");
+            boolean bookingUpdated = bookingDao.updateBookingStatusAndCheckOutTime(bookingId, "checked-out", LocalDateTime.now());
             if (!bookingUpdated) {
+                return false;
+            }
+
+            boolean roomUpdated = roomDao.updateRoomStatus(roomId, "available"); // Hoặc "cleaning"
+            if (!roomUpdated) {
                 return false;
             }
 
