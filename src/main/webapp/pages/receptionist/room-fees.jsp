@@ -37,60 +37,31 @@
             font-family: "Cabin", sans-serif;
         }
 
-        /* Professional Header Section */
-        .receptionist-header {
-            background: linear-gradient(135deg, #dfa974 0%, #c8965a 100%);
-            color: white;
-            padding: 40px 0;
-            margin-bottom: 0;
-            position: relative;
-            overflow: hidden;
+        /* Dashboard Layout */
+        .dashboard-wrapper {
+            display: flex;
+            min-height: 100vh;
         }
 
-        .receptionist-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-            opacity: 0.3;
+        .dashboard-content {
+            flex: 1;
+            margin-left: 250px; /* Width of sidebar */
+            width: calc(100% - 250px);
+            padding: 40px;
+            padding-bottom: 80px; /* Extra space at bottom to prevent footer overlap */
+            min-height: 100vh;
         }
 
-        .receptionist-header .container {
-            position: relative;
-            z-index: 2;
-        }
-
-        .receptionist-header h2 {
-            color: white;
-            margin: 0;
-            font-size: 2.5rem;
-            font-weight: 600;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .receptionist-header p {
-            color: rgba(255, 255, 255, 0.9);
-            margin: 10px 0 0 0;
-            font-size: 1.1rem;
-            font-weight: 300;
-        }
-
-        .receptionist-header .fa {
-            margin-right: 10px;
-            font-size: 2rem;
-            vertical-align: middle;
-        }
+        /* Professional Header Section - Removed */
 
         /* Main Content Area */
         .main-content {
-            background: white;
-            margin: -20px 0 0 0;
-            border-radius: 20px 20px 0 0;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
-            padding: 40px 0;
+            background: transparent;
+            margin: 0;
+            border-radius: 0;
+            box-shadow: none;
+            padding: 0;
+            padding-bottom: 80px;
             position: relative;
             z-index: 1;
         }
@@ -969,180 +940,21 @@
 </head>
 <body>
 <c:set var="pageActive" value="room-fees"/>
-<div class="d-flex" style="min-height:100vh;">
-  <div class="flex-grow-1 d-flex flex-column">
+<div class="dashboard-wrapper">
+    <jsp:include page="/common/sidebar.jsp"/>
+    <div class="dashboard-content">
     <!-- Page Preloder -->
     <div id="preloder">
         <div class="loader"></div>
     </div>
 
-    <!-- Header Section Begin -->
-    <header class="header-section">
-        <div class="top-nav">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-6">
-                        <ul class="tn-left">
-                            <li><i class="fa fa-phone"></i> (84) 359 797 703</li>
-                            <li><i class="fa fa-envelope"></i> 36hotel@gmail.com</li>
-                        </ul>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="tn-right">
-                            <div class="top-social">
-                                <a href="#"><i class="fa fa-facebook"></i></a>
-                                <a href="#"><i class="fa fa-twitter"></i></a>
-                                <a href="#"><i class="fa fa-tripadvisor"></i></a>
-                                <a href="#"><i class="fa fa-instagram"></i></a>
-                            </div>
-                            <a href="${pageContext.request.contextPath}/login" class="bk-btn">Logout</a>
-                            <div class="language-option">
-                                <img src="${pageContext.request.contextPath}/img/flag.jpg" alt="">
-                                <span>EN <i class="fa fa-angle-down"></i></span>
-                                <div class="flag-dropdown">
-                                    <ul>
-                                        <li><a href="#">Zi</a></li>
-                                        <li><a href="#">Fr</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="menu-item">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-2">
-                        <div class="logo">
-                            <a href="${pageContext.request.contextPath}/home">
-                                <img src="${pageContext.request.contextPath}/img/logo.png" alt="">
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-lg-10">
-                        <div class="nav-menu">
-                            <nav class="mainmenu">
-                                <ul>
-                                    <li <c:if test="${pageActive eq 'dashboard'}">class="active"</c:if>>
-                                        <a href="${pageContext.request.contextPath}/pages/receptionist/receptionist-dashboard.jsp">Dashboard</a>
-                                    </li>
-                                    <li <c:if test="${pageActive eq 'bills'}">class="active"</c:if>>
-                                        <a href="${pageContext.request.contextPath}/receptionist/bills">Bills</a>
-                                    </li>
-                                    <li <c:if test="${pageActive eq 'room-fees'}">class="active"</c:if>>
-                                        <a href="${pageContext.request.contextPath}/receptionist/room-fees">Room Fees</a>
-                                    </li>
-                                    <li <c:if test="${pageActive eq 'bookings'}">class="active"</c:if>>
-                                        <a href="${pageContext.request.contextPath}/receptionist/bookings">Bookings</a>
-                                    </li>
-                                    <li <c:if test="${pageActive eq 'penalties'}">class="active"</c:if>>
-                                        <a href="${pageContext.request.contextPath}/receptionist/penalties">Penalties</a>
-                                    </li>
-                                    <li <c:if test="${pageActive eq 'feedback'}">class="active"</c:if>>
-                                        <a href="${pageContext.request.contextPath}/receptionist/feedback">Feedback</a>
-                                    </li>
-                                    <li <c:if test="${pageActive eq 'room-list'}">class="active"</c:if>>
-                                        <a href="${pageContext.request.contextPath}/receptionist/rooms">Room List</a>
-                                    </li>
-                                </ul>
-                            </nav>
-                            <div class="nav-right search-switch">
-                                <i class="icon_search"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-    <!-- Header End -->
+    <!-- Header removed to match booking-list.jsp layout -->
 
-    <!-- Receptionist Header Section Begin -->
-    <div class="receptionist-header">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <h2><i class="fa fa-dollar"></i> Room Fees Management</h2>
-                    <p>View and manage room pricing information for receptionist</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Receptionist Header Section End -->
+    <!-- Header removed to match booking-list.jsp layout -->
 
     <!-- Room Fees Section Begin -->
     <section class="main-content">
         <div class="container">
-            <!-- Statistics Cards -->
-            <div class="row">
-                <div class="col-lg-3 col-md-6">
-                    <div class="stats-card">
-                        <div class="icon-wrapper">
-                            <i class="fa fa-bed"></i>
-                        </div>
-                        <h3>
-                            <c:choose>
-                                <c:when test="${not empty totalItems}">${totalItems}</c:when>
-                                <c:otherwise>${roomsWithCategory.size()}</c:otherwise>
-                            </c:choose>
-                        </h3>
-                        <p>Total Rooms</p>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="stats-card">
-                        <div class="icon-wrapper">
-                            <i class="fa fa-check-circle"></i>
-                        </div>
-                        <h3>
-                            <c:set var="availableCount" value="0" />
-                            <c:forEach var="room" items="${roomsWithCategory}">
-                                <c:if test="${room.status == 'available'}">
-                                    <c:set var="availableCount" value="${availableCount + 1}" />
-                                </c:if>
-                            </c:forEach>
-                            ${availableCount}
-                        </h3>
-                        <p>Available</p>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="stats-card">
-                        <div class="icon-wrapper">
-                            <i class="fa fa-times-circle"></i>
-                        </div>
-                        <h3>
-                            <c:set var="bookedCount" value="0" />
-                            <c:forEach var="room" items="${roomsWithCategory}">
-                                <c:if test="${room.status == 'booked'}">
-                                    <c:set var="bookedCount" value="${bookedCount + 1}" />
-                                </c:if>
-                            </c:forEach>
-                            ${bookedCount}
-                        </h3>
-                        <p>Booked</p>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="stats-card">
-                        <div class="icon-wrapper">
-                            <i class="fa fa-wrench"></i>
-                        </div>
-                        <h3>
-                            <c:set var="maintenanceCount" value="0" />
-                            <c:forEach var="room" items="${roomsWithCategory}">
-                                <c:if test="${room.status == 'maintenance'}">
-                                    <c:set var="maintenanceCount" value="${maintenanceCount + 1}" />
-                                </c:if>
-                            </c:forEach>
-                            ${maintenanceCount}
-                        </h3>
-                        <p>Maintenance</p>
-                    </div>
-                </div>
-            </div>
 
             <!-- Enhanced Search and Filter Section -->
             <div class="search-filter-section">
@@ -1395,86 +1207,7 @@
     </section>
     <!-- Room Fees Section End -->
 
-    <!-- Footer Section Begin -->
-    <footer class="footer-section">
-        <div class="container">
-            <div class="footer-text">
-                <div class="row">
-                    <div class="col-lg-4">
-                        <div class="ft-about">
-                            <div class="logo">
-                                <a href="${pageContext.request.contextPath}/home">
-                                    <img src="${pageContext.request.contextPath}/img/footer-logo.png" alt="">
-                                </a>
-                            </div>
-                            <p>We inspire and reach millions of travelers<br /> across 90 local websites</p>
-                            <div class="fa-social">
-                                <a href="#"><i class="fa fa-facebook"></i></a>
-                                <a href="#"><i class="fa fa-twitter"></i></a>
-                                <a href="#"><i class="fa fa-tripadvisor"></i></a>
-                                <a href="#"><i class="fa fa-instagram"></i></a>
-                                <a href="#"><i class="fa fa-youtube-play"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 offset-lg-1">
-                        <div class="ft-contact">
-                            <h6>Contact Us</h6>
-                            <ul>
-                                <li>(84) 359 797 703</li>
-                                <li>36hotel@gmail.com</li>
-                                <li>Thanh Hoa, Viet Nam</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 offset-lg-1">
-                        <div class="ft-newslatter">
-                            <h6>New latest</h6>
-                            <p>Get the latest updates and offers.</p>
-                            <form action="post" class="fn-form">
-                                <input type="text" placeholder="Email">
-                                <button type="submit"><i class="fa fa-send"></i></button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="copyright-option">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-7">
-                        <ul>
-                            <li><a href="${pageContext.request.contextPath}/contact">Contact</a></li>
-                            <li><a href="#">Terms of use</a></li>
-                            <li><a href="#">Privacy</a></li>
-                            <li><a href="#">Environmental Policy</a></li>
-                        </ul>
-                    </div>
-                    <div class="col-lg-5">
-                        <div class="co-text">
-                            <p>
-                                Copyright &copy;<script>document.write(new Date().getFullYear());</script>
-                                All rights reserved by 36 Hotel
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer>
-    <!-- Footer Section End -->
-
-    <!-- Search model Begin -->
-    <div class="search-model">
-        <div class="h-100 d-flex align-items-center justify-content-center">
-            <div class="search-close-switch"><i class="icon_close"></i></div>
-            <form class="search-model-form">
-                <input type="text" id="search-input" placeholder="Search here.....">
-            </form>
-        </div>
-    </div>
-    <!-- Search model end -->
+    <!-- Footer removed to match booking-list.jsp layout -->
 
     <!-- Js Plugins -->
     <script src="${pageContext.request.contextPath}/js/jquery-3.3.1.min.js"></script>
@@ -1683,5 +1416,8 @@
             });
         });
     </script>
-</body>
-</html>
+    </div>
+</div>
+
+    </body>
+    </html>

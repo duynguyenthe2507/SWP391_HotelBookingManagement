@@ -141,18 +141,25 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
+
             try (ResultSet rs = ps.executeQuery()) {
+                int count = 0;
                 while (rs.next()) {
                     Map<String, Object> map = new HashMap<>();
                     map.put("booking", mapResultSetToBooking(rs));
                     map.put("roomName", rs.getString("roomName"));
-                    map.put("customerName", rs.getString("guestName") != null ? rs.getString("guestName") : rs.getString("guestCustomerName"));
+                    map.put("customerName", rs.getString("guestName") != null ?
+                            rs.getString("guestName") : rs.getString("guestCustomerName"));
                     list.add(map);
+                    count++;
                 }
+                LOGGER.log(Level.INFO, "Found {0} bookings from database", count);
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error finding bookings", e);
+            e.printStackTrace(); // In ra console để debug
         }
+
         return list;
     }
 
@@ -176,23 +183,32 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
         }
         if (keyword != null && !keyword.isEmpty()) {
             sql.append("AND (b.guestName LIKE ? OR u_guest.firstName LIKE ? OR u_guest.lastName LIKE ? OR r.name LIKE ?) ");
-            params.add("%" + keyword + "%");
-            params.add("%" + keyword + "%");
-            params.add("%" + keyword + "%");
-            params.add("%" + keyword + "%");
+            String searchPattern = "%" + keyword + "%";
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
         }
         try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
+
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt(1);
+                    int count = rs.getInt(1);
+                    System.out.println(">>> COUNT result: " + count);
+                    return count;
                 }
             }
         } catch (SQLException e) {
+            System.out.println("!!! SQL EXCEPTION in countBookings!");
+            System.out.println("!!! Error: " + e.getMessage());
+            e.printStackTrace();
             LOGGER.log(Level.SEVERE, "Error counting bookings", e);
         }
+
+        System.out.println("=== BookingDao.countBookings COMPLETED - Returning 0 ===");
         return 0;
     }
 

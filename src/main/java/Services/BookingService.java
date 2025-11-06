@@ -1,9 +1,6 @@
 package Services;
 
-import Dao.BookingDao;
-import Dao.BookingDetailDao;
-import Dao.RoomDao;
-import Dao.ServicesDao;
+import Dao.*;
 import Models.Booking;
 import Models.BookingDetail;
 import Models.BookingDetailsViewModel;
@@ -35,12 +32,14 @@ public class BookingService {
     private RoomDao roomDao;
     private ServicesDao servicesDao;
     private BookingDetailDao bookingDetailDao;
+    private InvoiceDao invoiceDao;
 
     public BookingService() {
         this.bookingDao = new BookingDao();
         this.roomDao = new RoomDao();
         this.servicesDao = new ServicesDao();
         this.bookingDetailDao = new BookingDetailDao();
+        this.invoiceDao = new InvoiceDao();
     }
 
     // ============ OFFLINE BOOKING METHODS (Code gốc của bạn - Chính xác) ============
@@ -96,7 +95,7 @@ public class BookingService {
 
     public boolean checkInBooking(int bookingId, int roomId) {
         try {
-            boolean bookingUpdated = bookingDao.updateBookingStatus(bookingId, "checked-in");
+            boolean bookingUpdated = bookingDao.updateBookingStatusAndCheckInTime(bookingId, "checked-in", LocalDateTime.now());
             if (!bookingUpdated) {
                 return false;
             }
@@ -113,7 +112,7 @@ public class BookingService {
 
     public boolean checkOutBooking(int bookingId, int roomId) {
         try {
-            boolean bookingUpdated = bookingDao.updateBookingStatus(bookingId, "available");
+            boolean bookingUpdated = bookingDao.updateBookingStatusAndCheckOutTime(bookingId, "checked-out", LocalDateTime.now());
             if (!bookingUpdated) {
                 return false;
             }
