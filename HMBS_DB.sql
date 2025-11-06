@@ -524,6 +524,10 @@ VALUES
     ('0987654322', 'Jane', '', 'Smith', '1990-08-22', 'jane.smith@example.com', 'password123', 'customer', 2, 0, 1, GETDATE(), GETDATE()),
     ('0987654323', 'Robert', '', 'Johnson', '1978-03-10', 'robert.johnson@example.com', 'password123', 'customer', 3, 0, 1, GETDATE(), GETDATE());
 GO
+-- INSERT ADMIN ACCOUNT 2/11/2025
+INSERT INTO Users (mobilePhone, firstName, middleName, lastName, birthday, email, password, role)
+VALUES ('0906431404', 'ADMIN', 'OF', 'HOTEL', '1990-01-01', 'admin123@gmail.com', 'Admin123@@', 'admin');
+GO
 
 -- SAMPLE DATA - Rooms
 INSERT INTO Room (name, categoryId, price, capacity, status, description, imgUrl, updatedAt)

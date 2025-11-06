@@ -98,11 +98,12 @@ public class LoginController extends HttpServlet {
             String role = (u.getRole() != null) ? u.getRole().trim() : "";
 
             if ("Receptionist".equalsIgnoreCase(role)) {
-                // FIX: Redirect to CONTROLLER, not JSP
-                String controllerUrl = request.getContextPath() + "/receptionist/booking-list";
-                LOGGER.log(Level.INFO, "Redirecting Receptionist to booking-list controller: {0}", controllerUrl);
-                response.sendRedirect(controllerUrl);
-            } else {
+                LOGGER.log(Level.INFO, "Redirecting Admin/Receptionist to dashboard.");
+                response.sendRedirect(request.getContextPath() + "/pages/receptionist/booking-list.jsp");
+            } else if ("Admin".equalsIgnoreCase(role)) {
+                response.sendRedirect(request.getContextPath() + "/viewuser");
+            }
+            else {
                 LOGGER.log(Level.INFO, "Redirecting Customer to home page.");
                 response.sendRedirect(request.getContextPath() + "/home");
             }
