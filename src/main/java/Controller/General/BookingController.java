@@ -2,8 +2,9 @@ package Controller.General;
 
 import Dao.RoomDao;
 import Models.Booking;
-import Models.BookingDetail;
+import Models.BookingDetail; // <<< THÊM IMPORT
 import Models.Room;
+import Models.Users;
 import Services.BookingService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -13,16 +14,25 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
+import java.util.ArrayList; // <<< THÊM IMPORT
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Servlet này đã được SỬA LỖI LOGIC:
+ * 1. Sửa lỗi 405 (Method Not Allowed).
+ * 2. Sửa luồng đăng nhập:
+ * - Nếu chưa đăng nhập, VALIDATE dữ liệu (phòng, ngày) trước.
+ * - Nếu dữ liệu hợp lệ, LƯU giỏ hàng (cart) vào SESSION.
+ * - Đặt redirectUrl là /checkout (thay vì /room-details).
+ * - Chuyển đến /login.
+ * 3. Nếu đã đăng nhập: Tạo booking 'pending' và FORWARD sang /createPayment.
+ */
 @WebServlet(name = "BookingController", urlPatterns = {"/booking/add"})
 public class BookingController extends HttpServlet {
 
@@ -36,36 +46,42 @@ public class BookingController extends HttpServlet {
         this.roomDao = new RoomDao();
     }
 
-    /** Parse nhiều định dạng ngày linh hoạt **/
+    /** Parse nhiều định dạng ngày linh hoạt (Giữ nguyên code gốc của bạn) **/
     private LocalDateTime parseFlexibleDate(String dateStr, String defaultTime) throws DateTimeParseException {
         if (dateStr == null || dateStr.trim().isEmpty()) {
             throw new DateTimeParseException("Date string is empty", dateStr, 0);
         }
-
         List<String> formats = List.of(
-                "dd/MM/yyyy HH:mm",
-                "d/M/yyyy HH:mm",
-                "dd-MM-yyyy HH:mm",
-                "d-M-yyyy HH:mm",
-                "d MMMM, yyyy HH:mm",
-                "d MMM yyyy HH:mm"
+                "dd/MM/yyyy HH:mm", "d/M/yyyy HH:mm", "dd-MM-yyyy HH:mm",
+                "d-M-yyyy HH:mm", "d MMMM, yyyy HH:mm", "d MMM yyyy HH:mm"
         );
-
         for (String fmt : formats) {
             try {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern(fmt, Locale.ENGLISH);
                 return LocalDateTime.parse(dateStr.trim() + " " + defaultTime, formatter);
             } catch (Exception ignored) {}
         }
-
         throw new DateTimeParseException("Unsupported date format", dateStr, 0);
     }
+    
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        // Sửa lỗi 405 (Method Not Allowed)
+        // Nếu user bị redirect (GET) tới đây sau khi login, chuyển họ về trang phòng
+        // (Logic mới ở doPost sẽ ngăn điều này xảy ra, nhưng đây là 1 phòng vệ tốt)
+        LOGGER.log(Level.INFO, "GET request to BookingController, redirecting to /rooms.");
+        response.sendRedirect(request.getContextPath() + "/rooms");
+    }
+
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         HttpSession session = request.getSession();
+
+        // === BƯỚC 1: LẤY VÀ KIỂM TRA DỮ LIỆU (Validate data first) ===
         String roomIdStr = request.getParameter("roomId");
         String checkInDateStr = request.getParameter("checkInDate");
         String checkOutDateStr = request.getParameter("checkOutDate");
@@ -112,8 +128,12 @@ public class BookingController extends HttpServlet {
             response.sendRedirect(redirectOnErrorUrl);
             return;
         }
+        // === KẾT THÚC BƯỚC 1 ===
 
-        // Check availability
+
+        // === BƯỚC 2: KIỂM TRA PHÒNG (Validate room) ===
+        
+        // (BookingService và BookingDao của bạn đã được sửa lỗi này)
         if (!bookingService.isRoomAvailable(roomId, checkIn, checkOut)) {
             session.setAttribute("cartMessage", "Room is not available for selected dates.");
             session.setAttribute("cartMessageType", "WARNING");
@@ -121,7 +141,6 @@ public class BookingController extends HttpServlet {
             return;
         }
 
-        // Get room info
         Room room = roomDao.getById(roomId);
         if (room == null) {
             session.setAttribute("cartMessage", "Error retrieving room info.");
@@ -136,43 +155,85 @@ public class BookingController extends HttpServlet {
             response.sendRedirect(redirectOnErrorUrl);
             return;
         }
+        // === KẾT THÚC BƯỚC 2 ===
 
-        // ✅ Không insert DB ở đây — chỉ lưu booking tạm trong session
-        BookingDetail bookingDetail = new BookingDetail(
-                roomId, room.getPrice(), numGuests, room.getName(), room.getImgUrl()
-        );
 
-        // Nếu giỏ hàng chưa tồn tại thì tạo mới
-        List<BookingDetail> cart = (List<BookingDetail>) session.getAttribute("cart");
-        if (cart == null) {
-            cart = new ArrayList<>();
+        // === BƯỚC 3: KIỂM TRA ĐĂNG NHẬP (LOGIC MỚI THEO YÊU CẦU CỦA BẠN) ===
+        Users user = (Users) session.getAttribute("user");
+        
+        if (user == null) {
+            // User CHƯA đăng nhập. Lưu booking intent (giỏ hàng) vào session.
+            LOGGER.log(Level.INFO, "User not logged in. Saving booking intent to session and redirecting to login.");
+
+            // 1. Tạo giỏ hàng (cart)
+            BookingDetail bookingDetail = new BookingDetail(
+                    roomId, room.getPrice(), numGuests, room.getName(), room.getImgUrl()
+            );
+            List<BookingDetail> cart = new ArrayList<>();
+            cart.add(bookingDetail);
+
+            // 2. Lưu cart, ngày, và URL redirect (là /checkout)
+            session.setAttribute("cart", cart);
+            session.setAttribute("cartCheckIn", checkIn);
+            session.setAttribute("cartCheckOut", checkOut);
+            
+            // 3. Đặt redirectUrl là /checkout (thay vì trang room-details)
+            session.setAttribute("redirectUrl", request.getContextPath() + "/checkout"); 
+            
+            // 4. Chuyển đến trang login
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
         }
-        cart.add(bookingDetail);
+        // === KẾT THÚC BƯỚC 3 ===
 
-        // Tính tổng tiền chính xác theo số giờ / ngày
-        long totalHours = Duration.between(checkIn, checkOut).toHours();
-        double durationHours = (double) totalHours;
-        double nights = durationHours / 24.0;
-        double roomsSum = cart.stream()
-                .mapToDouble(BookingDetail::getPriceAtBooking)
-                .sum();
-        double totalPrice = roomsSum * nights;
 
-        // Lưu thông tin booking tổng (thời gian, trạng thái tạm)
-        Booking tempBooking = new Booking();
-        tempBooking.setCheckinTime(checkIn);
-        tempBooking.setCheckoutTime(checkOut);
-//        tempBooking.setDurationHours(durationHours);
-        tempBooking.setTotalPrice(totalPrice);
-        tempBooking.setStatus("PENDING");
+        // === BƯỚC 4: USER ĐÃ ĐĂNG NHẬP - TẠO BOOKING THẬT VÀ FORWARD ===
+        // (Nếu code chạy đến đây, user đã đăng nhập VÀ dữ liệu đã hợp lệ)
+        
+        try {
+            List<Integer> roomIds = List.of(roomId);
+            List<Integer> quantities = List.of(numGuests);
+            
+            LOGGER.info(">>> BookingController: (User logged in) Calling bookingService.createBooking()...");
+            int bookingId = bookingService.createBooking(
+                    user.getUserId(),
+                    roomIds,
+                    checkIn,
+                    checkOut,
+                    quantities,
+                    null, // Không có special request từ flow này
+                    "pending"
+            );
 
-        // Lưu session
-        session.setAttribute("tempBooking", tempBooking);
-        session.setAttribute("cart", cart);
-        session.setAttribute("cartCheckIn", checkIn);
-        session.setAttribute("cartCheckOut", checkOut);
+            if (bookingId != -1) {
+                LOGGER.info(">>> BookingController: Booking created successfully (ID: " + bookingId + ").");
+                Booking createdBooking = bookingService.getBookingById(bookingId);
+                
+                if (createdBooking == null) {
+                     throw new Exception("Failed to retrieve newly created booking details for VNPAY.");
+                }
 
-        LOGGER.info("✅ Temporary booking saved in session → Redirect to VNPay page");
-        response.sendRedirect(request.getContextPath() + "/createPayment");
+                // Đính kèm attributes (Giống OrderController)
+                request.setAttribute("bookingId", createdBooking.getBookingId());
+                request.setAttribute("totalPrice", createdBooking.getTotalPrice());
+                
+                // FORWARD sang /createPayment (Giống OrderController)
+                LOGGER.info(">>> BookingController: Forwarding to /createPayment.");
+                request.getRequestDispatcher("/createPayment").forward(request, response);
+
+            } else {
+                 LOGGER.log(Level.SEVERE, ">>> BookingController: bookingService.createBooking() returned -1.");
+                 session.setAttribute("cartMessage", "Could not create your booking. Please try again.");
+                 session.setAttribute("cartMessageType", "ERROR");
+                 response.sendRedirect(redirectOnErrorUrl);
+            }
+
+        } catch (Exception e) {
+             LOGGER.log(Level.SEVERE, "Error during booking creation process in BookingController", e);
+             session.setAttribute("cartMessage", "An unexpected error occurred: " + e.getMessage());
+             session.setAttribute("cartMessageType", "ERROR");
+             response.sendRedirect(redirectOnErrorUrl);
+        }
     }
 }
+
