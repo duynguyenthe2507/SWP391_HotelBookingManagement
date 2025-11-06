@@ -27,6 +27,131 @@ public class UsersDao extends DBContext {
                 rs.getString("avatar_url"));
     }
 
+    public List<Users> getFilteredAndSorted(String sortBy, String order, String roleFilter, String statusFilter, String firstNameFilter, String lastNameFilter, String searchKeyword) {
+        List<Users> list = new ArrayList<>();
+        String sql = "SELECT * FROM Users WHERE 1=1 ";
+
+        if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+            sql = sql + "AND (UPPER(firstName) LIKE UPPER(?) OR UPPER(middleName) LIKE UPPER(?) OR UPPER(lastName) LIKE UPPER(?)) ";
+        }
+        if (roleFilter != null && !roleFilter.isEmpty()) {
+            sql = sql + "AND role = ? ";
+        }
+        if (statusFilter != null && !statusFilter.isEmpty()) {
+            sql = sql + "AND isActive = ? ";
+        }
+        if (firstNameFilter != null && !firstNameFilter.isEmpty()) {
+            if (firstNameFilter.length() == 1) {
+                sql = sql + "AND UPPER(firstName) LIKE UPPER(?) ";
+            } else {
+                sql = sql + "AND firstName = ? ";
+            }
+        }
+        if (lastNameFilter != null && !lastNameFilter.isEmpty()) {
+            if (lastNameFilter.length() == 1) {
+                sql = sql + "AND UPPER(lastName) LIKE UPPER(?) ";
+            } else {
+                sql = sql + "AND lastName = ? ";
+            }
+        }
+        // Default sort: by ID. If order missing, default ASC.
+        String sortDirection = (order != null && order.equalsIgnoreCase("desc")) ? "DESC" : "ASC";
+        if (sortBy == null || sortBy.isEmpty() || sortBy.equals("id")) {
+            sql = sql + "ORDER BY userId " + sortDirection + " ";
+        } else if (sortBy.equals("name")) {
+            sql = sql + "ORDER BY firstName " + sortDirection + ", lastName " + sortDirection + " ";
+        }
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            int paramIndex = 1;
+            // Set parameter cho search keyword
+            if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+                String searchPattern = "%" + searchKeyword.trim() + "%";
+                ps.setString(paramIndex++, searchPattern); // firstName
+                ps.setString(paramIndex++, searchPattern); // middleName
+                ps.setString(paramIndex++, searchPattern); // lastName
+            }
+            if (roleFilter != null && !roleFilter.isEmpty()) {
+                ps.setString(paramIndex++, roleFilter);
+            }
+            if (statusFilter != null && !statusFilter.isEmpty()) {
+                boolean isActive;
+                if (statusFilter.equals("active")) {
+                    isActive = true;
+                } else {
+                    isActive = false;
+                }
+                ps.setBoolean(paramIndex++, isActive);
+            }
+            if (firstNameFilter != null && !firstNameFilter.isEmpty()) {
+                if (firstNameFilter.length() == 1) {
+                    ps.setString(paramIndex++, firstNameFilter + "%");
+                } else {
+                    ps.setString(paramIndex++, firstNameFilter);
+                }
+            }
+            if (lastNameFilter != null && !lastNameFilter.isEmpty()) {
+                if (lastNameFilter.length() == 1) {
+                    ps.setString(paramIndex++, lastNameFilter + "%");
+                } else {
+                    ps.setString(paramIndex++, lastNameFilter);
+                }
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(map(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public List<String> getDistinctRoles() {
+        return Arrays.asList("admin", "user", "receptionist");
+    }
+
+    public List<String> getDistinctStatuses() {
+        List<String> statuses = new ArrayList<>();
+        String sql = "SELECT DISTINCT CASE WHEN isActive = 1 THEN 'active' ELSE 'inactive' END AS status FROM Users";
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                statuses.add("active");
+                statuses.add("inactive");
+                return statuses;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return statuses;
+    }
+
+    public List<String> getDistinctFirstNames() {
+        List<String> names = new ArrayList<>();
+        String sql = "SELECT DISTINCT firstName FROM Users ORDER BY firstName";
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                names.add(rs.getString("firstName"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return names;
+    }
+
+    public List<String> getDistinctLastNames() {
+        List<String> names = new ArrayList<>();
+        String sql = "SELECT DISTINCT lastName FROM Users ORDER BY lastName";
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                names.add(rs.getString("lastName"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return names;
+    }
+
     public List<Users> getAll() {
         List<Users> list = new ArrayList<>();
         String sql = "SELECT * FROM Users";

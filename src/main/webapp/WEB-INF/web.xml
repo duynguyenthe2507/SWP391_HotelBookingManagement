@@ -20,6 +20,10 @@
         <servlet-name>EmailUtil</servlet-name>
         <servlet-class>Utils.EmailUtil</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>ViewUserController</servlet-name>
+        <servlet-class>Controller.Admin.ViewUserController</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ProfileController</servlet-name>
         <url-pattern>/profile</url-pattern>
@@ -39,6 +43,10 @@
     <servlet-mapping>
         <servlet-name>EmailUtil</servlet-name>
         <url-pattern>/emailutil</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ViewUserController</servlet-name>
+        <url-pattern>/viewuser</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>
