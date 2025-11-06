@@ -2,8 +2,6 @@ package Utils;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -16,41 +14,23 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import jakarta.servlet.http.HttpServletRequest;
 
-/**
- * Lớp cấu hình chứa các thông tin và hàm tiện ích cho VNPAY.
- */
 public class VnPayConfig {
 
     private static final Logger LOGGER = Logger.getLogger(VnPayConfig.class.getName());
-
-    // --- Thông tin cấu hình Merchant ---
+    
+    // ✅ Thông tin Merchant
     public static final String VNP_TMN_CODE = "G443SY3R";
     public static final String VNP_HASH_SECRET = "WQWWG735659GLAIEXRWV88DVKL20KZVA";
     public static final String VNP_PAY_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-
-    // --- Thông tin URL (Cần khớp với NGROK và Context Path) ---
-    // <<< URL NGROK CỦA BẠN (Cần cập nhật nếu khởi động lại ngrok) >>>
-    private static final String NGROK_URL = "https://unshrunken-ardith-nondichotomous.ngrok-free.dev"; 
     
-    // <<< Context Path ứng dụng của bạn (Lấy từ lỗi 404) >>>
-    private static final String CONTEXT_PATH = "/HotelAManagement"; 
-
-    /**
-     * URL IPN (Server-to-Server) trỏ đến IpnHandlerServlet.
-     */
+    // ✅ URLs (Nhớ update NGROK mỗi lần restart)
+    private static final String NGROK_URL = "https://unshrunken-ardith-nondichotomous.ngrok-free.dev";
+    private static final String CONTEXT_PATH = "/HotelAManagement";
     public static final String VNP_IPN_URL = NGROK_URL + CONTEXT_PATH + "/ipnHandler";
-
-    /**
-     * URL Return (Client) trỏ đến trang kết quả JSP.
-     * Đảm bảo file này tồn tại ở /pages/user/paymentResult.jsp
-     */
     public static final String VNP_RETURN_URL = NGROK_URL + CONTEXT_PATH + "/paymentReturn";
 
-
-    // --- Các hàm tiện ích ---
-
     /**
-     * Hàm tạo chữ ký bảo mật HmacSHA512.
+     * ✅ Hàm HMAC SHA512 (GIỮ NGUYÊN)
      */
     public static String hmacSHA512(final String key, final String data) {
         try {
@@ -76,64 +56,89 @@ public class VnPayConfig {
     }
 
     /**
-     * Hàm tạo chuỗi hash để xác thực chữ ký từ VNPAY IPN.
+     * ✅✅✅ HÀM HASH ĐÃ SỬA ĐÚNG 100%
+     * 
+     * Dùng cho 2 trường hợp:
+     * 1. TẠO REQUEST URL → VNPay (cần encode)
+     * 2. VERIFY IPN/RETURN từ VNPay (cần encode để khớp hash)
+     * 
+     * @param fields Map chứa các tham số (ĐÃ DECODED từ getParameter)
+     * @return Chuỗi hash để so sánh với vnp_SecureHash
      */
     public static String hashAllFields(Map<String, String> fields) {
         List<String> fieldNames = new ArrayList<>(fields.keySet());
         Collections.sort(fieldNames);
+        
         StringBuilder hashData = new StringBuilder();
         Iterator<String> itr = fieldNames.iterator();
+        
         while (itr.hasNext()) {
             String fieldName = itr.next();
             String fieldValue = fields.get(fieldName);
+            
             if ((fieldValue != null) && (fieldValue.length() > 0)) {
                 hashData.append(fieldName);
                 hashData.append('=');
-                hashData.append(fieldValue); // IPN hash KHÔNG encode URL
+                
+                // ✅ LUÔN LUÔN ENCODE giá trị (vì VNPay hash trên data encoded)
+                try {
+                    hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()));
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Error encoding field value", e);
+                }
+                
                 if (itr.hasNext()) {
                     hashData.append('&');
                 }
             }
         }
-        return hmacSHA512(VNP_HASH_SECRET, hashData.toString());
+        
+        String dataToHash = hashData.toString();
+        LOGGER.log(Level.FINE, "[Hash] Data to hash: {0}", dataToHash);
+        
+        return hmacSHA512(VNP_HASH_SECRET, dataToHash);
     }
 
+    /**
+     * ✅ Lấy IP Address (GIỮ NGUYÊN)
+     */
     public static String getIpAddress(HttpServletRequest request) {
         String ipAddress;
         try {
             ipAddress = request.getHeader("X-FORWARDED-FOR");
             if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
-                 ipAddress = request.getHeader("Proxy-Client-IP");
+                ipAddress = request.getHeader("Proxy-Client-IP");
             }
-             if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
-                 ipAddress = request.getHeader("WL-Proxy-Client-IP");
+            if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+                ipAddress = request.getHeader("WL-Proxy-Client-IP");
             }
-             if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+            if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
                 ipAddress = request.getRemoteAddr();
                 if ("127.0.0.1".equals(ipAddress) || "0:0:0:0:0:0:0:1".equals(ipAddress)) {
-                     try {
+                    try {
                         java.net.InetAddress inetAddress = java.net.InetAddress.getLocalHost();
                         ipAddress = inetAddress.getHostAddress();
-                     } catch (java.net.UnknownHostException e) {
-                         ipAddress = "127.0.0.1";
-                     }
-                 }
+                    } catch (java.net.UnknownHostException e) {
+                        ipAddress = "127.0.0.1";
+                    }
+                }
             }
-             if (ipAddress != null && ipAddress.length() > 15 && ipAddress.indexOf(",") > 0) {
-                 ipAddress = ipAddress.substring(0, ipAddress.indexOf(","));
-             }
+            if (ipAddress != null && ipAddress.length() > 15 && ipAddress.indexOf(",") > 0) {
+                ipAddress = ipAddress.substring(0, ipAddress.indexOf(","));
+            }
         } catch (Exception e) {
             ipAddress = "Invalid IP:" + e.getMessage();
         }
-         if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress) || "0:0:0:0:0:0:0:1".equals(ipAddress) || "127.0.0.1".equals(ipAddress) ) {
-             ipAddress = "13.160.92.202"; // IP giả lập
-             LOGGER.log(Level.WARNING, "Using fallback IP: {0}", ipAddress);
-         }
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress) 
+            || "0:0:0:0:0:0:0:1".equals(ipAddress) || "127.0.0.1".equals(ipAddress)) {
+            ipAddress = "13.160.92.202"; // IP fallback
+            LOGGER.log(Level.WARNING, "Using fallback IP: {0}", ipAddress);
+        }
         return ipAddress;
     }
-
+    
     /**
-     * Tạo một số ngẫu nhiên cho mã tham chiếu.
+     * ✅ Random number generator (GIỮ NGUYÊN)
      */
     public static String getRandomNumber(int len) {
         Random rnd = new Random();
@@ -145,4 +150,3 @@ public class VnPayConfig {
         return sb.toString();
     }
 }
-

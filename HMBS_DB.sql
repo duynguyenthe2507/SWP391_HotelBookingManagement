@@ -439,8 +439,7 @@ CREATE TABLE Rules (
                        updatedAt DATETIME DEFAULT GETDATE()
 );
 GO
-
-CREATE TRIGGER trg_update_rules
+REATE TRIGGER trg_update_rules
     ON Rules
     AFTER UPDATE
               AS
@@ -450,6 +449,38 @@ SET updatedAt = GETDATE()
     FROM Rules
     INNER JOIN inserted ON Rules.ruleId = inserted.ruleId;
 END;
+GO
+INSERT INTO Rules (title, description, status, createdAt, updatedAt)
+VALUES (
+    N'Quy định bảo mật thông tin khách hàng',
+    N'Thông tin cá nhân của khách (số điện thoại, email, giấy tờ tùy thân, dữ liệu thanh toán) tuyệt đối không được chia sẻ cho bên thứ ba trừ khi có yêu cầu pháp lý hợp lệ. Các nhân viên phải lưu trữ thông tin trên hệ thống nội bộ được mã hóa; không ghi thông tin nhạy cảm lên giấy ngoài quy trình cần thiết. Khi kết thúc ca, nhân viên phải đăng xuất khỏi hệ thống quản lý, khóa màn hình máy tính, và không để tài liệu chứa thông tin khách lộ ra ngoài.',
+    0,  -- Inactive
+    '2025-11-01T01:48:00',
+    '2025-11-01T01:51:00'
+);
+GO
+INSERT INTO Rules (title, description, status, createdAt, updatedAt)
+VALUES (
+    N'Hướng dẫn check-in cho receptionist',
+    N'Khi khách đến, nhân viên lễ tân cần:
+(1) Xác minh danh tính bằng CMND/CCCD/Hộ chiếu;
+(2) Đối chiếu với thông tin đặt phòng (họ tên, ngày nhận trả);
+(3) Thu tiền/cọc (nếu có) và cung cấp biên lai;
+(4) Giải thích các tiện ích và giờ sử dụng dịch vụ;
+(5) Hướng dẫn khách ký biên bản nhận phòng và cung cấp chìa khóa/QR code. Với khách nước ngoài, kiểm tra hộ chiếu và thực hiện khai báo công an nếu luật địa phương yêu cầu.',
+    1,  -- Active
+    '2025-11-01T01:48:00',
+    '2025-11-01T17:41:00'
+);
+GO
+INSERT INTO Rules (title, description, status, createdAt, updatedAt)
+VALUES (
+    N'Chính sách hủy phòng & hoàn tiền',
+    N'Khách hàng có thể hủy phòng miễn phí nếu thông báo trước ít nhất 48 giờ so với giờ nhận phòng. Nếu hủy trong vòng 48 giờ trước giờ nhận phòng, khách sẽ bị tính phí 1 đêm. Trong trường hợp đặt phòng theo khuyến mãi không hoàn tiền, phí sẽ không được hoàn trả. Mọi yêu cầu hoàn tiền cần liên hệ bộ phận lễ tân và phòng Kế toán để xử lý; thời gian xử lý hoàn tiền tối đa 7 ngày làm việc.',
+    1,  -- Active
+    '2025-11-01T01:48:00',
+    '2025-11-01T01:48:00'
+);
 GO
 
 -- MASTER DATA from root HMBS_DB.sql

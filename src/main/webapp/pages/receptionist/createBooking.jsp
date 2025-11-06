@@ -13,7 +13,6 @@
     <style>
         body { background-color: #f9f9f9; font-family: 'Cabin', sans-serif; }
         .dashboard-wrapper { display: flex; min-height: calc(100vh - 70px);
-        .sidebar { width: 250px; background: #222; color: #fff; padding: 30px 20px; position: fixed; top: 70px; bottom: 0; overflow-y: auto; z-index: 999;}
         .sidebar h3 { color: #dfa974; text-align: center; margin-bottom: 30px; font-weight: 700; }
         .sidebar a { display: block; color: #fff; padding: 12px 15px; border-radius: 6px; margin-bottom: 8px; text-decoration: none; transition: all 0.3s ease; }
         .sidebar a:hover, .sidebar a.active { background: #dfa974; color: #fff; }
@@ -24,13 +23,12 @@
         .booking-form .form-control, .booking-form select { border-radius: 8px; border: 1px solid #ced4da; padding: 10px 15px; }
         .booking-form .form-control:focus { border-color: #dfa974; box-shadow: 0 0 0 0.2rem rgba(223, 169, 116, 0.25); }
         .booking-form button[type="submit"] { background-color: #dfa974; border-color: #dfa974; padding: 12px 30px; border-radius: 20px; font-weight: 600; }
-        .booking-form button[type="submit"]:hover { background-color: #c8965a; border-color: #c8965a; }
+        .booking-form button[type="submit"]:hover { background-color: #c8965a; border-color: #c8965a; }}
     </style>
 </head>
+
 <body>
 <div id="preloder"><div class="loader"></div></div>
-
-<jsp:include page="/common/employee-header.jsp"/>
 
 <div class="dashboard-wrapper">
     <jsp:include page="/common/sidebar.jsp"/>

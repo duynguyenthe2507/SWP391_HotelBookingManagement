@@ -58,6 +58,7 @@
         .rule-desc {
             margin-top: 10px;
             color: #555;
+            white-space: pre-line;
         }
         .rule-date {
             font-size: 14px;
@@ -122,7 +123,6 @@
     </div>
 </section>
 
-<!-- ✅ Footer -->
 <jsp:include page="/common/footer.jsp"/>
 
 <script src="${pageContext.request.contextPath}/js/bootstrap.bundle.min.js"></script>

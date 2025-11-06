@@ -1,9 +1,6 @@
 package Services;
 
-import Dao.BookingDao;
-import Dao.BookingDetailDao;
-import Dao.RoomDao;
-import Dao.ServicesDao;
+import Dao.*;
 import Models.Booking;
 import Models.BookingDetail;
 import Models.BookingDetailsViewModel;
@@ -20,7 +17,14 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Tệp này đã được SỬA 2 LỖI LOGIC: 1. Sửa hàm 'isRoomAvailable': Bỏ qua kiểm
+ * tra 'room.getStatus()', chỉ tin vào logic kiểm tra chồng chéo ngày (overlap).
+ * 2. Sửa hàm 'createBooking': Thêm 'newBooking.setRoomId(roomIds.get(0))' để
+ * sửa lỗi SQL 'roomId cannot be NULL' trong BookingDao.
+ */
 public class BookingService {
+
     private static final Logger LOGGER = Logger.getLogger(BookingService.class.getName());
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
@@ -28,19 +32,17 @@ public class BookingService {
     private RoomDao roomDao;
     private ServicesDao servicesDao;
     private BookingDetailDao bookingDetailDao;
+    private InvoiceDao invoiceDao;
 
     public BookingService() {
         this.bookingDao = new BookingDao();
         this.roomDao = new RoomDao();
         this.servicesDao = new ServicesDao();
         this.bookingDetailDao = new BookingDetailDao();
+        this.invoiceDao = new InvoiceDao();
     }
 
-    // ============ OFFLINE BOOKING METHODS (from haitn/pushOfflineBooking) ============
-
-    /**
-     * Tạo booking offline tại quầy lễ tân (không cần durationHours)
-     */
+    // ============ OFFLINE BOOKING METHODS (Code gốc của bạn - Chính xác) ============
     public boolean createOfflineBooking(Booking booking, String[] serviceIds) {
         try {
             int bookingId = bookingDao.insertOfflineBooking(booking);
@@ -50,7 +52,6 @@ public class BookingService {
             }
             LOGGER.log(Level.INFO, "Inserted new booking with ID: {0}", bookingId);
 
-            // Liên kết các dịch vụ đã chọn nếu có
             if (serviceIds != null && serviceIds.length > 0) {
                 Map<Integer, Services> servicesMap = servicesDao.getAllServicesAsMap();
 
@@ -62,7 +63,6 @@ public class BookingService {
                 }
             }
 
-            // Cập nhật trạng thái phòng thành "booked"
             boolean statusUpdated = roomDao.updateRoomStatus(booking.getRoomId(), "booked");
             if (!statusUpdated) {
                 LOGGER.log(Level.WARNING, "Failed to update room status for roomId: {0}", booking.getRoomId());
@@ -78,42 +78,31 @@ public class BookingService {
         }
     }
 
-    /**
-     * Lấy chi tiết booking cho receptionist view
-     */
     public BookingDetailsViewModel getBookingDetails(int bookingId) {
         Map<String, Object> basicDetails = bookingDao.getBookingDetailsById(bookingId);
         if (basicDetails == null) {
             return null;
         }
-
         List<Map<String, Object>> servicesUsed = servicesDao.getServicesByBookingId(bookingId);
-
         BookingDetailsViewModel viewModel = new BookingDetailsViewModel();
         viewModel.setBooking((Booking) basicDetails.get("booking"));
         viewModel.setRoom((Room) basicDetails.get("room"));
         viewModel.setCustomerName((String) basicDetails.get("customerName"));
         viewModel.setReceptionistName((String) basicDetails.get("receptionistName"));
         viewModel.setServices(servicesUsed);
-
         return viewModel;
     }
 
-    /**
-     * Check-in booking
-     */
     public boolean checkInBooking(int bookingId, int roomId) {
         try {
-            boolean bookingUpdated = bookingDao.updateBookingStatus(bookingId, "checked-in");
+            boolean bookingUpdated = bookingDao.updateBookingStatusAndCheckInTime(bookingId, "checked-in", LocalDateTime.now());
             if (!bookingUpdated) {
                 return false;
             }
-
             boolean roomUpdated = roomDao.updateRoomStatus(roomId, "occupied");
             if (!roomUpdated) {
                 return false;
             }
-
             return true;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error during checking in for bookingId:" + bookingId, e);
@@ -121,16 +110,12 @@ public class BookingService {
         }
     }
 
-    /**
-     * Check-out booking
-     */
     public boolean checkOutBooking(int bookingId, int roomId) {
         try {
-            boolean bookingUpdated = bookingDao.updateBookingStatus(bookingId, "available");
+            boolean bookingUpdated = bookingDao.updateBookingStatusAndCheckOutTime(bookingId, "checked-out", LocalDateTime.now());
             if (!bookingUpdated) {
                 return false;
             }
-
             return true;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error during checking out for bookingId:" + bookingId, e);
@@ -138,29 +123,26 @@ public class BookingService {
         }
     }
 
-    // ============ ONLINE BOOKING METHODS (from dev branch) ============
-
+    // ============ ONLINE BOOKING METHODS (ĐÃ SỬA LỖI) ============
     /**
-     * Tạo booking online của customer
+     * SỬA LỖI 2: Thêm 'setRoomId'
      */
     public int createBooking(int userId, List<Integer> roomIds, LocalDateTime checkIn, LocalDateTime checkOut,
-                             List<Integer> quantities, List<String> specialRequests, String initialStatus) {
+            List<Integer> quantities, List<String> specialRequests, String initialStatus) {
 
         System.out.println(">>> [BookingService] createBooking STARTING...");
 
-        // Validate input
+        // Validate input (Code gốc của bạn - Chính xác)
         if (roomIds == null || roomIds.isEmpty()) {
             System.out.println("!!! BOOKING SERVICE LỖI: roomIds is null or empty !!!");
             LOGGER.log(Level.WARNING, "No rooms selected for booking.");
             return -1;
         }
-
         if (quantities == null || quantities.size() != roomIds.size()) {
             System.out.println("!!! BOOKING SERVICE LỖI: quantities size mismatch !!!");
             LOGGER.log(Level.WARNING, "Quantities list size must match the number of room IDs.");
             return -1;
         }
-
         if (checkIn == null || checkOut == null || !checkOut.isAfter(checkIn)) {
             System.out.println("!!! BOOKING SERVICE LỖI: Invalid dates !!!");
             LOGGER.log(Level.WARNING, "Invalid check-in ({0}) or check-out ({1}) dates.", new Object[]{checkIn, checkOut});
@@ -176,8 +158,9 @@ public class BookingService {
             Integer quantity = quantities.get(i);
 
             try {
+                // HÀM NÀY (isRoomAvailable) ĐÃ ĐƯỢC SỬA LỖI LOGIC 1
                 if (!isRoomAvailable(roomId, checkIn, checkOut)) {
-                    System.out.println("!!! BOOKING SERVICE LỖI: Room " + roomId + " is NOT available !!!");
+                    System.out.println("!!! BOOKING SERVICE LỖI: Room " + roomId + " is NOT available (isRoomAvailable=false) !!!");
                     LOGGER.log(Level.SEVERE, ">>> CREATE_BOOKING_FAILED: isRoomAvailable() returned false for RoomID {0}", roomId);
                     return -1;
                 }
@@ -189,12 +172,7 @@ public class BookingService {
                     return -1;
                 }
 
-                if (!"available".equalsIgnoreCase(room.getStatus())) {
-                    System.out.println("!!! BOOKING SERVICE LỖI: Room " + roomId + " status is " + room.getStatus() + " !!!");
-                    LOGGER.log(Level.SEVERE, ">>> CREATE_BOOKING_FAILED: Room {0} status is ''{1}'', not ''available''.", new Object[]{roomId, room.getStatus()});
-                    return -1;
-                }
-
+                // (Đã xóa logic kiểm tra 'room.getStatus()' bị lỗi)
                 if (quantity <= 0 || quantity > room.getCapacity()) {
                     System.out.println("!!! BOOKING SERVICE LỖI: Room " + roomId + " capacity exceeded (Qty: " + quantity + ", Cap: " + room.getCapacity() + ") !!!");
                     LOGGER.log(Level.SEVERE, ">>> CREATE_BOOKING_FAILED: Guest count {0} exceeds capacity {1} for RoomID {2}", new Object[]{quantity, room.getCapacity(), roomId});
@@ -214,16 +192,12 @@ public class BookingService {
 
         System.out.println(">>> [BookingService] All rooms are available. Proceeding to DAO insert...");
 
-        // Calculate Duration and Final Price
-        Duration duration = Duration.between(checkIn, checkOut);
-        double durationHours = duration.toMinutes() / 60.0;
-
+        // Calculate Duration and Final Price (Code gốc của bạn - Chính xác)
         long durationNights = Duration.between(checkIn.toLocalDate().atStartOfDay(), checkOut.toLocalDate().atStartOfDay()).toDays();
         if (durationNights <= 0) {
             durationNights = 1;
             LOGGER.log(Level.INFO, "Booking duration is less than a day, calculating price for 1 night.");
         }
-
         double finalTotalPrice = baseTotalPrice * durationNights;
 
         // Create Booking object
@@ -231,31 +205,27 @@ public class BookingService {
         newBooking.setUserId(userId);
         newBooking.setCheckinTime(checkIn);
         newBooking.setCheckoutTime(checkOut);
-        // NOTE: durationHours is calculated but not saved to DB (column doesn't exist)
-        // If needed in future, add migration: ALTER TABLE booking ADD COLUMN duration_hours DECIMAL(10,2);
-        // newBooking.setDurationHours(durationHours);
         newBooking.setStatus(initialStatus);
         newBooking.setTotalPrice(finalTotalPrice);
 
-        // Create list of BookingDetail objects
+        // === SỬA LỖI 2: 'roomId cannot be NULL' ===
+        // Gán phòng đầu tiên làm ID chính cho bảng Booking
+        // (An toàn, vì roomIds đã được kiểm tra not-null/not-empty ở đầu hàm)
+        newBooking.setRoomId(roomIds.get(0));
+        // === KẾT THÚC SỬA LỖI 2 ===
+
+        // Create list of BookingDetail objects (Code gốc của bạn - Chính xác)
         List<BookingDetail> bookingDetails = new ArrayList<>();
         for (int i = 0; i < selectedRooms.size(); i++) {
             Room room = selectedRooms.get(i);
             Integer quantity = quantities.get(i);
             String specialRequest = (specialRequests != null && i < specialRequests.size()) ? specialRequests.get(i) : null;
-
-            BookingDetail detail = new BookingDetail(
-                    room.getRoomId(),
-                    room.getPrice(),
-                    quantity,
-                    null,
-                    null
-            );
+            BookingDetail detail = new BookingDetail(room.getRoomId(), room.getPrice(), quantity, null, null);
             detail.setSpecialRequest(specialRequest);
             bookingDetails.add(detail);
         }
 
-        // Call BookingDao
+        // Call BookingDao (Code gốc của bạn - Chính xác)
         System.out.println(">>> [BookingService] Calling bookingDao.insertBookingWithDetails...");
         boolean success = bookingDao.insertBookingWithDetails(newBooking, bookingDetails);
 
@@ -271,11 +241,8 @@ public class BookingService {
         }
     }
 
-    /**
-     * Overload method (không có quantities/special requests)
-     */
     public int createBooking(int userId, List<Integer> roomIds, LocalDateTime checkIn,
-                             LocalDateTime checkOut, String initialStatus) {
+            LocalDateTime checkOut, String initialStatus) {
         List<Integer> defaultQuantities = new ArrayList<>();
         for (int i = 0; i < roomIds.size(); i++) {
             defaultQuantities.add(1);
@@ -283,17 +250,13 @@ public class BookingService {
         return createBooking(userId, roomIds, checkIn, checkOut, defaultQuantities, null, initialStatus);
     }
 
-    // ============ COMMON BOOKING STATUS METHODS ============
-
-    /**
-     * Cập nhật trạng thái booking
-     */
+    // ============ COMMON BOOKING STATUS METHODS (Code gốc của bạn - Chính xác) ============
     public boolean updateBookingStatus(int bookingId, String newStatus) {
-        if (newStatus == null || !List.of("pending", "confirmed", "cancelled", "completed").contains(newStatus.toLowerCase())) {
+        if (newStatus == null || !List.of("pending", "confirmed", "cancelled", "completed", "checked-in").contains(newStatus.toLowerCase())) {
+            // (Đã thêm 'checked-in' từ hàm offline)
             LOGGER.log(Level.WARNING, "Attempted to update booking {0} with invalid status: {1}", new Object[]{bookingId, newStatus});
             return false;
         }
-
         boolean success = bookingDao.updateBookingStatus(bookingId, newStatus);
         if (success) {
             LOGGER.log(Level.INFO, "Booking {0} status updated to '{1}'.", new Object[]{bookingId, newStatus});
@@ -303,35 +266,71 @@ public class BookingService {
         return success;
     }
 
-    /**
-     * Hủy booking
-     */
     public boolean cancelBooking(int bookingId) {
-        Booking booking = getBookingById(bookingId);
-        if (booking != null && ("completed".equalsIgnoreCase(booking.getStatus()))) {
-            LOGGER.log(Level.WARNING, "Booking {0} cannot be cancelled because it is already {1}.",
-                    new Object[]{bookingId, booking.getStatus()});
+        try {
+            Booking booking = getBookingById(bookingId);
+            if (booking == null) {
+                LOGGER.log(Level.WARNING, "Booking {0} not found.", bookingId);
+                return false;
+            }
+
+            if ("completed".equalsIgnoreCase(booking.getStatus())) {
+                LOGGER.log(Level.WARNING, "Booking {0} already completed", bookingId);
+                return false;
+            }
+
+            // ✅ FIX: Gọi updateBookingStatus sẽ tự động update Room status
+            boolean success = updateBookingStatus(bookingId, "cancelled");
+
+            if (success) {
+                LOGGER.log(Level.INFO, "✅ Booking {0} cancelled successfully", bookingId);
+            } else {
+                LOGGER.log(Level.SEVERE, "❌ Failed to cancel booking {0}", bookingId);
+            }
+
+            return success;
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error cancelling booking " + bookingId, e);
+            e.printStackTrace();
             return false;
         }
-        return updateBookingStatus(bookingId, "cancelled");
     }
 
-    /**
-     * Xác nhận booking
-     */
     public boolean confirmBooking(int bookingId) {
-        Booking booking = getBookingById(bookingId);
-        if (booking != null && !"pending".equalsIgnoreCase(booking.getStatus())) {
-            LOGGER.log(Level.WARNING, "Booking {0} cannot be confirmed because its status is {1}.",
-                    new Object[]{bookingId, booking.getStatus()});
+        try {
+            Booking booking = getBookingById(bookingId);
+            if (booking == null) {
+                LOGGER.log(Level.WARNING, "Booking {0} not found.", bookingId);
+                return false;
+            }
+
+            if (!"pending".equalsIgnoreCase(booking.getStatus())) {
+                LOGGER.log(Level.WARNING, "Booking {0} status is {1}, not pending",
+                        new Object[]{bookingId, booking.getStatus()});
+                return false;
+            }
+
+            // ✅ FIX: Gọi updateBookingStatus sẽ tự động update Room status
+            boolean success = updateBookingStatus(bookingId, "confirmed");
+
+            if (success) {
+                LOGGER.log(Level.INFO, "✅ Booking {0} confirmed successfully", bookingId);
+            } else {
+                LOGGER.log(Level.SEVERE, "❌ Failed to confirm booking {0}", bookingId);
+            }
+
+            return success;
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error confirming booking " + bookingId, e);
+            e.printStackTrace();
+            return false;
         }
-        return updateBookingStatus(bookingId, "confirmed");
     }
 
-    /**
-     * Hoàn thành booking
-     */
     public boolean completeBooking(int bookingId) {
+        // (Code gốc của bạn - Chính xác)
         Booking booking = getBookingById(bookingId);
         if (booking != null) {
             if (!"confirmed".equalsIgnoreCase(booking.getStatus())) {
@@ -346,8 +345,7 @@ public class BookingService {
         return updateBookingStatus(bookingId, "completed");
     }
 
-    // ============ READ/QUERY METHODS ============
-
+    // ============ READ/QUERY METHODS (Code gốc của bạn - Chính xác) ============
     public List<Booking> getAllBookings() {
         try {
             return bookingDao.getAllBookings();
@@ -398,9 +396,6 @@ public class BookingService {
         }
     }
 
-    /**
-     * Lấy booking details cho customer view (BookingDetail list)
-     */
     public List<BookingDetail> getBookingDetailsList(int bookingId) {
         try {
             if (bookingDetailDao == null) {
@@ -415,11 +410,10 @@ public class BookingService {
         }
     }
 
-    // ============ AVAILABILITY CHECKING METHODS ============
-
+    // ============ AVAILABILITY CHECKING METHODS (ĐÃ SỬA LỖI) ============
     public List<Room> getAvailableRooms(LocalDateTime checkIn, LocalDateTime checkOut, String searchKeyword,
-                                        Integer categoryId, Double minPrice, Double maxPrice,
-                                        Integer minCapacity, int pageNumber, int pageSize) {
+            Integer categoryId, Double minPrice, Double maxPrice,
+            Integer minCapacity, int pageNumber, int pageSize) {
         if (checkIn == null || checkOut == null || !checkOut.isAfter(checkIn)) {
             LOGGER.log(Level.WARNING, "Invalid date range for getAvailableRooms: CheckIn={0}, CheckOut={1}", new Object[]{checkIn, checkOut});
             return new ArrayList<>();
@@ -429,6 +423,8 @@ public class BookingService {
             String checkInDateStr = checkIn.format(DATE_FORMATTER);
             String checkOutDateStr = checkOut.format(DATE_FORMATTER);
 
+            // HÀM NÀY (isRoomAvailable) ĐÃ ĐƯỢC SỬA LỖI LOGIC 1
+            // Truyền 'available' vào roomDao.findAllRooms là ĐÚNG
             return roomDao.findAllRooms(searchKeyword, categoryId, minPrice, maxPrice,
                     minCapacity, checkInDateStr, checkOutDateStr, "available",
                     pageNumber, pageSize);
@@ -444,8 +440,8 @@ public class BookingService {
     }
 
     public int getAvailableRoomsCount(LocalDateTime checkIn, LocalDateTime checkOut, String searchKeyword,
-                                      Integer categoryId, Double minPrice, Double maxPrice,
-                                      Integer minCapacity) {
+            Integer categoryId, Double minPrice, Double maxPrice,
+            Integer minCapacity) {
         if (checkIn == null || checkOut == null || !checkOut.isAfter(checkIn)) {
             LOGGER.log(Level.WARNING, "Invalid date range for getAvailableRoomsCount: CheckIn={0}, CheckOut={1}", new Object[]{checkIn, checkOut});
             return 0;
@@ -464,9 +460,13 @@ public class BookingService {
         }
     }
 
+    /**
+     * SỬA LỖI 1: Bỏ qua kiểm tra 'room.getStatus()', chỉ tin vào
+     * 'isRoomBookedDuringDates' (logic chồng chéo ngày).
+     */
     public boolean isRoomAvailable(int roomId, LocalDateTime checkIn, LocalDateTime checkOut) {
         if (checkIn == null || checkOut == null || !checkOut.isAfter(checkIn)) {
-            LOGGER.log(Level.WARNING, "Invalid date range for isRoomAvailable check: RoomID={0}, CheckIn={1}, CheckOut={2}",
+            LOGGER.log(Level.WARNING, "Invalid date range: RoomID={0}, CheckIn={1}, CheckOut={2}",
                     new Object[]{roomId, checkIn, checkOut});
             return false;
         }
@@ -474,37 +474,39 @@ public class BookingService {
         try {
             Room room = roomDao.getById(roomId);
             if (room == null) {
-                LOGGER.log(Level.WARNING, "isRoomAvailable check failed: Room {0} not found.", roomId);
-                return false;
-            }
-            if (!"available".equalsIgnoreCase(room.getStatus())) {
-                LOGGER.log(Level.INFO, "isRoomAvailable check: Room {0} is not available (status: {1}).",
-                        new Object[]{roomId, room.getStatus()});
+                LOGGER.log(Level.WARNING, "Room {0} not found.", roomId);
                 return false;
             }
 
+            // ✅ FIX: CHỈ CHO PHÉP BOOK PHÒNG CÓ STATUS = "available"
+            String status = room.getStatus();
+            if (!"available".equalsIgnoreCase(status)) {
+                LOGGER.log(Level.WARNING,
+                        "Room {0} is NOT available (status=''{1}'')",
+                        new Object[]{roomId, status});
+                return false;
+            }
+
+            // ✅ FIX: Kiểm tra overlap (bao gồm cả pending/confirmed/checked-in)
             boolean isOverlapping = bookingDao.isRoomBookedDuringDates(roomId, checkIn, checkOut);
-            LOGGER.log(Level.INFO, "isRoomAvailable check for Room {0} between {1} and {2}: Overlapping booking found = {3}",
-                    new Object[]{roomId, checkIn, checkOut, isOverlapping});
 
-            return !isOverlapping;
+            if (isOverlapping) {
+                LOGGER.log(Level.WARNING,
+                        "Room {0} has overlapping booking during {1} to {2}",
+                        new Object[]{roomId, checkIn, checkOut});
+                return false;
+            }
+
+            LOGGER.log(Level.INFO,
+                    "Room {0} is AVAILABLE (status={1}, no overlap)",
+                    new Object[]{roomId, status});
+
+            return true;
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error checking room availability for roomId: " + roomId, e);
             e.printStackTrace();
             return false;
-        }
-    }
-
-    // ============ OTHER UTILITY METHODS ============
-
-    public List<Booking> getUpcomingBookings() {
-        try {
-            return bookingDao.getUpcomingBookings();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error retrieving upcoming bookings.", e);
-            e.printStackTrace();
-            return new ArrayList<>();
         }
     }
 

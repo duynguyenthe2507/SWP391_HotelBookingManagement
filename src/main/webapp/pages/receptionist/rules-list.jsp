@@ -1,27 +1,43 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Manage Hotel Rules | 36 Hotel</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/font-awesome.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
-
+    <meta name="description" content="Sona Template">
+    <meta name="keywords" content="Sona, unica, creative, html">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Rule Management - 36 Hotel</title>
+    <link href="https://fonts.googleapis.com/css?family=Lora:400,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Cabin:400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.min.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/font-awesome.min.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/elegant-icons.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/flaticon.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/owl.carousel.min.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/nice-select.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/jquery-ui.min.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/magnific-popup.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/slicknav.min.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/receptionist-bills.css" type="text/css">
     <style>
-        body { background-color: #f9f9f9; }
-        .btn-add {
-            background-color: #dfa974;
-            color: #fff;
+        .action-link.delete-btn {
+            background: none;
             border: none;
-            padding: 10px 18px;
-            border-radius: 6px;
-            font-weight: 600;
-            transition: all 0.3s ease;
+            padding: 0;
+            color: #dc3545;
+            cursor: pointer;
+            font-weight: 500;
+            font-family: "Cabin", sans-serif;
+            font-size: 14px;
         }
-        .btn-add:hover { background-color: #b67b4b; }
-
+        .action-link.delete-btn:hover {
+            color: #a71d2a;
+        }
         .side-panel {
             position: fixed;
             top: 0;
@@ -33,21 +49,34 @@
             z-index: 9999;
             transition: right 0.4s ease;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
-        .side-panel.active { right: 0; }
-
+        .side-panel.active {
+            right: 0;
+        }
         .panel-header {
             background-color: #dfa974;
             color: white;
-            padding: 20px;
+            padding: 20px 25px;
             font-size: 18px;
             font-weight: 700;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-shrink: 0;
         }
-        .panel-body { padding: 25px; }
-        .panel-body input, .panel-body textarea, .panel-body select {
+        .panel-close {
+            cursor: pointer;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .panel-body {
+            padding: 25px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        .panel-body .form-control {
             border-radius: 8px;
             border: 1px solid #ccc;
         }
@@ -57,211 +86,232 @@
             padding: 20px 25px;
             border-top: 1px solid #eee;
             background-color: #f8f8f8;
+            flex-shrink: 0;
         }
-        .btn-cancel {
-            background: #dc3545;
-            color: white;
+        .btn-cancel, .btn-save {
             border: none;
             border-radius: 6px;
             padding: 10px 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-cancel:hover {
+            background: #5a6268;
         }
         .btn-save {
             background: #28a745;
             color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 10px 20px;
         }
-        .table thead th {
-            background-color: #dfa974;
-            color: white;
-            text-align: center;
+        .btn-save:hover {
+            background: #218838;
         }
-        .table td { vertical-align: middle; }
-        .badge-active { background-color: #28a745; color: white; padding: 5px 10px; border-radius: 6px; }
-        .badge-inactive { background-color: #dc3545; color: white; padding: 5px 10px; border-radius: 6px; }
-        .action-link { color: #dfa974; cursor: pointer; font-weight: 600; }
+        .status-badge.status-active {
+            color: #ffffff;
+            background: #28a745;
+        }
+        .status-badge.status-inactive {
+            color: #ffffff;
+            background: #6c757d;
+        }
+        .col-description {
+            white-space: pre-line;
+            text-align: left;
+            font-size: 13px;
+            max-width: 350px;
+            overflow-wrap: break-word;
+            line-height: 1.4;
+        }
     </style>
 </head>
 
 <body>
-
-<div class="container mt-5 mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Rules Receptionist</h2>
-        <button class="btn-add" onclick="openPanel('add')"><i class="fa fa-plus"></i> Add New Rule</button>
+<c:set var="pageActive" value="rules"/>
+<div class="dashboard-wrapper">
+    <jsp:include page="/common/sidebar.jsp"/>
+    <div class="dashboard-content">
+        <div id="preloder">
+            <div class="loader"></div>
+        </div>
+        <section class="main-content">
+            <div class="container-fluid">
+                <c:if test="${not empty param.success}">
+                    <div class="alert alert-success">
+                        <i class="fa fa-check-circle"></i> Operation saved successfully!
+                    </div>
+                </c:if>
+                <c:if test="${not empty error}">
+                    <div class="alert alert-danger">
+                        <i class="fa fa-times-circle"></i> ${error}
+                    </div>
+                </c:if>
+                <div class="search-section">
+                    <form action="${pageContext.request.contextPath}/rules" method="get" class="search-form">
+                        <input type="text" name="search" class="search-input" placeholder="Search by rule title..." value="${search}">
+                        <button type="submit" class="search-btn">
+                            <i class="fa fa-search"></i> Filter
+                        </button>
+                        <c:if test="${not empty search}">
+                            <a href="${pageContext.request.contextPath}/rules" class="action-btn secondary">
+                                <i class="fa fa-times"></i> Clear
+                            </a>
+                        </c:if>
+                    </form>
+                </div>
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="openPanel('add')">
+                        <i class="fa fa-plus"></i> Add New Rule
+                    </button>
+                </div>
+                <div class="bills-table">
+                    <div class="table-header">
+                        <h4><i class="fa fa-book"></i> Rules List</h4>
+                    </div>
+                    <c:choose>
+                        <c:when test="${not empty rules}">
+                            <table class="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Description</th>
+                                    <th>Status</th>
+                                    <th>Created At</th>
+                                    <th>Updated At</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <c:forEach var="r" items="${rules}" varStatus="loop">
+                                    <fmt:formatDate value="${r.createdAt}" pattern="yyyy-MM-dd'T'HH:mm" var="fmtCreatedAt" />
+                                    <fmt:formatDate value="${r.updatedAt}" pattern="yyyy-MM-dd'T'HH:mm" var="fmtUpdatedAt" />
+                                    <tr data-rule-id="${r.ruleId}" data-title="${fn:escapeXml(r.title)}" data-description="${fn:escapeXml(r.description)}" data-status="${r.status ? 'Active' : 'Inactive'}" data-created-at="${fmtCreatedAt}" data-updated-at="${fmtUpdatedAt}">
+                                        <td><div class="bill-id">${loop.count}</div></td>
+                                        <td><div class="customer-name">${r.title}</div></td>
+                                        <td class="col-description">${r.description}</td>
+                                        <td><span class="status-badge ${r.status ? 'status-active' : 'status-inactive'}">${r.status ? 'Active' : 'Inactive'}</span></td>
+                                        <td><div class="bill-date"><fmt:formatDate value="${r.createdAt}" pattern="dd/MM/yyyy HH:mm"/></div></td>
+                                        <td><div class="bill-date"><fmt:formatDate value="${r.updatedAt}" pattern="dd/MM/yyyy HH:mm"/></div></td>
+                                        <td>
+                                            <div class="action-links">
+                                                <span class="action-link edit" onclick="openPanel('edit', this)">
+                                                    <i class="fa fa-edit"></i> Edit
+                                                </span>
+                                                <form action="${pageContext.request.contextPath}/rules/delete" method="get" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this rule?');">
+                                                    <input type="hidden" name="id" value="${r.ruleId}">
+                                                    <button type="submit" class="action-link delete-btn">
+                                                        <i class="fa fa-trash"></i> Delete
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                                </tbody>
+                            </table>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="empty-state">
+                                <i class="fa fa-book"></i>
+                                <h4>No Rules Found</h4>
+                                <p>
+                                    <c:if test="${not empty search}">No rules found matching your filter.</c:if>
+                                    <c:if test="${empty search}">No rules have been created yet.</c:if>
+                                </p>
+                                <button class="action-btn" onclick="openPanel('add')">
+                                    <i class="fa fa-plus"></i> Create First Rule
+                                </button>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+            </div>
+        </section>
+        <div class="side-panel" id="sidePanel">
+            <form method="post" id="ruleForm" action="${pageContext.request.contextPath}/rules/save">
+                <div class="panel-header">
+                    <span id="panelTitle">Add New Rule</span>
+                    <span class="panel-close" onclick="closePanel()">&times;</span>
+                </div>
+                <div class="panel-body">
+                    <input type="hidden" id="ruleId" name="ruleId">
+                    <div class="mb-3">
+                        <label for="title">Rule Title</label>
+                        <input type="text" id="title" name="title" class="form-control" required maxlength="255">
+                    </div>
+                    <div class="mb-3">
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description" rows="5" class="form-control" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="status">Status</label>
+                        <select id="status" name="status" class="form-control" required>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="createdAt">Created At</label>
+                        <input type="datetime-local" id="createdAt" name="createdAt" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label for="updatedAt">Updated At</label>
+                        <input type="datetime-local" id="updatedAt" name="updatedAt" class="form-control">
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    <button type="button" class="btn-cancel" onclick="closePanel()">Cancel</button>
+                    <button type="submit" class="btn-save">Save Changes</button>
+                </div>
+            </form>
+        </div>
     </div>
-
-    <table class="table table-bordered text-center">
-        <thead>
-        <tr>
-            <th>#</th>
-            <th>Title</th>
-            <th>Description</th>
-            <th>Status</th>
-            <th>Created At</th>
-            <th>Updated At</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        <c:forEach var="r" items="${rules}" varStatus="i">
-            <tr>
-                <td>${i.index + 1}</td>
-                <td>${r.title}</td>
-                <td>${r.description}</td>
-                <td><span class="${r.status ? 'badge-active' : 'badge-inactive'}">${r.status ? 'Active' : 'Inactive'}</span></td>
-                <td>${r.createdAt}</td>
-                <td>${r.updatedAt}</td>
-                <td>
-                    <span class="action-link"
-                          onclick="openPanel('edit', ${r.ruleId}, '${r.title}', '${r.description}', '${r.status}', '${r.createdAt}', '${r.updatedAt}')">
-                        <i class="fa fa-pencil"></i> Edit
-                    </span>
-                    <a href="javascript:void(0);"
-                       class="text-danger"
-                       onclick="confirmDelete('${pageContext.request.contextPath}/rules/delete?id=${r.ruleId}')">
-                        <i class="fa fa-trash"></i> Delete
-                    </a>
-                </td>
-            </tr>
-        </c:forEach>
-        </tbody>
-    </table>
 </div>
-
-<!-- ✅ Slide Panel -->
-<div class="side-panel" id="sidePanel">
-    <form action="${pageContext.request.contextPath}/rules/save" method="post" id="ruleForm">
-        <div class="panel-header">
-            <span id="panelTitle">Add New Rule</span>
-            <span style="cursor:pointer" onclick="closePanel()">&times;</span>
-        </div>
-
-        <div class="panel-body">
-            <input type="hidden" id="ruleId" name="ruleId">
-
-            <div class="mb-3">
-                <label>Rule Title</label>
-                <input type="text" id="title" name="title" class="form-control" required>
-            </div>
-
-            <div class="mb-3">
-                <label>Description</label>
-                <textarea id="description" name="description" rows="3" class="form-control" required></textarea>
-            </div>
-
-            <div class="mb-3">
-                <label>Status</label>
-                <select id="status" name="status" class="form-select">
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
-                </select>
-            </div>
-
-            <!-- ✅ Cho phép tự nhập -->
-            <div class="mb-3">
-                <label>Created At (Manual Input)</label>
-                <input type="datetime-local" id="createdAt" name="createdAt" class="form-control">
-            </div>
-
-            <div class="mb-3">
-                <label>Updated At (Manual Input)</label>
-                <input type="datetime-local" id="updatedAt" name="updatedAt" class="form-control">
-            </div>
-        </div>
-
-        <div class="panel-footer">
-            <button type="button" class="btn-cancel" onclick="closePanel()">Cancel</button>
-            <button type="submit" class="btn-save">Save Changes</button>
-        </div>
-    </form>
-</div>
+<script src="${pageContext.request.contextPath}/js/jquery-3.3.1.min.js"></script>
+<script src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>
+<script src="${pageContext.request.contextPath}/js/jquery.magnific-popup.min.js"></script>
+<script src="${pageContext.request.contextPath}/js/jquery.nice-select.min.js"></script>
+<script src="${pageContext.request.contextPath}/js/jquery-ui.min.js"></script>
+<script src="${pageContext.request.contextPath}/js/jquery.slicknav.js"></script>
+<script src="${pageContext.request.contextPath}/js/owl.carousel.min.js"></script>
+<script src="${pageContext.request.contextPath}/js/main.js"></script>
 <script>
     const panel = document.getElementById("sidePanel");
-    const ruleIdField = document.getElementById("ruleId");
-    const titleField = document.getElementById("title");
-    const descField = document.getElementById("description");
-    const statusField = document.getElementById("status");
-    const createdAtField = document.getElementById("createdAt");
-    const updatedAtField = document.getElementById("updatedAt");
+    const form = document.getElementById("ruleForm");
     const panelTitle = document.getElementById("panelTitle");
-
-    function openPanel(mode, id = "", title = "", desc = "", status = "Active", created = "", updated = "") {
-        panel.classList.add("active");
-
+    const f_ruleId = document.getElementById('ruleId');
+    const f_title = document.getElementById('title');
+    const f_description = document.getElementById('description');
+    const f_status = document.getElementById('status');
+    const f_createdAt = document.getElementById('createdAt');
+    const f_updatedAt = document.getElementById('updatedAt');
+    function openPanel(mode, button) {
+        form.reset();
         if (mode === 'add') {
             panelTitle.innerText = "Add New Rule";
-            ruleIdField.value = "";
-            titleField.value = "";
-            descField.value = "";
-            statusField.value = "Active";
-            createdAtField.value = "";
-            updatedAtField.value = "";
-        } else {
-            panelTitle.innerText = "Edit Rule";
-            ruleIdField.value = id;
-            titleField.value = title;
-            descField.value = desc;
-            statusField.value = status;
-            createdAtField.value = convertDate(created);
-            updatedAtField.value = convertDate(updated);
+            f_ruleId.value = "";
+            f_status.value = "Active";
+            f_createdAt.value = "";
+            f_updatedAt.value = "";
+        } else if (mode === 'edit') {
+            panelTitle.innerText = "Edit Rule Information";
+            const row = button.closest('tr');
+            const data = row.dataset;
+            f_ruleId.value = data.ruleId;
+            f_title.value = data.title;
+            f_description.value = data.description;
+            f_status.value = data.status;
+            f_createdAt.value = data.createdAt;
+            f_updatedAt.value = data.updatedAt;
         }
+        panel.classList.add("active");
     }
-
     function closePanel() {
         panel.classList.remove("active");
     }
-
-    // Chuyển đổi ngày từ định dạng SQL hoặc text sang định dạng datetime-local
-    function convertDate(dateStr) {
-        if (!dateStr) return "";
-        try {
-            const date = new Date(dateStr);
-            return date.toISOString().slice(0, 16);
-        } catch (e) {
-            return "";
-        }
-    }
 </script>
-
-<script src="${pageContext.request.contextPath}/js/bootstrap.bundle.min.js"></script>
-
-<script>
-    // Khi submit form thêm/sửa rule -> reload lại sau khi lưu thành công
-    document.addEventListener("DOMContentLoaded", function () {
-        const form = document.querySelector("form[action*='save']");
-        if (form) {
-            form.addEventListener("submit", function (e) {
-                e.preventDefault(); // Ngăn gửi form mặc định
-                const formData = new FormData(form);
-
-                fetch(form.action, {
-                    method: 'POST',
-                    body: formData
-                }).then(response => {
-                    if (response.ok) {
-                        alert("Lưu thành công!");
-                        window.location.reload(); // Tự reload lại trang
-                    } else {
-                        alert("Có lỗi xảy ra khi lưu!");
-                    }
-                }).catch(err => alert("Lỗi: " + err));
-            });
-        }
-    });
-</script>
-    <script>
-        // Xác nhận khi xóa
-        function confirmDelete(url) {
-        const confirmed = confirm("Bạn có chắc chắn muốn xóa không?");
-        if (confirmed) {
-        window.location.href = url;
-    }
-    }
-</script>
-
-
-
 </body>
 </html>

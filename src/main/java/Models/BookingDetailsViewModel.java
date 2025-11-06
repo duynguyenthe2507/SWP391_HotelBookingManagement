@@ -13,4 +13,5 @@ public class BookingDetailsViewModel {
     private String customerName;
     private String receptionistName;
     private List<Map<String, Object>> services;
+    private Integer invoiceId;
 }

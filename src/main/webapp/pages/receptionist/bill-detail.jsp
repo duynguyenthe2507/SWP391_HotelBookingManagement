@@ -33,141 +33,15 @@
 
 <body>
 <c:set var="pageActive" value="bills"/>
-<div class="d-flex" style="min-height:100vh;">
-  <!-- Sidebar begin (giống dashboard) -->
-  <nav class="sidebar d-flex flex-column col-lg-2 col-md-3 col-3 p-0 min-vh-100" style="background-color: #23242a;">
-    <div class="sidebar-sticky flex-grow-1 d-flex flex-column">
-      <div class="text-center mt-4 mb-4">
-        <div style="font-family: 'Lora', serif; font-style:italic; font-weight:bold; font-size:2em; color:#dfa974; letter-spacing:1px;">Sona.</div>
-        <h5 class="font-weight-bold" style="color: #dfa974;">Reception Dashboard</h5>
-      </div>
-      <ul class="nav flex-column flex-grow-1">
-        <li class="nav-item"><a href="${pageContext.request.contextPath}/pages/receptionist/receptionist-dashboard.jsp" class="nav-link text-white"><i class="fa fa-tachometer mr-2"></i> Dashboard</a></li>
-        <li class="nav-item"><a href="${pageContext.request.contextPath}/receptionist/bills" class="nav-link text-white active" style="background-color: #dfa974; font-weight: bold;"><i class="fa fa-file-text-o mr-2"></i> Bills</a></li>
-        <li class="nav-item"><a href="${pageContext.request.contextPath}/receptionist/room-fees" class="nav-link text-white"><i class="fa fa-dollar mr-2"></i> Room Fees</a></li>
-        <li class="nav-item"><a href="${pageContext.request.contextPath}/receptionist/bookings" class="nav-link text-white"><i class="fa fa-calendar mr-2"></i> Bookings</a></li>
-        <li class="nav-item"><a href="${pageContext.request.contextPath}/receptionist/penalties" class="nav-link text-white"><i class="fa fa-gavel mr-2"></i> Penalties</a></li>
-        <li class="nav-item"><a href="${pageContext.request.contextPath}/receptionist/feedback" class="nav-link text-white"><i class="fa fa-comments mr-2"></i> Feedback</a></li>
-        <li class="nav-item"><a href="${pageContext.request.contextPath}/receptionist/rooms" class="nav-link text-white"><i class="fa fa-home mr-2"></i> Room List</a></li>
-        <li class="nav-item"><a href="${pageContext.request.contextPath}/profile" class="nav-link text-white"><i class="fa fa-user mr-2"></i> Profile</a></li>
-        <li class="nav-item"><a href="${pageContext.request.contextPath}/login" class="nav-link text-white"><i class="fa fa-sign-out mr-2"></i> Logout</a></li>
-      </ul>
-      <div class="mt-auto mb-3"></div>
-    </div>
-  </nav>
-  <!-- Sidebar end -->
-  <!-- Main layout block: header, content (giữ nguyên bill-detail), footer -->
-  <div class="flex-grow-1 d-flex flex-column">
+<div class="dashboard-wrapper">
+    <jsp:include page="/common/sidebar.jsp"/>
+    <div class="dashboard-content">
     <!-- Page Preloder -->
     <div id="preloder">
         <div class="loader"></div>
     </div>
 
-    <!-- Header Section Begin -->
-    <header class="header-section no-print">
-        <div class="top-nav">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-6">
-                        <ul class="tn-left">
-                            <li><i class="fa fa-phone"></i> (12) 345 67890</li>
-                            <li><i class="fa fa-envelope"></i> info.colorlib@gmail.com</li>
-                        </ul>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="tn-right">
-                            <div class="top-social">
-                                <a href="#"><i class="fa fa-facebook"></i></a>
-                                <a href="#"><i class="fa fa-twitter"></i></a>
-                                <a href="#"><i class="fa fa-tripadvisor"></i></a>
-                                <a href="#"><i class="fa fa-instagram"></i></a>
-                            </div>
-                            <a href="#" class="bk-btn">Booking Now</a>
-                            <div class="language-option">
-                                <img src="${pageContext.request.contextPath}/img/flag.jpg" alt="">
-                                <span>EN <i class="fa fa-angle-down"></i></span>
-                                <div class="flag-dropdown">
-                                    <ul>
-                                        <li><a href="#">Zi</a></li>
-                                        <li><a href="#">Fr</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="menu-item">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-2">
-                        <div class="logo">
-                            <a href="${pageContext.request.contextPath}/home">
-                                <img src="${pageContext.request.contextPath}/img/logo.png" alt="">
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-lg-10">
-                        <div class="nav-menu">
-                            <nav class="mainmenu">
-                                <ul>
-                                    <li <c:if test="${pageActive eq 'dashboard'}">class="active"</c:if>>
-                                        <a href="${pageContext.request.contextPath}/pages/receptionist/receptionist-dashboard.jsp">Dashboard</a>
-                                    </li>
-                                    <li <c:if test="${pageActive eq 'bills'}">class="active"</c:if>>
-                                        <a href="${pageContext.request.contextPath}/receptionist/bills">Bills</a>
-                                    </li>
-                                    <li <c:if test="${pageActive eq 'room-fees'}">class="active"</c:if>>
-                                        <a href="${pageContext.request.contextPath}/receptionist/room-fees">Room Fees</a>
-                                    </li>
-                                    <li <c:if test="${pageActive eq 'bookings'}">class="active"</c:if>>
-                                        <a href="${pageContext.request.contextPath}/receptionist/bookings">Bookings</a>
-                                    </li>
-                                    <li <c:if test="${pageActive eq 'penalties'}">class="active"</c:if>>
-                                        <a href="${pageContext.request.contextPath}/receptionist/penalties">Penalties</a>
-                                    </li>
-                                    <li <c:if test="${pageActive eq 'feedback'}">class="active"</c:if>>
-                                        <a href="${pageContext.request.contextPath}/receptionist/feedback">Feedback</a>
-                                    </li>
-                                    <li <c:if test="${pageActive eq 'room-list'}">class="active"</c:if>>
-                                        <a href="${pageContext.request.contextPath}/receptionist/rooms">Room List</a>
-                                    </li>
-                                </ul>
-                            </nav>
-                            <div class="nav-right search-switch">
-                                <i class="icon_search"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-    <!-- Header End -->
-
-    <!-- Professional Header Section -->
-    <section class="receptionist-header no-print">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <h2>
-                        <i class="fa fa-file-text-o"></i>
-                        <c:choose>
-                            <c:when test="${editMode}">Edit Bill #${billInfo.invoice.invoiceId}</c:when>
-                            <c:otherwise>Bill Detail #${billInfo.invoice.invoiceId}</c:otherwise>
-                        </c:choose>
-                    </h2>
-                    <p>
-                        <c:choose>
-                            <c:when test="${editMode}">Modify bill information and charges</c:when>
-                            <c:otherwise>View detailed bill information and print invoice</c:otherwise>
-                        </c:choose>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
+    <!-- Header removed to match booking-list.jsp layout -->
 
     <!-- Main Content Section -->
     <section class="main-content">
@@ -405,37 +279,38 @@
                                     <input type="hidden" name="action" value="update">
                                     <input type="hidden" name="invoiceId" value="${billInfo.invoice.invoiceId}">
 
-                                    <!-- Grid Layout for Bill Breakdown -->
-                                    <!-- Room Cost row -->
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                        <label class="form-label" style="font-weight: 600; color: #333; margin: 0;">Room Cost</label>
-                                        <input type="number" step="0.01" name="totalRoomCost" class="form-control"
-                                               value="${billInfo.invoice.totalRoomCost}" required
-                                               style="width: auto; min-width: 180px; max-width: 250px; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; background: #f8f9fa; text-align: right;">
-                                    </div>
+                                    <div class="calculation-section">
+                                        <!-- Room Cost row -->
+                                        <div class="calculation-row">
+                                            <label class="calculation-label" style="margin: 0;">Room Cost</label>
+                                            <input type="number" step="0.01" name="totalRoomCost"
+                                                   value="${billInfo.invoice.totalRoomCost}" required
+                                                   style="width: auto; min-width: 150px; padding: 8px 12px; border: 2px solid #e5e5e5; border-radius: 8px; font-size: 14px; font-weight: 700; color: #dfa974; font-family: 'Lora', serif; text-align: right; background: white;">
+                                        </div>
 
-                                    <!-- Service Cost row -->
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                        <label class="form-label" style="font-weight: 600; color: #333; margin: 0;">Service Cost</label>
-                                        <input type="number" step="0.01" name="totalServiceCost" class="form-control"
-                                               value="${billInfo.invoice.totalServiceCost}" required
-                                               style="width: auto; min-width: 180px; max-width: 250px; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; background: #f8f9fa; text-align: right;">
-                                    </div>
+                                        <!-- Service Cost row -->
+                                        <div class="calculation-row">
+                                            <label class="calculation-label" style="margin: 0;">Service Cost</label>
+                                            <input type="number" step="0.01" name="totalServiceCost"
+                                                   value="${billInfo.invoice.totalServiceCost}" required
+                                                   style="width: auto; min-width: 150px; padding: 8px 12px; border: 2px solid #e5e5e5; border-radius: 8px; font-size: 14px; font-weight: 700; color: #dfa974; font-family: 'Lora', serif; text-align: right; background: white;">
+                                        </div>
 
-                                    <!-- Tax Amount row -->
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                        <label class="form-label" style="font-weight: 600; color: #333; margin: 0;">Tax Amount</label>
-                                        <input type="number" step="0.01" name="taxAmount" class="form-control"
-                                               value="${billInfo.invoice.taxAmount}" required
-                                               style="width: auto; min-width: 180px; max-width: 250px; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; background: #f8f9fa; text-align: right;">
-                                    </div>
+                                        <!-- Tax Amount row -->
+                                        <div class="calculation-row">
+                                            <label class="calculation-label" style="margin: 0;">Tax Amount</label>
+                                            <input type="number" step="0.01" name="taxAmount"
+                                                   value="${billInfo.invoice.taxAmount}" required
+                                                   style="width: auto; min-width: 150px; padding: 8px 12px; border: 2px solid #e5e5e5; border-radius: 8px; font-size: 14px; font-weight: 700; color: #dfa974; font-family: 'Lora', serif; text-align: right; background: white;">
+                                        </div>
 
-                                    <!-- Total Amount row -->
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                        <label class="form-label" style="font-weight: 900; color: #000; margin: 0; font-size: 16px;"><b><strong>TOTAL AMOUNT</strong></b></label>
-                                        <input type="number" step="0.01" name="totalAmount" class="form-control"
-                                               value="${billInfo.invoice.totalAmount}" readonly
-                                               style="width: auto; min-width: 180px; max-width: 250px; padding: 12px 15px; border: 1px solid #dfa974; border-radius: 8px; font-size: 14px; font-weight: 700; background: #dfa974; color: white; text-align: right;">
+                                        <!-- Total Amount row -->
+                                        <div class="calculation-row">
+                                            <label class="calculation-label" style="margin: 0;">Total Amount</label>
+                                            <input type="number" step="0.01" name="totalAmount"
+                                                   value="${billInfo.invoice.totalAmount}" readonly
+                                                   style="width: auto; min-width: 150px; padding: 8px 12px; border: 2px solid #dfa974; border-radius: 8px; font-size: 18px; font-weight: 700; color: #dfa974; font-family: 'Lora', serif; text-align: right; background: #f8f9fa; cursor: not-allowed;">
+                                        </div>
                                     </div>
 
                                     <div class="action-buttons">
@@ -532,70 +407,7 @@
         </div>
     </section>
 
-    <!-- Footer Section Begin -->
-    <footer class="footer-section no-print">
-        <div class="container">
-            <div class="footer-text">
-                <div class="row">
-                    <div class="col-lg-4">
-                        <div class="ft-about">
-                            <div class="logo">
-                                <a href="#">
-                                    <img src="${pageContext.request.contextPath}/img/footer-logo.png" alt="">
-                                </a>
-                            </div>
-                            <p>We inspire and reach millions of travelers<br /> across 90 local websites</p>
-                            <div class="fa-social">
-                                <a href="#"><i class="fa fa-facebook"></i></a>
-                                <a href="#"><i class="fa fa-twitter"></i></a>
-                                <a href="#"><i class="fa fa-tripadvisor"></i></a>
-                                <a href="#"><i class="fa fa-instagram"></i></a>
-                                <a href="#"><i class="fa fa-youtube-play"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 offset-lg-1">
-                        <div class="ft-contact">
-                            <h6>Contact Us</h6>
-                            <ul>
-                                <li>(12) 345 67890</li>
-                                <li>info.colorlib@gmail.com</li>
-                                <li>856 Cordia Extension Apt. 356, Lake, United State</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 offset-lg-1">
-                        <div class="ft-newslatter">
-                            <h6>New latest</h6>
-                            <p>Get the latest updates and offers.</p>
-                            <form action="#" class="fn-form">
-                                <input type="text" placeholder="Email">
-                                <button type="submit"><i class="fa fa-send"></i></button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="copyright-option">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-7">
-                        <ul>
-                            <li><a href="#">Contact</a></li>
-                            <li><a href="#">Terms of use</a></li>
-                            <li><a href="#">Privacy</a></li>
-                            <li><a href="#">Environmental Policy</a></li>
-                        </ul>
-                    </div>
-                    <div class="col-lg-5">
-                        <div class="co-text"><p>Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="fa fa-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a></p></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer>
-    <!-- Footer Section End -->
+    <!-- Footer removed to match booking-list.jsp layout -->
   </div>
 </div>
 
