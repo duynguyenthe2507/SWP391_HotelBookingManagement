@@ -79,6 +79,9 @@
                                         <li <c:if test="${pageContext.request.servletPath eq '/rooms'}">class="active"</c:if>>
                                             <a href="${pageContext.request.contextPath}/rooms">Rooms</a>
                                         </li>
+                                        <li <c:if test="${pageContext.request.servletPath eq '/guidelines'}">class="active"</c:if>>
+                                            <a href="${pageContext.request.contextPath}/guidelines">Guidelines</a>
+                                        </li>
                                         <li <c:if test="${pageContext.request.servletPath eq '/rules'}">class="active"</c:if>>
                                             <a href="${pageContext.request.contextPath}/rules">Rules</a>
                                         </li>

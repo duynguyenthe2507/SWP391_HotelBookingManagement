@@ -104,19 +104,23 @@
                 </c:if>
 
                 <c:forEach var="r" items="${rules}">
-                    <div class="rule-card">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h3 class="rule-title">${r.title}</h3>
-                            <span class="${r.status ? 'status-active' : 'status-inactive'}">
-                                    ${r.status ? 'Active' : 'Inactive'}
-                            </span>
+                    <%-- Thêm thẻ <c:if> để kiểm tra r.status là true --%>
+                    <c:if test="${r.status}">
+                        <div class="rule-card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h3 class="rule-title">${r.title}</h3>
+
+                                    <%-- Vì bây giờ chúng ta chỉ hiển thị 'Active', bạn có thể đơn giản hóa thẻ span --%>
+                                <span class="status-active">
+                        Active
+                </span>
+                            </div>
+                            <p class="rule-desc">${r.description}</p>
+                            <p class="rule-date">
+                                Updated: ${r.updatedAt}
+                            </p>
                         </div>
-                        <p class="rule-desc">${r.description}</p>
-                        <p class="rule-date">
-                            Created: ${r.createdAt} |
-                            Updated: ${r.updatedAt}
-                        </p>
-                    </div>
+                    </c:if> <%-- Đóng thẻ <c:if> --%>
                 </c:forEach>
             </div>
         </div>
