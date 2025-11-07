@@ -808,4 +808,74 @@ SET totalPrice = COALESCE((
 WHERE bookingId = @booking8;
 GO
 
+-- Table: ServiceGuideline (Dùng cho Guideline.java và GuidelineDao.java)
+CREATE TABLE ServiceGuideline (
+                                  guidelineId INT IDENTITY(1,1) PRIMARY KEY,
+                                  serviceId INT NULL,
+                                  title NVARCHAR(255) NOT NULL,
+                                  content NVARCHAR(MAX) NOT NULL,
+                                  imageUrl VARCHAR(500) NULL,
+                                  status BIT DEFAULT 1,
+                                  createdAt DATETIME DEFAULT GETDATE(),
+                                  updatedAt DATETIME DEFAULT GETDATE(),
+                                  CONSTRAINT FK_Guideline_Service FOREIGN KEY (serviceId) REFERENCES Services(serviceId) ON DELETE SET NULL
+);
+GO
 
+-- Trigger để tự động cập nhật 'updatedAt' cho ServiceGuideline
+CREATE TRIGGER trg_update_serviceGuideline
+    ON ServiceGuideline
+    AFTER UPDATE
+              AS
+BEGIN
+UPDATE ServiceGuideline
+SET updatedAt = GETDATE()
+    FROM ServiceGuideline
+    INNER JOIN inserted ON ServiceGuideline.guidelineId = inserted.guidelineId;
+END;
+GO
+-- Thêm dữ liệu mẫu cho bảng ServiceGuideline
+INSERT INTO ServiceGuideline (serviceId, title, content, imageUrl, status)
+VALUES
+(
+    NULL, -- (NULL) = Guideline chung
+    N'Quy định chung về Giờ yên tĩnh',
+    N'Để đảm bảo trải nghiệm nghỉ ngơi cho tất cả quý khách, vui lòng giữ yên tĩnh trong khuôn viên khách sạn, đặc biệt tại hành lang và khu vực sảnh, trong khoảng thời gian từ 10:00 PM (22:00) đến 7:00 AM (07:00) sáng hôm sau.',
+    '',
+    1 -- (1) = Active (Hiển thị)
+);
+
+INSERT INTO ServiceGuideline (serviceId, title, content, imageUrl, status)
+VALUES
+    (
+        4, -- (Giả sử 4 là serviceId của Spa)
+        N'Hướng dẫn sử dụng Dịch vụ Spa',
+        N'Quý khách vui lòng đặt lịch hẹn Spa trước ít nhất 1 giờ để được phục vụ tốt nhất.
+    Nếu cần hủy lịch, xin báo trước 30 phút.
+    Vui lòng có mặt trước giờ hẹn 5 phút để chuẩn bị.
+    Xin cảm ơn!',
+        'img/guidelines/guidelines-1.jpg',
+        1 -- (1) = Active (Hiển thị)
+    );
+
+INSERT INTO ServiceGuideline (serviceId, title, content, imageUrl, status)
+VALUES
+    (
+        NULL, -- (NULL) = Guideline chung
+        N'Chính sách về Vật nuôi (Thú cưng)',
+        N'Vì lý do an toàn và vệ sinh chung, khách sạn 36 Hotel rất tiếc không thể tiếp nhận vật nuôi (thú cưng) trong thời gian quý khách lưu trú.',
+        'img/guidelines/guidelines-2.jpg', -- (NULL) = Không có ảnh
+        0 -- (0) = Inactive (Ẩn)
+    );
+
+INSERT INTO ServiceGuideline (serviceId, title, content, imageUrl, status)
+VALUES
+    (
+        3, -- (Giả sử 3 là serviceId của Nhà hàng)
+        N'Quy định về Trang phục Nhà hàng',
+        N'Khi dùng bữa tại nhà hàng của khách sạn, quý khách vui lòng mặc trang phục lịch sự.
+    Chúng tôi xin phép không phục vụ khách mặc đồ ngủ, đồ bơi, hoặc trang phục không phù hợp.',
+        'img/guidelines/guidelines-1.jpg',
+        1 -- (1) = Active (Hiển thị)
+    );
+GO
