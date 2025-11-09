@@ -439,8 +439,7 @@ CREATE TABLE Rules (
                        updatedAt DATETIME DEFAULT GETDATE()
 );
 GO
-
-CREATE TRIGGER trg_update_rules
+REATE TRIGGER trg_update_rules
     ON Rules
     AFTER UPDATE
               AS
@@ -450,6 +449,38 @@ SET updatedAt = GETDATE()
     FROM Rules
     INNER JOIN inserted ON Rules.ruleId = inserted.ruleId;
 END;
+GO
+INSERT INTO Rules (title, description, status, createdAt, updatedAt)
+VALUES (
+    N'Quy định bảo mật thông tin khách hàng',
+    N'Thông tin cá nhân của khách (số điện thoại, email, giấy tờ tùy thân, dữ liệu thanh toán) tuyệt đối không được chia sẻ cho bên thứ ba trừ khi có yêu cầu pháp lý hợp lệ. Các nhân viên phải lưu trữ thông tin trên hệ thống nội bộ được mã hóa; không ghi thông tin nhạy cảm lên giấy ngoài quy trình cần thiết. Khi kết thúc ca, nhân viên phải đăng xuất khỏi hệ thống quản lý, khóa màn hình máy tính, và không để tài liệu chứa thông tin khách lộ ra ngoài.',
+    0,  -- Inactive
+    '2025-11-01T01:48:00',
+    '2025-11-01T01:51:00'
+);
+GO
+INSERT INTO Rules (title, description, status, createdAt, updatedAt)
+VALUES (
+    N'Hướng dẫn check-in cho receptionist',
+    N'Khi khách đến, nhân viên lễ tân cần:
+(1) Xác minh danh tính bằng CMND/CCCD/Hộ chiếu;
+(2) Đối chiếu với thông tin đặt phòng (họ tên, ngày nhận trả);
+(3) Thu tiền/cọc (nếu có) và cung cấp biên lai;
+(4) Giải thích các tiện ích và giờ sử dụng dịch vụ;
+(5) Hướng dẫn khách ký biên bản nhận phòng và cung cấp chìa khóa/QR code. Với khách nước ngoài, kiểm tra hộ chiếu và thực hiện khai báo công an nếu luật địa phương yêu cầu.',
+    1,  -- Active
+    '2025-11-01T01:48:00',
+    '2025-11-01T17:41:00'
+);
+GO
+INSERT INTO Rules (title, description, status, createdAt, updatedAt)
+VALUES (
+    N'Chính sách hủy phòng & hoàn tiền',
+    N'Khách hàng có thể hủy phòng miễn phí nếu thông báo trước ít nhất 48 giờ so với giờ nhận phòng. Nếu hủy trong vòng 48 giờ trước giờ nhận phòng, khách sẽ bị tính phí 1 đêm. Trong trường hợp đặt phòng theo khuyến mãi không hoàn tiền, phí sẽ không được hoàn trả. Mọi yêu cầu hoàn tiền cần liên hệ bộ phận lễ tân và phòng Kế toán để xử lý; thời gian xử lý hoàn tiền tối đa 7 ngày làm việc.',
+    1,  -- Active
+    '2025-11-01T01:48:00',
+    '2025-11-01T01:48:00'
+);
 GO
 
 -- MASTER DATA from root HMBS_DB.sql
@@ -492,6 +523,10 @@ VALUES
     ('0987654321', 'John', '', 'Doe', '1985-06-15', 'john.doe@example.com', 'password123', 'customer', 1, 0, 1, GETDATE(), GETDATE()),
     ('0987654322', 'Jane', '', 'Smith', '1990-08-22', 'jane.smith@example.com', 'password123', 'customer', 2, 0, 1, GETDATE(), GETDATE()),
     ('0987654323', 'Robert', '', 'Johnson', '1978-03-10', 'robert.johnson@example.com', 'password123', 'customer', 3, 0, 1, GETDATE(), GETDATE());
+GO
+-- INSERT ADMIN ACCOUNT 2/11/2025
+INSERT INTO Users (mobilePhone, firstName, middleName, lastName, birthday, email, password, role)
+VALUES ('0906431404', 'ADMIN', 'OF', 'HOTEL', '1990-01-01', 'admin123@gmail.com', 'Admin123@@', 'admin');
 GO
 
 -- SAMPLE DATA - Rooms
@@ -773,4 +808,74 @@ SET totalPrice = COALESCE((
 WHERE bookingId = @booking8;
 GO
 
+-- Table: ServiceGuideline (Dùng cho Guideline.java và GuidelineDao.java)
+CREATE TABLE ServiceGuideline (
+                                  guidelineId INT IDENTITY(1,1) PRIMARY KEY,
+                                  serviceId INT NULL,
+                                  title NVARCHAR(255) NOT NULL,
+                                  content NVARCHAR(MAX) NOT NULL,
+                                  imageUrl VARCHAR(500) NULL,
+                                  status BIT DEFAULT 1,
+                                  createdAt DATETIME DEFAULT GETDATE(),
+                                  updatedAt DATETIME DEFAULT GETDATE(),
+                                  CONSTRAINT FK_Guideline_Service FOREIGN KEY (serviceId) REFERENCES Services(serviceId) ON DELETE SET NULL
+);
+GO
 
+-- Trigger để tự động cập nhật 'updatedAt' cho ServiceGuideline
+CREATE TRIGGER trg_update_serviceGuideline
+    ON ServiceGuideline
+    AFTER UPDATE
+              AS
+BEGIN
+UPDATE ServiceGuideline
+SET updatedAt = GETDATE()
+    FROM ServiceGuideline
+    INNER JOIN inserted ON ServiceGuideline.guidelineId = inserted.guidelineId;
+END;
+GO
+-- Thêm dữ liệu mẫu cho bảng ServiceGuideline
+INSERT INTO ServiceGuideline (serviceId, title, content, imageUrl, status)
+VALUES
+(
+    NULL, -- (NULL) = Guideline chung
+    N'Quy định chung về Giờ yên tĩnh',
+    N'Để đảm bảo trải nghiệm nghỉ ngơi cho tất cả quý khách, vui lòng giữ yên tĩnh trong khuôn viên khách sạn, đặc biệt tại hành lang và khu vực sảnh, trong khoảng thời gian từ 10:00 PM (22:00) đến 7:00 AM (07:00) sáng hôm sau.',
+    '',
+    1 -- (1) = Active (Hiển thị)
+);
+
+INSERT INTO ServiceGuideline (serviceId, title, content, imageUrl, status)
+VALUES
+    (
+        4, -- (Giả sử 4 là serviceId của Spa)
+        N'Hướng dẫn sử dụng Dịch vụ Spa',
+        N'Quý khách vui lòng đặt lịch hẹn Spa trước ít nhất 1 giờ để được phục vụ tốt nhất.
+    Nếu cần hủy lịch, xin báo trước 30 phút.
+    Vui lòng có mặt trước giờ hẹn 5 phút để chuẩn bị.
+    Xin cảm ơn!',
+        'img/guidelines/guidelines-1.jpg',
+        1 -- (1) = Active (Hiển thị)
+    );
+
+INSERT INTO ServiceGuideline (serviceId, title, content, imageUrl, status)
+VALUES
+    (
+        NULL, -- (NULL) = Guideline chung
+        N'Chính sách về Vật nuôi (Thú cưng)',
+        N'Vì lý do an toàn và vệ sinh chung, khách sạn 36 Hotel rất tiếc không thể tiếp nhận vật nuôi (thú cưng) trong thời gian quý khách lưu trú.',
+        'img/guidelines/guidelines-2.jpg', -- (NULL) = Không có ảnh
+        0 -- (0) = Inactive (Ẩn)
+    );
+
+INSERT INTO ServiceGuideline (serviceId, title, content, imageUrl, status)
+VALUES
+    (
+        3, -- (Giả sử 3 là serviceId của Nhà hàng)
+        N'Quy định về Trang phục Nhà hàng',
+        N'Khi dùng bữa tại nhà hàng của khách sạn, quý khách vui lòng mặc trang phục lịch sự.
+    Chúng tôi xin phép không phục vụ khách mặc đồ ngủ, đồ bơi, hoặc trang phục không phù hợp.',
+        'img/guidelines/guidelines-1.jpg',
+        1 -- (1) = Active (Hiển thị)
+    );
+GO

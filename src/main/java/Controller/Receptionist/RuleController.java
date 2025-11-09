@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeParseException; // Thêm import
 
 @WebServlet(name = "RuleController", urlPatterns = {"/rules", "/rules/save", "/rules/edit", "/rules/delete"})
 public class RuleController extends HttpServlet {
@@ -21,6 +22,7 @@ public class RuleController extends HttpServlet {
             throws ServletException, IOException {
 
         String action = request.getServletPath();
+        String contextPath = request.getContextPath();
 
         switch (action) {
             case "/rules":
@@ -28,7 +30,7 @@ public class RuleController extends HttpServlet {
                 request.setAttribute("rules", ruleDao.getAllRules());
 
                 if (user != null && "receptionist".equalsIgnoreCase(user.getRole())) {
-                    // Receptionist có thể quản lý
+                    // Đã sửa ở file JSP, nên chuyển đến file JSP đã sửa
                     request.getRequestDispatcher("/pages/receptionist/rules-list.jsp").forward(request, response);
                 } else {
                     // User chỉ xem
@@ -37,15 +39,16 @@ public class RuleController extends HttpServlet {
                 break;
 
             case "/rules/edit":
-                // Lấy rule theo ID để hiển thị lên form edit
+                // Logic này không được dùng bởi rules-list.jsp mới, nhưng vẫn sửa cho đúng
                 try {
                     int id = Integer.parseInt(request.getParameter("id"));
                     Rule rule = ruleDao.getRuleById(id);
                     request.setAttribute("rule", rule);
+                    // Giả sử bạn có trang rules-edit.jsp
                     request.getRequestDispatcher("/pages/receptionist/rules-edit.jsp").forward(request, response);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    response.sendRedirect(request.getContextPath() + "/common/sidebar.jsp");
+                    response.sendRedirect(contextPath + "/rules");
                 }
                 break;
 
@@ -56,10 +59,10 @@ public class RuleController extends HttpServlet {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                response.sendRedirect(request.getContextPath() + "/common/sidebar.jsp");
+                response.sendRedirect(contextPath + "/rules?success=true");
                 break;
             default:
-                response.sendRedirect(request.getContextPath() + "/common/sidebar.jsp");
+                response.sendRedirect(contextPath + "/rules");
         }
     }
 
@@ -72,51 +75,68 @@ public class RuleController extends HttpServlet {
         String idStr = request.getParameter("ruleId");
         String title = request.getParameter("title");
         String description = request.getParameter("description");
-        String statusStr = request.getParameter("status");
+        String statusStr = request.getParameter("status"); // [cite: 93]
+        String createdAtStr = request.getParameter("createdAt");
         String updatedAtStr = request.getParameter("updatedAt");
 
-        boolean status = "1".equals(statusStr) || "Active".equalsIgnoreCase(statusStr);
+        boolean status = "Active".equalsIgnoreCase(statusStr); //
 
         try {
-            // Lấy giờ Việt Nam hiện tại cho CreatedAt
             LocalDateTime vnTime = LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
-            Timestamp createdAt = Timestamp.valueOf(vnTime);
+            Rule rule;
+            Timestamp createdAt = null;
+            try {
+                if (createdAtStr != null && !createdAtStr.trim().isEmpty()) {
+                    createdAt = Timestamp.valueOf(createdAtStr.replace("T", " ") + ":00");
+                }
+            } catch (DateTimeParseException | IllegalArgumentException ex) {
+                System.out.println("⚠️ Lỗi parse CreatedAt.");
+            }
+            Timestamp updatedAt = null;
+            try {
+                if (updatedAtStr != null && !updatedAtStr.trim().isEmpty()) {
+                    updatedAt = Timestamp.valueOf(updatedAtStr.replace("T", " ") + ":00"); //
+                }
+            } catch (DateTimeParseException | IllegalArgumentException ex) {
+                System.out.println("⚠️ Lỗi parse UpdatedAt.");
+            }
+
 
             if (idStr == null || idStr.trim().isEmpty()) {
-
-                Rule newRule = new Rule();
-                newRule.setTitle(title);
-                newRule.setDescription(description);
-                newRule.setStatus(status);
-                newRule.setCreatedAt(createdAt);
-                newRule.setUpdatedAt(null);
-
-                ruleDao.insertRule(newRule);
-            } else {
-
-                int id = Integer.parseInt(idStr);
-                Timestamp updatedAt = null;
-                try {
-                    if (updatedAtStr != null && !updatedAtStr.trim().isEmpty()) {
-                        updatedAt = Timestamp.valueOf(updatedAtStr.replace("T", " ") + ":00");
-                    }
-                } catch (Exception ex) {
-                    System.out.println("⚠️ Lỗi khi parse UpdatedAt, sẽ bỏ qua giá trị thủ công.");
-                }
-
-                Rule rule = new Rule();
-                rule.setRuleId(id);
+                // === TẠO MỚI ===
+                rule = new Rule();
                 rule.setTitle(title);
                 rule.setDescription(description);
                 rule.setStatus(status);
-                rule.setUpdatedAt(updatedAt);
+                if (createdAt == null) {
+                    rule.setCreatedAt(Timestamp.valueOf(vnTime));
+                } else {
+                    rule.setCreatedAt(createdAt);
+                }
+                rule.setUpdatedAt(rule.getCreatedAt());
 
+                ruleDao.insertRule(rule);
+
+            } else {
+                int id = Integer.parseInt(idStr);
+                rule = ruleDao.getRuleById(id);
+                if (rule == null) {
+                    throw new Exception("Không tìm thấy Rule với ID: " + id);
+                }
+                rule.setTitle(title);
+                rule.setDescription(description);
+                rule.setStatus(status);
+                if (createdAt != null) {
+                    rule.setCreatedAt(createdAt);
+                }
+                if (updatedAt == null) {
+                    rule.setUpdatedAt(Timestamp.valueOf(vnTime));
+                } else {
+                    rule.setUpdatedAt(updatedAt);
+                }
                 ruleDao.updateRule(rule);
             }
-            // Sau khi lưu thành công, chuyển sang trang sidebar.jsp
-            response.sendRedirect(request.getContextPath() + "/common/sidebar.jsp");
-
-
+            response.sendRedirect(request.getContextPath() + "/rules?success=true");
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", "Lưu thất bại: " + e.getMessage());
@@ -124,5 +144,4 @@ public class RuleController extends HttpServlet {
             request.getRequestDispatcher("/pages/receptionist/rules-list.jsp").forward(request, response);
         }
     }
-
 }

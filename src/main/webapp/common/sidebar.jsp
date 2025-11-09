@@ -137,7 +137,10 @@
            class="${currentPath == '/receptionist/rooms' ? 'active' : ''}">
             <i class="fa fa-list"></i> Room Edit
         </a>
-
+        <a href="${contextPath}/guidelines"
+           class="${currentPath == '/guidelines' ? 'active' : ''}">
+            <i class="fa fa-info-circle"></i> Guidelines
+        </a>
         <a href="${contextPath}/rules"
            class="${currentPath == '/rules' ? 'active' : ''}">
             <i class="fa fa-book"></i> Rules

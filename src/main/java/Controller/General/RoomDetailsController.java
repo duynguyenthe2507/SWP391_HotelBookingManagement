@@ -45,7 +45,7 @@ public class RoomDetailsController extends HttpServlet {
             return;
         }
 
-        try {
+        try {                                                                                                                                       
             Room room = roomDao.getById(roomId); 
 
             if (room != null) {
