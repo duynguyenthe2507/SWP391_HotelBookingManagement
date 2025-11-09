@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.min.css" type="text/css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/font-awesome.min.css" type="text/css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/jquery-ui.min.css" type="text/css">
 
     <%-- Add CSS --%>
     <style>
@@ -45,7 +46,7 @@
         </c:if>
 
         <c:if test="${not empty cartItems}">
-            <form action="checkout" method="post">
+            <form action="${pageContext.request.contextPath}/checkout" method="GET">
                 <div class="row">
                     <div class="col-lg-8">
                         <div class="cart-table">
@@ -97,6 +98,17 @@
                                 <li class="subtotal">Provisional <span>0 VND</span></li>
                                 <li class="cart-total">Total <span>0 VND</span></li>
                             </ul>
+
+                            <div class="check-date" style="margin-top: 20px;">
+                                <label for="date-in" style="font-weight: 600;">Check In:</label>
+                                <input type="text" class="date-input form-control" name="checkInDate" id="date-in" required>
+                                <i class="icon_calendar" style="position: absolute; right: 20px; top: 40px; color: #dfa974;"></i>
+                            </div>
+                            <div class="check-date" style="margin-top: 15px;">
+                                <label for="date-out" style="font-weight: 600;">Check Out:</label>
+                                <input type="text" class="date-input form-control" name="checkOutDate" id="date-out" required>
+                                <i class="icon_calendar" style="position: absolute; right: 20px; top: 40px; color: #dfa974;"></i>
+                            </div>
                             <button type="submit" class="proceed-btn" style="width: 100%; border: none; padding: 15px;
                             text-transform: uppercase; font-weight: 700; background-color: #dfa974; color: #ffffff;">
                                 SUBMIT PAYMENT
@@ -115,6 +127,7 @@
 <script src="${pageContext.request.contextPath}/js/jquery-3.3.1.min.js"></script>
 <script src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>
 <script src="${pageContext.request.contextPath}/js/main.js"></script>
+<script src="${pageContext.request.contextPath}/js/jquery-ui.min.js"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -200,6 +213,21 @@
         });
 
         updateTotals();
+    });
+
+    $(document).ready(function() {
+        $(".date-input").datepicker({
+            dateFormat: 'dd/mm/yy',
+            minDate: 0,
+            onSelect: function(selectedDate) {
+                var option = this.id === "date-in" ? "minDate" : "maxDate";
+                var date = $(this).datepicker('getDate');
+                if (option === "minDate" && date) {
+                    date.setDate(date.getDate() + 1);
+                    $("#date-out").datepicker("option", "minDate", date);
+                }
+            }
+        });
     });
 </script>
 </body>

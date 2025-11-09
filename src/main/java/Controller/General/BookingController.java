@@ -17,7 +17,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList; // <<< THÊM IMPORT
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -86,6 +87,8 @@ public class BookingController extends HttpServlet {
         String checkInDateStr = request.getParameter("checkInDate");
         String checkOutDateStr = request.getParameter("checkOutDate");
         String numGuestsStr = request.getParameter("numGuests");
+        String specialRequest = request.getParameter("specialRequest");
+        String[] serviceIds = request.getParameterValues("serviceIds");
 
         LOGGER.log(Level.INFO, "Received booking request: roomId={0}, checkIn={1}, checkOut={2}, guests={3}",
                 new Object[]{roomIdStr, checkInDateStr, checkOutDateStr, numGuestsStr});
