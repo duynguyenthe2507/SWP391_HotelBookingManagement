@@ -513,4 +513,191 @@ public class InvoiceDao extends DBContext {
         }
         return null; // Không tìm thấy hóa đơn
     }
+
+    // Revenue Report Methods
+    /**
+     * Get revenue by date range
+     */
+    public List<Map<String, Object>> getRevenueByDateRange(java.sql.Date startDate, java.sql.Date endDate) {
+        List<Map<String, Object>> revenueData = new ArrayList<>();
+        String sql = """
+            SELECT CAST(i.issuedDate AS DATE) AS date,
+                   COUNT(i.invoiceId) AS invoiceCount,
+                   SUM(i.totalAmount) AS totalRevenue,
+                   SUM(i.totalRoomCost) AS roomRevenue,
+                   SUM(i.totalServiceCost) AS serviceRevenue,
+                   SUM(i.taxAmount) AS taxRevenue
+            FROM Invoice i
+            WHERE CAST(i.issuedDate AS DATE) BETWEEN ? AND ?
+            GROUP BY CAST(i.issuedDate AS DATE)
+            ORDER BY CAST(i.issuedDate AS DATE) ASC
+        """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setDate(1, startDate);
+            ps.setDate(2, endDate);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("date", rs.getDate("date"));
+                    data.put("invoiceCount", rs.getInt("invoiceCount"));
+                    data.put("totalRevenue", rs.getDouble("totalRevenue"));
+                    data.put("roomRevenue", rs.getDouble("roomRevenue"));
+                    data.put("serviceRevenue", rs.getDouble("serviceRevenue"));
+                    data.put("taxRevenue", rs.getDouble("taxRevenue"));
+                    revenueData.add(data);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return revenueData;
+    }
+
+    /**
+     * Get revenue by month
+     */
+    public List<Map<String, Object>> getRevenueByMonth(int year) {
+        List<Map<String, Object>> revenueData = new ArrayList<>();
+        String sql = """
+            SELECT MONTH(i.issuedDate) AS month,
+                   COUNT(i.invoiceId) AS invoiceCount,
+                   SUM(i.totalAmount) AS totalRevenue,
+                   SUM(i.totalRoomCost) AS roomRevenue,
+                   SUM(i.totalServiceCost) AS serviceRevenue,
+                   SUM(i.taxAmount) AS taxRevenue
+            FROM Invoice i
+            WHERE YEAR(i.issuedDate) = ?
+            GROUP BY MONTH(i.issuedDate)
+            ORDER BY MONTH(i.issuedDate) ASC
+        """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, year);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("month", rs.getInt("month"));
+                    data.put("invoiceCount", rs.getInt("invoiceCount"));
+                    data.put("totalRevenue", rs.getDouble("totalRevenue"));
+                    data.put("roomRevenue", rs.getDouble("roomRevenue"));
+                    data.put("serviceRevenue", rs.getDouble("serviceRevenue"));
+                    data.put("taxRevenue", rs.getDouble("taxRevenue"));
+                    revenueData.add(data);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return revenueData;
+    }
+
+    /**
+     * Get revenue by year
+     */
+    public List<Map<String, Object>> getRevenueByYear() {
+        List<Map<String, Object>> revenueData = new ArrayList<>();
+        String sql = """
+            SELECT YEAR(i.issuedDate) AS year,
+                   COUNT(i.invoiceId) AS invoiceCount,
+                   SUM(i.totalAmount) AS totalRevenue,
+                   SUM(i.totalRoomCost) AS roomRevenue,
+                   SUM(i.totalServiceCost) AS serviceRevenue,
+                   SUM(i.taxAmount) AS taxRevenue
+            FROM Invoice i
+            GROUP BY YEAR(i.issuedDate)
+            ORDER BY YEAR(i.issuedDate) ASC
+        """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Map<String, Object> data = new HashMap<>();
+                data.put("year", rs.getInt("year"));
+                data.put("invoiceCount", rs.getInt("invoiceCount"));
+                data.put("totalRevenue", rs.getDouble("totalRevenue"));
+                data.put("roomRevenue", rs.getDouble("roomRevenue"));
+                data.put("serviceRevenue", rs.getDouble("serviceRevenue"));
+                data.put("taxRevenue", rs.getDouble("taxRevenue"));
+                revenueData.add(data);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return revenueData;
+    }
+
+    /**
+     * Get total revenue summary
+     */
+    public Map<String, Object> getTotalRevenueSummary() {
+        Map<String, Object> summary = new HashMap<>();
+        String sql = """
+            SELECT COUNT(i.invoiceId) AS totalInvoices,
+                   SUM(i.totalAmount) AS totalRevenue,
+                   SUM(i.totalRoomCost) AS totalRoomRevenue,
+                   SUM(i.totalServiceCost) AS totalServiceRevenue,
+                   SUM(i.taxAmount) AS totalTaxRevenue,
+                   AVG(i.totalAmount) AS averageInvoiceAmount
+            FROM Invoice i
+        """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                summary.put("totalInvoices", rs.getInt("totalInvoices"));
+                summary.put("totalRevenue", rs.getDouble("totalRevenue"));
+                summary.put("totalRoomRevenue", rs.getDouble("totalRoomRevenue"));
+                summary.put("totalServiceRevenue", rs.getDouble("totalServiceRevenue"));
+                summary.put("totalTaxRevenue", rs.getDouble("totalTaxRevenue"));
+                summary.put("averageInvoiceAmount", rs.getDouble("averageInvoiceAmount"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return summary;
+    }
+
+    /**
+     * Get revenue by date range with detailed invoice list
+     */
+    public List<Map<String, Object>> getRevenueDetailsByDateRange(java.sql.Date startDate, java.sql.Date endDate) {
+        List<Map<String, Object>> details = new ArrayList<>();
+        String sql = """
+            SELECT i.invoiceId, i.bookingId, i.totalAmount, i.totalRoomCost, 
+                   i.totalServiceCost, i.taxAmount, i.issuedDate,
+                   u.firstName, u.lastName, u.mobilePhone,
+                   b.checkinTime, b.checkoutTime
+            FROM Invoice i
+            INNER JOIN Booking b ON i.bookingId = b.bookingId
+            INNER JOIN Users u ON b.userId = u.userId
+            WHERE CAST(i.issuedDate AS DATE) BETWEEN ? AND ?
+            ORDER BY i.issuedDate DESC
+        """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setDate(1, startDate);
+            ps.setDate(2, endDate);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> detail = new HashMap<>();
+                    detail.put("invoiceId", rs.getInt("invoiceId"));
+                    detail.put("bookingId", rs.getInt("bookingId"));
+                    detail.put("totalAmount", rs.getDouble("totalAmount"));
+                    detail.put("totalRoomCost", rs.getDouble("totalRoomCost"));
+                    detail.put("totalServiceCost", rs.getDouble("totalServiceCost"));
+                    detail.put("taxAmount", rs.getDouble("taxAmount"));
+                    detail.put("issuedDate", rs.getTimestamp("issuedDate"));
+                    detail.put("customerName", rs.getString("firstName") + " " + rs.getString("lastName"));
+                    detail.put("customerPhone", rs.getString("mobilePhone"));
+                    detail.put("checkinTime", rs.getTimestamp("checkinTime"));
+                    detail.put("checkoutTime", rs.getTimestamp("checkoutTime"));
+                    details.add(detail);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return details;
+    }
 }
