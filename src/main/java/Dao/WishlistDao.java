@@ -1,5 +1,6 @@
 package Dao;
 
+import Models.Wishlist;
 import Models.WishlistItem;
 import Utils.DBContext;
 
@@ -48,5 +49,45 @@ public class WishlistDao extends DBContext {
             e.printStackTrace();
             return false;
         }
+    }
+
+    /**
+     * Thêm một phòng mới vào danh sách yêu thích của người dùng.
+     * @param item Đối tượng Wishlist (chỉ cần userId và roomId)
+     * @return true nếu thêm thành công.
+     */
+    public boolean addToWishlist(Wishlist item) {
+        String sql = "INSERT INTO Wishlist (userId, roomId) VALUES (?, ?)";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, item.getUserId());
+            ps.setInt(2, item.getRoomId());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            // (Thêm logging)
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Kiểm tra xem một phòng đã tồn tại trong wishlist của người dùng chưa.
+     * @param userId ID người dùng
+     * @param roomId ID phòng
+     * @return true nếu đã tồn tại.
+     */
+    public boolean checkIfExists(int userId, int roomId) {
+        String sql = "SELECT COUNT(*) FROM Wishlist WHERE userId = ? AND roomId = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setInt(2, roomId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

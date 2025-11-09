@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 /**
  * Servlet này xử lý Giai đoạn 4: Tạo đơn hàng từ Giỏ hàng (Session).
  * URL: /order/create
- * Đã thêm log System.out.println để debug lỗi không thấy log.
  */
 @WebServlet(name = "OrderController", urlPatterns = {"/order/create"})
 public class OrderController extends HttpServlet {
@@ -55,6 +54,10 @@ public class OrderController extends HttpServlet {
         List<BookingDetail> cart = (List<BookingDetail>) session.getAttribute("cart");
         LocalDateTime cartCheckIn = (LocalDateTime) session.getAttribute("cartCheckIn");
         LocalDateTime cartCheckOut = (LocalDateTime) session.getAttribute("cartCheckOut");
+        List<String> serviceIds = (List<String>) session.getAttribute("cartServices");
+        List<String> specialRequests = cart.stream()
+                .map(BookingDetail::getSpecialRequest)
+                .collect(Collectors.toList());
         String paymentMethod = request.getParameter("paymentMethod");
 
         System.out.println("Order Data Check: UserID=" + (user != null ? user.getUserId() : "null") +
@@ -74,7 +77,6 @@ public class OrderController extends HttpServlet {
 
         List<Integer> roomIds = cart.stream().map(BookingDetail::getRoomId).collect(Collectors.toList());
         List<Integer> quantities = cart.stream().map(BookingDetail::getGuestCount).collect(Collectors.toList());
-        List<String> specialRequests = null; 
 
         int bookingId = -1;
         try {
@@ -86,7 +88,8 @@ public class OrderController extends HttpServlet {
                     cartCheckOut,
                     quantities,
                     specialRequests,
-                    "pending"
+                    "pending",
+                    serviceIds
             );
             System.out.println(">>> OrderController: bookingService.createBooking() trả về: " + bookingId);
 
@@ -95,9 +98,7 @@ public class OrderController extends HttpServlet {
                 System.out.println(">>> OrderController: TẠO BOOKING THÀNH CÔNG (ID: " + bookingId + ")");
                 LOGGER.info("Booking created successfully with ID: " + bookingId);
 
-                session.removeAttribute("cart");
-                session.removeAttribute("cartCheckIn");
-                session.removeAttribute("cartCheckOut");
+                session.removeAttribute("cartServices");
 
                 if ("COD".equalsIgnoreCase(paymentMethod)) {
                     System.out.println(">>> OrderController: Thanh toán COD. Redirect sang success page.");

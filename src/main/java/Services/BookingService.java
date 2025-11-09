@@ -151,7 +151,8 @@ public class BookingService {
      * Tạo booking online của customer
      */
     public int createBooking(int userId, List<Integer> roomIds, LocalDateTime checkIn, LocalDateTime checkOut,
-                             List<Integer> quantities, List<String> specialRequests, String initialStatus) {
+                             List<Integer> quantities, List<String> specialRequests, String initialStatus,
+                             List<String> serviceIds) {
 
         System.out.println(">>> [BookingService] createBooking STARTING...");
 
@@ -270,6 +271,17 @@ public class BookingService {
             System.out.println(">>> [BookingService] bookingDao.insertBookingWithDetails SUCCEEDED. Returning Booking ID: " + newBooking.getBookingId());
             LOGGER.log(Level.INFO, "New booking created successfully with ID: {0} for user {1}.",
                     new Object[]{newBooking.getBookingId(), userId});
+            if (serviceIds != null && !serviceIds.isEmpty()) {
+                try {
+                    Map<Integer, Services> servicesMap = servicesDao.getAllServicesAsMap();
+                    bookingDao.linkServicesToBooking(newBooking.getBookingId(), serviceIds.toArray(new String[0]), servicesMap);
+
+                    LOGGER.log(Level.INFO, "Linked {0} services to new booking {1}",
+                            new Object[]{serviceIds.size(), newBooking.getBookingId()});
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Booking created but FAILED to link services", e);
+                }
+            }
             return newBooking.getBookingId();
         } else {
             System.out.println("!!! BOOKING SERVICE LỖI: bookingDao.insertBookingWithDetails() returned false !!!");
@@ -281,14 +293,14 @@ public class BookingService {
     /**
      * Overload method (không có quantities/special requests)
      */
-    public int createBooking(int userId, List<Integer> roomIds, LocalDateTime checkIn,
-                             LocalDateTime checkOut, String initialStatus) {
-        List<Integer> defaultQuantities = new ArrayList<>();
-        for (int i = 0; i < roomIds.size(); i++) {
-            defaultQuantities.add(1);
-        }
-        return createBooking(userId, roomIds, checkIn, checkOut, defaultQuantities, null, initialStatus);
-    }
+//    public int createBooking(int userId, List<Integer> roomIds, LocalDateTime checkIn,
+//                             LocalDateTime checkOut, String initialStatus) {
+//        List<Integer> defaultQuantities = new ArrayList<>();
+//        for (int i = 0; i < roomIds.size(); i++) {
+//            defaultQuantities.add(1);
+//        }
+//        return createBooking(userId, roomIds, checkIn, checkOut, defaultQuantities, null, initialStatus);
+//    }
 
     // ============ COMMON BOOKING STATUS METHODS ============
 

@@ -84,7 +84,7 @@ public class RoomsController extends HttpServlet {
 
             request.setAttribute("rooms", rooms);
             request.setAttribute("categories", categories);
-            request.setAttribute("currentPage", pageNumber);
+            request.setAttribute("pageNumber", pageNumber);
             request.setAttribute("noOfPages", noOfPages);
             request.setAttribute("pageSize", pageSize);
 

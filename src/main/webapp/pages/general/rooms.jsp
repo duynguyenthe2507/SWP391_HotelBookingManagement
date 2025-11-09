@@ -316,39 +316,47 @@
                     <c:choose>
                         <c:when test="${not empty requestScope.rooms}">
                             <c:forEach var="room" items="${requestScope.rooms}">
-                                <div class="col-lg-4 col-md-6">
-                                    <div class="room-item">
-                                        <c:set var="imgSrc" value="${not empty room.imgUrl ? pageContext.request.contextPath.concat('/').concat(room.imgUrl) : pageContext.request.contextPath.concat('/img/placeholder.jpg')}"/>
-                                        <img src="${imgSrc}"
-                                             alt="${room.name}"
-                                             onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/img/placeholder.jpg';"
-                                             style="width:100%; height:250px; object-fit: cover;">
-                                        <div class="ri-text">
-                                            <h4><c:out value="${room.name}"/></h4>
-                                            <h3>
-                                                <fmt:formatNumber value="${room.price}" pattern="#,##0"/> VND
-                                                <span>/Pernight</span>
-                                            </h3>   
-                                            <table>
-                                                <tbody>
-                                                    <tr>
-                                                        <td class="r-o">Type:</td>
-                                                        <td><strong><c:out value="${room.category.name}"/></strong></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="r-o">Capacity:</td>
-                                                        <td>Max <c:out value="${room.capacity}"/> person(s)</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="r-o">Status:</td>
-                                                        <td><c:out value="${room.status}"/></td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                            <c:url value="/room-details" var="detailsUrl">
-                                                <c:param name="roomId" value="${room.roomId}"/>
-                                            </c:url>
-                                            <a href="${detailsUrl}" class="primary-btn room-detail-btn">More Details</a>
+                                <div class="col-lg-4 col-md-6 mb-4">
+                                    <div class="room-item-wrapper">
+                                        <div class="card room-item-card shadow-sm">
+
+                                            <c:set var="imgSrc" value="${not empty room.imgUrl ? pageContext.request.contextPath.concat('/').concat(room.imgUrl) : pageContext.request.contextPath.concat('/img/placeholder.jpg')}"/>
+                                            <img src="${imgSrc}"
+                                                 class="card-img-top"
+                                                 alt="${room.name}"
+                                                 onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/img/placeholder.jpg';">
+
+                                            <div class="card-body">
+                                                <h4 class="card-title"><c:out value="${room.name}"/></h4>
+
+                                                <div class="room-price">
+                                                    <fmt:formatNumber value="${room.price}" pattern="#,##0"/> VND
+                                                    <span>/Pernight</span>
+                                                </div>
+
+                                                <p class="room-info"><strong>Type:</strong> <c:out value="${room.category.name}"/></p>
+                                                <p class="room-info"><strong>Capacity:</strong> Max <c:out value="${room.capacity}"/> person(s)</p>
+                                                <p class="room-info"><strong>Status:</strong> <c:out value="${room.status}"/></p>
+
+                                                <div class="card-actions">
+
+                                                    <c:url value="/room-details" var="detailsUrl">
+                                                        <c:param name="roomId" value="${room.roomId}"/>
+                                                    </c:url>
+                                                    <a href="${detailsUrl}" class="btn btn-outline-dark btn-sm">More Details</a>
+
+                                                    <form action="${pageContext.request.contextPath}/add-to-cart" method="post" class="d-inline">
+                                                        <input type="hidden" name="roomId" value="${room.roomId}">
+                                                        <input type="hidden" name="quantity" value="1">
+                                                        <button type="submit" class="btn btn-sm" style="background-color: #dfa974; color: white;">Add to Cart</button>
+                                                    </form>
+
+                                                    <form action="${pageContext.request.contextPath}/add-to-wishlist" method="post" class="d-inline">
+                                                        <input type="hidden" name="roomId" value="${room.roomId}">
+                                                        <button type_ ="submit" class="btn btn-outline-danger btn-sm btn-wishlist" title="Add to Wishlist"><i class="fa fa-heart"></i></button>
+                                                    </form>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

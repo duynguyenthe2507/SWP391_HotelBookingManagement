@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -70,6 +71,8 @@ public class BookingController extends HttpServlet {
         String checkInDateStr = request.getParameter("checkInDate");
         String checkOutDateStr = request.getParameter("checkOutDate");
         String numGuestsStr = request.getParameter("numGuests");
+        String specialRequest = request.getParameter("specialRequest");
+        String[] serviceIds = request.getParameterValues("serviceIds");
 
         LOGGER.log(Level.INFO, "Received booking request: roomId={0}, checkIn={1}, checkOut={2}, guests={3}",
                 new Object[]{roomIdStr, checkInDateStr, checkOutDateStr, numGuestsStr});
@@ -137,16 +140,17 @@ public class BookingController extends HttpServlet {
             return;
         }
 
-        // ✅ Không insert DB ở đây — chỉ lưu booking tạm trong session
+        // Không insert DB ở đây — chỉ lưu booking tạm trong session
         BookingDetail bookingDetail = new BookingDetail(
                 roomId, room.getPrice(), numGuests, room.getName(), room.getImgUrl()
         );
 
-        // Nếu giỏ hàng chưa tồn tại thì tạo mới
-        List<BookingDetail> cart = (List<BookingDetail>) session.getAttribute("cart");
-        if (cart == null) {
-            cart = new ArrayList<>();
+        if (specialRequest != null) {
+            bookingDetail.setSpecialRequest(specialRequest);
         }
+
+        // Nếu giỏ hàng chưa tồn tại thì tạo mới
+        List<BookingDetail> cart = new ArrayList<>();
         cart.add(bookingDetail);
 
         // Tính tổng tiền chính xác theo số giờ / ngày
@@ -172,7 +176,13 @@ public class BookingController extends HttpServlet {
         session.setAttribute("cartCheckIn", checkIn);
         session.setAttribute("cartCheckOut", checkOut);
 
-        LOGGER.info("✅ Temporary booking saved in session → Redirect to VNPay page");
-        response.sendRedirect(request.getContextPath() + "/createPayment");
+        if (serviceIds != null && serviceIds.length > 0) {
+            session.setAttribute("cartServices", Arrays.asList(serviceIds));
+        } else {
+            session.removeAttribute("cartServices"); // Xóa nếu không chọn
+        }
+
+        LOGGER.info("✅ Temporary booking saved in session → Redirect to Checkout page");
+        response.sendRedirect(request.getContextPath() + "/checkout");
     }
 }
