@@ -40,19 +40,19 @@ public class BillController extends HttpServlet {
         
         try {
             switch (action) {
-                case "list":
+                case "listBill":
                     handleListBills(request, response);
                     break;
-                case "search":
+                case "searchBill":
                     handleSearchBills(request, response);
                     break;
-                case "detail":
+                case "detailBill":
                     handleBillDetail(request, response);
                     break;
-                case "create":
+                case "createBill":
                     handleCreateBillForm(request, response);
                     break;
-                case "edit":
+                case "editBill":
                     handleEditBillForm(request, response);
                     break;
                 default:
@@ -61,8 +61,10 @@ public class BillController extends HttpServlet {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("error", "An error occurred while processing your request.");
-            request.getRequestDispatcher("/pages/receptionist/bills.jsp").forward(request, response);
+            if (!response.isCommitted()) {
+                request.setAttribute("error", "An error occurred while processing your request: " + e.getMessage());
+                request.getRequestDispatcher("/pages/receptionist/bills.jsp").forward(request, response);
+            }
         }
     }
 

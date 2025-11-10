@@ -6,6 +6,22 @@ body {
     font-family: "Cabin", sans-serif;
 }
 
+/* Dashboard Layout */
+.dashboard-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+.dashboard-content {
+    flex: 1;
+    margin-left: 250px; /* Width of sidebar */
+    width: calc(100% - 250px);
+    padding: 40px;
+    padding-bottom: 80px; /* Extra space at bottom to prevent footer overlap */
+    overflow-y: auto;
+    min-height: 100vh;
+}
+
 /* Professional Header Section */
 .receptionist-header {
     background: linear-gradient(135deg, #dfa974 0%, #c8965a 100%);
@@ -55,11 +71,12 @@ body {
 
 /* Main Content Area */
 .main-content {
-    background: white;
-    margin: -20px 0 0 0;
-    border-radius: 20px 20px 0 0;
-    box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
-    padding: 40px 0;
+    background: transparent;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+    padding-bottom: 80px;
     position: relative;
     z-index: 1;
 }

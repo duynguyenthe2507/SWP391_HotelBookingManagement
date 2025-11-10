@@ -17,6 +17,11 @@ public class BookingDetailsController extends HttpServlet {
     private BookingService bookingService;
 
     @Override
+    public void init() throws ServletException {
+        this.bookingService = new BookingService();
+    }
+
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException {
 
@@ -38,7 +43,15 @@ public class BookingDetailsController extends HttpServlet {
             } else {
                 request.setAttribute("details", details);
                 request.setAttribute("pageTitle", "Booking Details");
-                request.setAttribute("currentPage", "Details");
+
+                request.setAttribute("breadcrumbHomeName", "Dashboard");
+                request.setAttribute("breadcrumbHomeUrl", "/receptionist/booking-list");
+
+                request.setAttribute("breadcrumbParentName", "Booking List");
+                request.setAttribute("breadcrumbParentUrl", "/receptionist/booking-list");
+
+                request.setAttribute("currentPage", "Details #" + bookingId);
+
                 request.getRequestDispatcher("/pages/receptionist/bookingDetails.jsp").forward(request, response);
             }
         } catch (NumberFormatException e) {
@@ -74,11 +87,11 @@ public class BookingDetailsController extends HttpServlet {
                 message = success ? "Booking checkout successful" : "Booking checkout failed";
                 if (success) {
                     session.setAttribute("bookingMessage", message + "Redirecting to create bill...");
-                    response.sendRedirect(request.getContextPath() + "/receptionist/create-bill?bookingId=" + bookingId);
+                    response.sendRedirect(request.getContextPath() + "/receptionist/bills");
                     return;
                 }
             } else if ("createBill".equals(action)) {
-                response.sendRedirect(request.getContextPath() + "/receptionist/create-bill?bookingId=" + bookingId);
+                response.sendRedirect(request.getContextPath() + "/receptionist/bills?bookingId=" + bookingId);
                 return;
             } else {
                 message = "Invalid action";

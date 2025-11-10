@@ -54,6 +54,16 @@ Thumbs.db
 *.swo
 
 
+# Thư mục build của IntelliJ
+/out/
+
+# Thư mục build của Maven (bạn có pom.xml)
+/target/
+
+# Thư mục cài đặt của IDE
+.idea/
+*.iml
+
 # Maven
 target/
 # Eclipse / IDE files

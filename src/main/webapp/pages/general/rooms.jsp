@@ -316,39 +316,47 @@
                     <c:choose>
                         <c:when test="${not empty requestScope.rooms}">
                             <c:forEach var="room" items="${requestScope.rooms}">
-                                <div class="col-lg-4 col-md-6">
-                                    <div class="room-item">
-                                        <c:set var="imgSrc" value="${not empty room.imgUrl ? pageContext.request.contextPath.concat('/').concat(room.imgUrl) : pageContext.request.contextPath.concat('/img/placeholder.jpg')}"/>
-                                        <img src="${imgSrc}"
-                                             alt="${room.name}"
-                                             onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/img/placeholder.jpg';"
-                                             style="width:100%; height:250px; object-fit: cover;">
-                                        <div class="ri-text">
-                                            <h4><c:out value="${room.name}"/></h4>
-                                            <h3>
-                                                <fmt:formatNumber value="${room.price}" pattern="#,##0"/> VND
-                                                <span>/Pernight</span>
-                                            </h3>   
-                                            <table>
-                                                <tbody>
-                                                    <tr>
-                                                        <td class="r-o">Type:</td>
-                                                        <td><strong><c:out value="${room.category.name}"/></strong></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="r-o">Capacity:</td>
-                                                        <td>Max <c:out value="${room.capacity}"/> person(s)</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="r-o">Status:</td>
-                                                        <td><c:out value="${room.status}"/></td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                            <c:url value="/room-details" var="detailsUrl">
-                                                <c:param name="roomId" value="${room.roomId}"/>
-                                            </c:url>
-                                            <a href="${detailsUrl}" class="primary-btn room-detail-btn">More Details</a>
+                                <div class="col-lg-4 col-md-6 mb-4">
+                                    <div class="room-item-wrapper">
+                                        <div class="card room-item-card shadow-sm">
+
+                                            <c:set var="imgSrc" value="${not empty room.imgUrl ? pageContext.request.contextPath.concat('/').concat(room.imgUrl) : pageContext.request.contextPath.concat('/img/placeholder.jpg')}"/>
+                                            <img src="${imgSrc}"
+                                                 class="card-img-top"
+                                                 alt="${room.name}"
+                                                 onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/img/placeholder.jpg';">
+
+                                            <div class="card-body">
+                                                <h4 class="card-title"><c:out value="${room.name}"/></h4>
+
+                                                <div class="room-price">
+                                                    <fmt:formatNumber value="${room.price}" pattern="#,##0"/> VND
+                                                    <span>/Pernight</span>
+                                                </div>
+
+                                                <p class="room-info"><strong>Type:</strong> <c:out value="${room.category.name}"/></p>
+                                                <p class="room-info"><strong>Capacity:</strong> Max <c:out value="${room.capacity}"/> person(s)</p>
+                                                <p class="room-info"><strong>Status:</strong> <c:out value="${room.status}"/></p>
+
+                                                <div class="card-actions">
+
+                                                    <c:url value="/room-details" var="detailsUrl">
+                                                        <c:param name="roomId" value="${room.roomId}"/>
+                                                    </c:url>
+                                                    <a href="${detailsUrl}" class="btn btn-outline-dark btn-sm">More Details</a>
+
+                                                    <form action="${pageContext.request.contextPath}/add-to-cart" method="post" class="d-inline">
+                                                        <input type="hidden" name="roomId" value="${room.roomId}">
+                                                        <input type="hidden" name="quantity" value="1">
+                                                        <button type="submit" class="btn btn-sm" style="background-color: #dfa974; color: white;">Add to Cart</button>
+                                                    </form>
+
+                                                    <form action="${pageContext.request.contextPath}/add-to-wishlist" method="post" class="d-inline">
+                                                        <input type="hidden" name="roomId" value="${room.roomId}">
+                                                        <button type_ ="submit" class="btn btn-outline-danger btn-sm btn-wishlist" title="Add to Wishlist"><i class="fa fa-heart"></i></button>
+                                                    </form>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -363,132 +371,44 @@
                         </c:otherwise>
                     </c:choose>
 
-                    <!-- PHÂN TRANG ĐÃ SỬA: DÙNG noOfPages -->
-                    <!-- PHÂN TRANG ĐÃ SỬA URL -->
-                    <!-- PHÂN TRANG ĐÃ SỬA 100% - KHÔNG CÒN LỖI 404 -->
+                    
                     <div class="col-lg-12">
+                         <div class="col-lg-12">
                         <div class="room-pagination pagination">
-                            <c:if test="${not empty requestScope.rooms && requestScope.noOfPages > 0}">
+                            <c:url var="basePageUrl" value="/rooms">
+                                <c:param name="search" value="${param.search}"/>
+                                <c:param name="categoryId" value="${param.categoryId}"/>
+                                <c:param name="minPrice" value="${param.minPrice}"/>
+                                <c:param name="maxPrice" value="${param.maxPrice}"/>
+                                <c:param name="minCapacity" value="${param.minCapacity}"/>
+                                <c:param name="checkInDate" value="${param.checkInDate}"/>
+                                <c:param name="checkOutDate" value="${param.checkOutDate}"/>
+                                <c:param name="statusFilter" value="${param.statusFilter}"/>
+                            </c:url>
 
-                                <!-- Tạo base URL chỉ /rooms -->
-                                <c:url var="cleanBase" value="/rooms" />
-
-                                <!-- Tạo URL có tham số filter (nếu có) -->
-                                <c:set var="hasParam" value="false" />
-                                <c:url var="basePageUrl" value="/rooms">
-                                    <c:if test="${not empty param.search}">
-                                        <c:param name="search" value="${param.search}"/>
-                                        <c:set var="hasParam" value="true"/>
-                                    </c:if>
-                                    <c:if test="${not empty param.categoryId}">
-                                        <c:param name="categoryId" value="${param.categoryId}"/>
-                                        <c:set var="hasParam" value="true"/>
-                                    </c:if>
-                                    <c:if test="${not empty param.minPrice}">
-                                        <c:param name="minPrice" value="${param.minPrice}"/>
-                                        <c:set var="hasParam" value="true"/>
-                                    </c:if>
-                                    <c:if test="${not empty param.maxPrice}">
-                                        <c:param name="maxPrice" value="${param.maxPrice}"/>
-                                        <c:set var="hasParam" value="true"/>
-                                    </c:if>
-                                    <c:if test="${not empty param.minCapacity}">
-                                        <c:param name="minCapacity" value="${param.minCapacity}"/>
-                                        <c:set var="hasParam" value="true"/>
-                                    </c:if>
-                                    <c:if test="${not empty param.checkInDate}">
-                                        <c:param name="checkInDate" value="${param.checkInDate}"/>
-                                        <c:set var="hasParam" value="true"/>
-                                    </c:if>
-                                    <c:if test="${not empty param.checkOutDate}">
-                                        <c:param name="checkOutDate" value="${param.checkOutDate}"/>
-                                        <c:set var="hasParam" value="true"/>
-                                    </c:if>
-                                    <c:if test="${not empty param.statusFilter}">
-                                        <c:param name="statusFilter" value="${param.statusFilter}"/>
-                                        <c:set var="hasParam" value="true"/>
-                                    </c:if>
-                                </c:url>
-
-                                <!-- Hàm tạo link trang -->
-                                <c:set var="pageLink">
-                                    <c:choose>
-                                        <c:when test="${hasParam}">
-                                            ${basePageUrl}&page=
-                                        </c:when>
-                                        <c:otherwise>
-                                            ${cleanBase}?page=
-                                        </c:otherwise>
-                                    </c:choose>
-                                </c:set>
-
-                                <!-- Previous -->
-                                <c:set var="hasParam" value="false" />
-                                <c:url var="basePageUrl" value="/rooms">
-                                    <c:if test="${not empty param.search}"><c:param name="search" value="${param.search}"/><c:set var="hasParam" value="true"/></c:if>
-                                    <c:if test="${not empty param.categoryId}"><c:param name="categoryId" value="${param.categoryId}"/><c:set var="hasParam" value="true"/></c:if>
-                                    <c:if test="${not empty param.minPrice}"><c:param name="minPrice" value="${param.minPrice}"/><c:set var="hasParam" value="true"/></c:if>
-                                    <c:if test="${not empty param.maxPrice}"><c:param name="maxPrice" value="${param.maxPrice}"/><c:set var="hasParam" value="true"/></c:if>
-                                    <c:if test="${not empty param.minCapacity}"><c:param name="minCapacity" value="${param.minCapacity}"/><c:set var="hasParam" value="true"/></c:if>
-                                    <c:if test="${not empty param.checkInDate}"><c:param name="checkInDate" value="${param.checkInDate}"/><c:set var="hasParam" value="true"/></c:if>
-                                    <c:if test="${not empty param.checkOutDate}"><c:param name="checkOutDate" value="${param.checkOutDate}"/><c:set var="hasParam" value="true"/></c:if>
-                                    <c:if test="${not empty param.statusFilter}"><c:param name="statusFilter" value="${param.statusFilter}"/><c:set var="hasParam" value="true"/></c:if>
-                                </c:url>
-                                <c:set var="pageLink">
-                                    <c:choose>
-                                        <c:when test="${hasParam}">${basePageUrl}&page=</c:when>
-                                        <c:otherwise>/hmbs/rooms?page=</c:otherwise> <%-- Hoặc ${cleanBase}?page= --%>
-                                    </c:choose>
-                                </c:set>
-
-                                <c:choose>
-                                    <c:when test="${requestScope.pageNumber > 1}">
-                                        <a href="${pageLink}${requestScope.pageNumber - 1}">Previous</a>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <span class="disabled">Previous</span>
-                                    </c:otherwise>
-                                </c:choose>
-
-                                <c:set var="startPage" value="${requestScope.pageNumber - 2}"/>
-                                <c:set var="endPage" value="${requestScope.pageNumber + 2}"/>
-                                <%-- (logic tính startPage/endPage giữ nguyên) --%>
-                                <c:if test="${startPage < 1}"><c:set var="startPage" value="1"/><c:set var="endPage" value="${requestScope.noOfPages >= 5 ? 5 : requestScope.noOfPages}"/></c:if>
-                                <c:if test="${endPage > requestScope.noOfPages}"><c:set var="endPage" value="${requestScope.noOfPages}"/><c:set var="startPage" value="${requestScope.noOfPages - 4 > 1 ? requestScope.noOfPages - 4 : 1}"/></c:if>
-
-                                <c:if test="${startPage > 1}">
-                                    <a href="${pageLink}1">1</a>
-                                    <c:if test="${startPage > 2}"><span>...</span></c:if>
-                                </c:if>
-
-                                <c:forEach var="i" begin="${startPage}" end="${endPage}">
-                                    <c:choose>
-                                        <c:when test="${i == requestScope.pageNumber}"> <%-- SỬA Ở ĐÂY --%>
-                                            <span class="current-page">${i}</span>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <a href="${pageLink}${i}">${i}</a>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </c:forEach>
-
-                                <c:if test="${endPage < requestScope.noOfPages}">
-                                    <c:if test="${endPage < requestScope.noOfPages - 1}"><span>...</span></c:if>
-                                    <a href="${pageLink}${requestScope.noOfPages}">${requestScope.noOfPages}</a>
-                                </c:if>
-
-                                <c:choose>
-                                    <c:when test="${requestScope.pageNumber < requestScope.noOfPages}"> <%-- SỬA Ở ĐÂY --%>
-                                        <a href="${pageLink}${requestScope.pageNumber + 1}">Next</a>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <span class="disabled">Next</span>
-                                    </c:otherwise>
-                                </c:choose>
+                            <c:if test="${requestScope.currentPage > 1}">
+                                <a href="${basePageUrl}&page=${requestScope.currentPage - 1}">&laquo; Before</a>
+                            </c:if>
+                            <c:if test="${requestScope.currentPage <= 1}">
+                                <span class="disabled">&laquo; Before</span>
                             </c:if>
 
-                            <c:if test="${empty requestScope.rooms}">
-                                <p class="text-center text-muted">No rooms available.</p>
+                            <c:forEach var="i" begin="1" end="${requestScope.noOfPages}">
+                                <c:choose>
+                                    <c:when test="${i == requestScope.currentPage}">
+                                        <span class="current-page">${i}</span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <a href="${basePageUrl}&page=${i}">${i}</a>
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:forEach>
+
+                            <c:if test="${requestScope.currentPage < requestScope.noOfPages}">
+                                <a href="${basePageUrl}&page=${requestScope.currentPage + 1}">After &raquo;</a>
+                            </c:if>
+                            <c:if test="${requestScope.currentPage >= requestScope.noOfPages}">
+                                <span class="disabled">After &raquo;</span>
                             </c:if>
                         </div>
                     </div>

@@ -301,9 +301,10 @@ public class InvoiceDao extends DBContext {
     // Get detailed bill information including customer and booking details
     public Map<String, Object> getDetailedBillInfo(int invoiceId) {
         String sql = """
-            SELECT i.*, b.checkinTime, b.checkoutTime, b.durationHours, b.status as bookingStatus,
+            SELECT i.*, b.checkinTime, b.checkoutTime, b.status as bookingStatus,
                    u.firstName, u.middleName, u.lastName, u.email, u.mobilePhone,
-                   r.discountPercentage
+                   r.discountPercentage,
+                   DATEDIFF(HOUR, b.checkinTime, b.checkoutTime) as durationHours
             FROM Invoice i
             INNER JOIN Booking b ON i.bookingId = b.bookingId
             INNER JOIN Users u ON b.userId = u.userId
@@ -490,5 +491,26 @@ public class InvoiceDao extends DBContext {
             }
         } catch (SQLException e) { e.printStackTrace(); }
         return serviceDetails;
+    }
+
+    /**
+     * Tìm ID hóa đơn dựa trên ID booking.
+     * @param bookingId ID của booking
+     * @return Integer (Invoice ID) nếu tìm thấy, null nếu không.
+     */
+    public Integer getInvoiceIdByBookingId(int bookingId) {
+        String sql = "SELECT invoiceId FROM Invoice WHERE bookingId = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, bookingId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            // (Thêm logging)
+            e.printStackTrace();
+        }
+        return null; // Không tìm thấy hóa đơn
     }
 }

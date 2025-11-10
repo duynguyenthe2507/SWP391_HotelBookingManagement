@@ -28,7 +28,7 @@ public class LoginController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         String phone = request.getParameter("phone");
         String password = request.getParameter("password");
         HttpSession session = request.getSession();
@@ -59,7 +59,7 @@ public class LoginController extends HttpServlet {
                 request.getRequestDispatcher("/pages/auth/login.jsp").forward(request, response);
                 return;
             }
-            
+
             // Verify password (check if hashed or plain text)
             boolean passwordMatch = false;
             if (u.getPassword().startsWith("$2a$")) {
@@ -79,18 +79,18 @@ public class LoginController extends HttpServlet {
 
             // Login successful
             LOGGER.log(Level.INFO, "User {0} (ID: {1}) logged in successfully.", new Object[]{u.getMobilePhone(), u.getUserId()});
-            
+
             // Set session attributes
-            session.setAttribute("user", u); 
-            session.setAttribute("loggedInUser", u); 
+            session.setAttribute("user", u);
+            session.setAttribute("loggedInUser", u);
             session.setAttribute("role", u.getRole());
 
             // Check for redirect URL (if user was redirected to login)
             String redirectUrl = (String) session.getAttribute("redirectUrl");
             if (redirectUrl != null && !redirectUrl.isEmpty()) {
                 LOGGER.log(Level.INFO, "Redirecting user to saved URL: {0}", redirectUrl);
-                session.removeAttribute("redirectUrl"); 
-                response.sendRedirect(redirectUrl); 
+                session.removeAttribute("redirectUrl");
+                response.sendRedirect(redirectUrl);
                 return;
             }
 
@@ -110,7 +110,7 @@ public class LoginController extends HttpServlet {
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error during login process for phone: " + phone, e);
-            e.printStackTrace(); 
+            e.printStackTrace();
             request.setAttribute("error", "An unexpected error occurred. Please try again.");
             request.getRequestDispatcher("/pages/auth/login.jsp").forward(request, response);
         }

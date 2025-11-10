@@ -4,7 +4,7 @@ import Dao.PaymentDao;
 import Models.Booking;
 import Models.Payment;
 import Services.BookingService;
-import Utils.VnPayConfig; // Đảm bảo import đúng
+import Utils.VnPayConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -12,8 +12,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -23,11 +21,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Servlet này xử lý Giai đoạn 5: Nhận thông báo IPN (Instant Payment Notification) từ VNPAY.
- * Đã sửa lỗi parse ngày và so sánh double.
- */
-@WebServlet(name = "IpnHandlerServlet", urlPatterns = {"/ipnHandler"})
+@WebServlet(name = "IpnHandlerController", urlPatterns = {"/ipnHandler"})
 public class IpnHandlerController extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(IpnHandlerController.class.getName());
@@ -41,137 +35,143 @@ public class IpnHandlerController extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) 
+            throws ServletException, IOException {
         processIpnRequest(req, resp);
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) 
+            throws ServletException, IOException {
         processIpnRequest(req, resp);
     }
 
-    private void processIpnRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Map<String, String> fields = new HashMap<>();
-        // Đọc tất cả tham số (sử dụng UTF-8)
+    private void processIpnRequest(HttpServletRequest req, HttpServletResponse resp) 
+            throws IOException {
+        
+        // ✅ CHỈ CẦN 1 MAP - getParameter() đã decode tự động
+        Map<String, String> vnp_Params = new HashMap<>();
+        
         for (Enumeration<String> params = req.getParameterNames(); params.hasMoreElements(); ) {
-            String fieldName = URLDecoder.decode(params.nextElement(), StandardCharsets.UTF_8.toString());
-            String fieldValue = URLDecoder.decode(req.getParameter(fieldName), StandardCharsets.UTF_8.toString());
-            if ((fieldValue != null) && (fieldValue.length() > 0)) {
-                fields.put(fieldName, fieldValue);
+            String fieldName = params.nextElement();
+            String fieldValue = req.getParameter(fieldName); // ✅ Đã decoded
+            
+            if (fieldValue != null && fieldValue.length() > 0) {
+                vnp_Params.put(fieldName, fieldValue);
             }
         }
 
-        String vnp_SecureHash = req.getParameter("vnp_SecureHash");
-        if (fields.containsKey("vnp_SecureHashType")) fields.remove("vnp_SecureHashType");
-        if (fields.containsKey("vnp_SecureHash")) fields.remove("vnp_SecureHash");
+        String vnp_SecureHash = vnp_Params.remove("vnp_SecureHash");
+        vnp_Params.remove("vnp_SecureHashType");
 
         resp.setContentType("application/json");
 
-        // Xác thực chữ ký
-        String signValue = VnPayConfig.hashAllFields(fields);
-        LOGGER.log(Level.INFO, "Received IPN request. Calculated Hash: {0}, Received Hash: {1}", new Object[]{signValue, vnp_SecureHash});
+        // ✅ Hash (VnPayConfig sẽ tự encode lại để khớp)
+        String signValue = VnPayConfig.hashAllFields(vnp_Params);
 
-        if (signValue.equals(vnp_SecureHash)) {
-            String vnp_TxnRef = req.getParameter("vnp_TxnRef"); // Mã Booking ID
-            String vnp_ResponseCode = req.getParameter("vnp_ResponseCode"); // "00" là thành công
-            String vnp_TransactionStatus = req.getParameter("vnp_TransactionStatus"); // "00" là thành công
-            String vnp_AmountStr = req.getParameter("vnp_Amount"); // Số tiền (đã nhân 100)
-            String vnp_PayDateStr = req.getParameter("vnp_PayDate"); // yyyyMMddHHmmss
-            String vnp_TransactionNo = req.getParameter("vnp_TransactionNo"); // Mã GD VNPAY
-            String vnp_BankCode = req.getParameter("vnp_BankCode"); // Mã ngân hàng
+        LOGGER.log(Level.INFO, "[IPN] Calculated Hash: {0}", signValue);
+        LOGGER.log(Level.INFO, "[IPN] Received Hash: {0}", vnp_SecureHash);
 
-            try {
-                int bookingId = Integer.parseInt(vnp_TxnRef);
-                double amountVNPAY = Double.parseDouble(vnp_AmountStr) / 100.0; // Đổi về VND
-
-                // Parse ngày thanh toán
-                LocalDateTime transactionDateTime = LocalDateTime.now(); // Mặc định
-                if (vnp_PayDateStr != null && !vnp_PayDateStr.isEmpty()) {
-                    try {
-                        DateTimeFormatter vnpDateFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-                        transactionDateTime = LocalDateTime.parse(vnp_PayDateStr, vnpDateFormatter);
-                    } catch (DateTimeParseException e) {
-                        LOGGER.log(Level.SEVERE, "Error parsing vnp_PayDate: " + vnp_PayDateStr, e);
-                    }
-                }
-
-                // 1. Kiểm tra Booking tồn tại
-                Booking booking = bookingService.getBookingById(bookingId);
-                if (booking == null) {
-                    LOGGER.log(Level.SEVERE, "Booking not found for ID: {0}", bookingId);
-                    resp.getWriter().write("{\"RspCode\":\"01\",\"Message\":\"Order not found\"}");
-                    return;
-                }
-
-                // 2. Kiểm tra số tiền
-                // So sánh double với sai số nhỏ
-                boolean checkAmount = Math.abs(booking.getTotalPrice() - amountVNPAY) < 0.01;
-                if (!checkAmount) {
-                    LOGGER.log(Level.SEVERE, "Amount mismatch! DB Amount: {0}, VNPAY Amount: {1}",
-                            new Object[]{booking.getTotalPrice(), amountVNPAY});
-                    resp.getWriter().write("{\"RspCode\":\"04\",\"Message\":\"Invalid amount\"}");
-                    return;
-                }
-                
-                // 3. Kiểm tra trạng thái đơn hàng (chỉ xử lý nếu đang "pending")
-                if (!"pending".equalsIgnoreCase(booking.getStatus())) {
-                    LOGGER.log(Level.WARNING, "Order status is not 'pending' (ID: {0}, Status: {1}). Already processed?",
-                            new Object[]{bookingId, booking.getStatus()});
-                    // Trả về 00 vì đơn hàng đã được xử lý trước đó (thành công hoặc thất bại)
-                    resp.getWriter().write("{\"RspCode\":\"00\",\"Message\":\"Order already confirmed/processed\"}");
-                    return;
-                }
-
-                // --- Nếu tất cả kiểm tra đều qua ---
-
-                // Tạo đối tượng Payment để lưu lại
-                Payment payment = new Payment();
-                payment.setBookingId(bookingId);
-                payment.setAmount(amountVNPAY);
-                payment.setMethod("VNPAY");
-                payment.setTransactionTime(transactionDateTime);
-                payment.setUpdatedAt(LocalDateTime.now());
-                payment.setVnpTransactionNo(vnp_TransactionNo);
-                payment.setVnpBankCode(vnp_BankCode);
-
-                // 4. Xử lý kết quả thanh toán
-                if ("00".equals(vnp_ResponseCode) && "00".equals(vnp_TransactionStatus)) {
-                    // Giao dịch THÀNH CÔNG
-                    boolean updateSuccess = bookingService.confirmBooking(bookingId);
-                    
-                    if (updateSuccess) {
-                        LOGGER.log(Level.INFO, "Booking {0} status updated to 'confirmed' successfully.", bookingId);
-                        payment.setStatus("completed");
-                        paymentDao.insertPayment(payment);
-                        resp.getWriter().write("{\"RspCode\":\"00\",\"Message\":\"Confirm Success\"}");
-                    } else {
-                        LOGGER.log(Level.SEVERE, "Failed to update booking {0} status to 'confirmed'.", bookingId);
-                        resp.getWriter().write("{\"RspCode\":\"99\",\"Message\":\"Update Booking Failed\"}");
-                    }
-                } else {
-                    // Giao dịch THẤT BẠI
-                    boolean cancelSuccess = bookingService.cancelBooking(bookingId);
-                    LOGGER.log(Level.WARNING, "VNPAY transaction failed (Code: {0}). Booking {1} status update to cancelled: {2}",
-                            new Object[]{vnp_ResponseCode, bookingId, cancelSuccess});
-                    
-                    payment.setStatus("failed");
-                    paymentDao.insertPayment(payment);
-                    // Vẫn trả về 00 cho VNPAY vì đã xử lý (hủy đơn) thành công phía Merchant
-                    resp.getWriter().write("{\"RspCode\":\"00\",\"Message\":\"Confirm Success\"}");
-                }
-
-            } catch (NumberFormatException e) {
-                LOGGER.log(Level.SEVERE, "Error parsing Booking ID or Amount from IPN.", e);
-                resp.getWriter().write("{\"RspCode\":\"99\",\"Message\":\"Invalid Input Format\"}");
-            } catch (Exception e) {
-                 LOGGER.log(Level.SEVERE, "Unexpected error processing IPN.", e);
-                 e.printStackTrace(); // In lỗi chi tiết ra log
-                 resp.getWriter().write("{\"RspCode\":\"99\",\"Message\":\"Unknown error\"}");
-            }
-        } else {
-            LOGGER.log(Level.SEVERE, "Invalid VNPAY checksum!");
+        if (vnp_SecureHash == null || !signValue.equals(vnp_SecureHash)) { 
+            LOGGER.log(Level.SEVERE, "[IPN] ❌ Invalid VNPAY checksum!");
             resp.getWriter().write("{\"RspCode\":\"97\",\"Message\":\"Invalid Checksum\"}");
+            return;
+        }
+            
+        LOGGER.info("[IPN] ✅ Signature verification SUCCESS.");
+        
+        // ✅ Lấy các tham số đã decoded
+        String vnp_TxnRef = vnp_Params.get("vnp_TxnRef");
+        String vnp_ResponseCode = vnp_Params.get("vnp_ResponseCode");
+        String vnp_TransactionStatus = vnp_Params.get("vnp_TransactionStatus");
+        String vnp_AmountStr = vnp_Params.get("vnp_Amount");
+        String vnp_PayDateStr = vnp_Params.get("vnp_PayDate");
+        String vnp_TransactionNo = vnp_Params.get("vnp_TransactionNo");
+        String vnp_BankCode = vnp_Params.get("vnp_BankCode");
+
+        try {
+            // ✅ Parse bookingId (hỗ trợ "12" hoặc "12_timestamp")
+            int bookingId;
+            if (vnp_TxnRef.contains("_")) {
+                bookingId = Integer.parseInt(vnp_TxnRef.split("_")[0]);
+            } else {
+                bookingId = Integer.parseInt(vnp_TxnRef);
+            }
+            
+            double amountVNPAY = Double.parseDouble(vnp_AmountStr) / 100.0;
+
+            LocalDateTime transactionDateTime = LocalDateTime.now();
+            if (vnp_PayDateStr != null && !vnp_PayDateStr.isEmpty()) {
+                try {
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+                    transactionDateTime = LocalDateTime.parse(vnp_PayDateStr, formatter);
+                } catch (DateTimeParseException e) {
+                    LOGGER.log(Level.SEVERE, "[IPN] Error parsing vnp_PayDate", e);
+                }
+            }
+
+            // 1. Kiểm tra Booking tồn tại
+            Booking booking = bookingService.getBookingById(bookingId);
+            if (booking == null) {
+                LOGGER.log(Level.SEVERE, "[IPN] Booking not found: {0}", bookingId);
+                resp.getWriter().write("{\"RspCode\":\"01\",\"Message\":\"Order not found\"}");
+                return;
+            }
+
+            // 2. Kiểm tra số tiền
+            if (Math.abs(booking.getTotalPrice() - amountVNPAY) > 0.01) {
+                LOGGER.log(Level.SEVERE, "[IPN] Amount mismatch! DB: {0}, VNPay: {1}",
+                        new Object[]{booking.getTotalPrice(), amountVNPAY});
+                resp.getWriter().write("{\"RspCode\":\"04\",\"Message\":\"Invalid amount\"}");
+                return;
+            }
+            
+            // 3. Kiểm tra trạng thái
+            if (!"pending".equalsIgnoreCase(booking.getStatus())) {
+                LOGGER.log(Level.WARNING, "[IPN] Booking {0} already processed (Status: {1})",
+                        new Object[]{bookingId, booking.getStatus()});
+                resp.getWriter().write("{\"RspCode\":\"00\",\"Message\":\"Already processed\"}");
+                return;
+            }
+
+            // 4. Tạo Payment record
+            Payment payment = new Payment();
+            payment.setBookingId(bookingId);
+            payment.setAmount(amountVNPAY);
+            payment.setMethod("VNPAY");
+            payment.setTransactionTime(transactionDateTime);
+            payment.setUpdatedAt(LocalDateTime.now());
+            payment.setVnpTransactionNo(vnp_TransactionNo);
+            payment.setVnpBankCode(vnp_BankCode);
+
+            // 5. Xử lý kết quả
+            if ("00".equals(vnp_ResponseCode) && "00".equals(vnp_TransactionStatus)) {
+                // ✅ Thành công
+                if (bookingService.confirmBooking(bookingId)) {
+                    LOGGER.log(Level.INFO, "[IPN] ✅ Booking {0} confirmed", bookingId);
+                    payment.setStatus("completed");
+                    paymentDao.insertPayment(payment);
+                    resp.getWriter().write("{\"RspCode\":\"00\",\"Message\":\"Success\"}");
+                } else {
+                    LOGGER.log(Level.SEVERE, "[IPN] ❌ Failed to confirm booking {0}", bookingId);
+                    resp.getWriter().write("{\"RspCode\":\"99\",\"Message\":\"Update failed\"}");
+                }
+            } else {
+                // ❌ Thất bại/Hủy
+                bookingService.cancelBooking(bookingId);
+                LOGGER.log(Level.WARNING, "[IPN] ❌ Transaction failed (Code: {0}), Booking {1} cancelled",
+                        new Object[]{vnp_ResponseCode, bookingId});
+                payment.setStatus("failed");
+                paymentDao.insertPayment(payment);
+                resp.getWriter().write("{\"RspCode\":\"00\",\"Message\":\"Order cancelled\"}");
+            }
+
+        } catch (NumberFormatException e) {
+            LOGGER.log(Level.SEVERE, "[IPN] Invalid number format", e);
+            resp.getWriter().write("{\"RspCode\":\"99\",\"Message\":\"Invalid format\"}");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "[IPN] Unexpected error", e);
+            resp.getWriter().write("{\"RspCode\":\"99\",\"Message\":\"Unknown error\"}");
         }
     }
 }
-

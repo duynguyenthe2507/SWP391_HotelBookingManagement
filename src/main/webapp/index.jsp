@@ -53,37 +53,41 @@
                     <div class="col-xl-4 col-lg-5 offset-xl-2 offset-lg-1">
                         <div class="booking-form">
                             <h3>Booking Your Hotel</h3>
-                            <form action="post">
+                            <form action="${pageContext.request.contextPath}/rooms" method="GET" id="homeBookingForm">
+
                                 <div class="check-date">
-                                    <label for="date-in">Check In:</label>
-                                    <input type="text" class="date-input" id="date-in">
+                                    <label for="date-in-home">Check In:</label>
+                                    <input type="text" class="date-input" name="checkInDate" id="date-in-home" required>
                                     <i class="icon_calendar"></i>
                                 </div>
+
                                 <div class="check-date">
-                                    <label for="date-out">Check Out:</label>
-                                    <input type="text" class="date-input" id="date-out">
+                                    <label for="date-out-home">Check Out:</label>
+                                    <input type="text" class="date-input" name="checkOutDate" id="date-out-home" required>
                                     <i class="icon_calendar"></i>
                                 </div>
+
                                 <div class="select-option">
-                                    <label for="guest">Guests:</label>
-                                    <select id="guest">
-                                        <option value="">1 Adults</option>
-                                        <option value="">2 Adults</option>
-                                        <option value="">3 Adults</option>
-                                        <option value="">4 Adults</option>
-                                        <option value="">5 Adults</option>
+                                    <label for="guestCount">Guests:</label>
+                                    <select id="guestCount" name="minCapacity">
+                                        <option value="1">1 Guest</option>
+                                        <option value="2">2 Guests</option>
+                                        <option value="3">3 Guests</option>
+                                        <option value="4">4 Guests</option>
                                     </select>
                                 </div>
+
                                 <div class="select-option">
-                                    <label for="room">Room:</label>
-                                    <select id="room">
-                                        <option value="">1 Room</option>
-                                        <option value="">2 Room</option>
-                                        <option value="">3 Room</option>
-                                        <option value="">4 Room</option>
+                                    <label for="categorySelect">Category:</label>
+                                    <select id="categorySelect" name="categoryId">
+                                        <option value="">All Categories</option>
+                                        <c:forEach var="cat" items="${categories}">
+                                            <option value="${cat.categoryId}">${cat.name}</option>
+                                        </c:forEach>
                                     </select>
                                 </div>
-                                <button type="submit">Check Availability</button>
+
+                                <button type="submit" id="btnGoToCheckout">Find Rooms</button>
                             </form>
                         </div>
                     </div>
@@ -170,7 +174,10 @@
         <script src="js/owl.carousel.min.js"></script>
         <script src="js/main.js"></script>
         <script>
-        function logout() {
+        
+
+        <script>
+          function logout() {
         if (confirm("Are you sure you want to logout?")) {
           var form = document.createElement("form");
           form.method = "post";
@@ -186,6 +193,29 @@
           form.submit();
         }
       }
+          
+          
+            $(document).ready(function() {
+                // Khởi tạo Datepicker
+                $('#date-in-home').datepicker({
+                    dateFormat: 'dd/mm/yy',
+                    minDate: 0,
+                    onSelect: function(selectedDate) {
+                        var date = $(this).datepicker('getDate');
+                        if (date) {
+                            date.setDate(date.getDate() + 1);
+                            $('#date-out-home').datepicker('option', 'minDate', date);
+                        }
+                    }
+                });
+                $('#date-out-home').datepicker({
+                    dateFormat: 'dd/mm/yy',
+                    minDate: 0
+                });
+
+                // Khởi tạo Nice Select
+                $('select').niceSelect();
+            });
         </script>
     </body>
 </html>
