@@ -196,7 +196,7 @@ public class BookingController extends HttpServlet {
         try {
             List<Integer> roomIds = List.of(roomId);
             List<Integer> quantities = List.of(numGuests);
-            
+
             LOGGER.info(">>> BookingController: (User logged in) Calling bookingService.createBooking()...");
             int bookingId = bookingService.createBooking(
                     user.getUserId(),
@@ -205,7 +205,8 @@ public class BookingController extends HttpServlet {
                     checkOut,
                     quantities,
                     null, // Không có special request từ flow này
-                    "pending"
+                    "pending",
+                    (serviceIds != null) ? Arrays.asList(serviceIds) : null
             );
 
             if (bookingId != -1) {

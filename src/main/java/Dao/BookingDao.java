@@ -787,4 +787,33 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
     public void close() throws Exception {
         super.closeConnection(); // Gọi hàm close() từ DBContext cha
     }
+
+    public boolean updateBookingStatusAndCheckInTime(int bookingId, String newStatus, LocalDateTime checkInTime) {
+        String sql = "UPDATE Booking SET status = ?, checkinTime = ?, updatedAt = GETDATE() WHERE bookingId = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, newStatus);
+            ps.setTimestamp(2, Timestamp.valueOf(checkInTime));
+            ps.setInt(3, bookingId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error updating booking status and check-in time for " + bookingId, e);
+            return false;
+        }
+    }
+
+    /**
+     * [MỚI] Cập nhật status VÀ thời gian check-out thực tế.
+     */
+    public boolean updateBookingStatusAndCheckOutTime(int bookingId, String newStatus, LocalDateTime checkOutTime) {
+        String sql = "UPDATE Booking SET status = ?, checkoutTime = ?, updatedAt = GETDATE() WHERE bookingId = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, newStatus);
+            ps.setTimestamp(2, Timestamp.valueOf(checkOutTime));
+            ps.setInt(3, bookingId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error updating booking status and check-out time for " + bookingId, e);
+            return false;
+        }
+    }
 }
