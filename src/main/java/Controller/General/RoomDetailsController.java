@@ -56,8 +56,7 @@ public class RoomDetailsController extends HttpServlet {
                 LOGGER.log(Level.WARNING, "No room found with ID: {0}", roomId);
                 request.getSession().setAttribute("cartMessage", "Không tìm thấy phòng với ID " + roomId + "."); 
                 request.getSession().setAttribute("cartMessageType", "ERROR");
-                response.sendRedirect(request.getContextPath() + "/rooms");
-            }
+                request.getRequestDispatcher("/pages/general/rooms.jsp").forward(request, response);            }
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error processing RoomDetailsServlet GET request for RoomID: " + roomId, e);

@@ -17,7 +17,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList; // <<< THÊM IMPORT
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -86,6 +87,8 @@ public class BookingController extends HttpServlet {
         String checkInDateStr = request.getParameter("checkInDate");
         String checkOutDateStr = request.getParameter("checkOutDate");
         String numGuestsStr = request.getParameter("numGuests");
+        String specialRequest = request.getParameter("specialRequest");
+        String[] serviceIds = request.getParameterValues("serviceIds");
 
         LOGGER.log(Level.INFO, "Received booking request: roomId={0}, checkIn={1}, checkOut={2}, guests={3}",
                 new Object[]{roomIdStr, checkInDateStr, checkOutDateStr, numGuestsStr});
@@ -193,7 +196,7 @@ public class BookingController extends HttpServlet {
         try {
             List<Integer> roomIds = List.of(roomId);
             List<Integer> quantities = List.of(numGuests);
-            
+
             LOGGER.info(">>> BookingController: (User logged in) Calling bookingService.createBooking()...");
             int bookingId = bookingService.createBooking(
                     user.getUserId(),
@@ -202,7 +205,8 @@ public class BookingController extends HttpServlet {
                     checkOut,
                     quantities,
                     null, // Không có special request từ flow này
-                    "pending"
+                    "pending",
+                    (serviceIds != null) ? Arrays.asList(serviceIds) : null
             );
 
             if (bookingId != -1) {

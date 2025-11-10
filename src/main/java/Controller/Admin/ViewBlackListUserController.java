@@ -11,15 +11,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 
-@WebServlet(name = "ViewUserController", urlPatterns = "/viewuser")
-public class ViewUserController extends HttpServlet {
+@WebServlet(name = "ViewBlackListUserController", urlPatterns = {"/admin/black-list"})
+public class ViewBlackListUserController extends HttpServlet {
 
     private UsersDao usersDao = new UsersDao();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String sortParam = request.getParameter("sort"); // expected values: id_asc, id_desc
+        // Tự động blacklist user nếu có >= 3 lần no-show
+        usersDao.autoBlacklistUsers();
+        
+        String sortParam = request.getParameter("sort");
         String sortBy = request.getParameter("sortBy");
         String order = request.getParameter("order");
         if (sortParam != null && !sortParam.isEmpty()) {
@@ -32,11 +35,15 @@ public class ViewUserController extends HttpServlet {
             }
         }
         String roleFilter = request.getParameter("role");
+        // Map "user" to "customer" if needed (for backward compatibility)
+        if (roleFilter != null && roleFilter.equals("user")) {
+            roleFilter = "customer";
+        }
         String statusFilter = request.getParameter("status");
         String firstNameFilter = request.getParameter("firstName");
         String lastNameFilter = request.getParameter("lastName");
         String searchKeyword = request.getParameter("search");
-        // code phân trang
+        //code phân trang
         int page = 1;
         int pageSize = 10;
 
@@ -52,24 +59,16 @@ public class ViewUserController extends HttpServlet {
             page = 1;
         }
 
-        int totalUsers = usersDao.countAllUsers(roleFilter, statusFilter, firstNameFilter, lastNameFilter,
-                searchKeyword);
+        int totalUsers = usersDao.countBlacklistedUsers(roleFilter, statusFilter, firstNameFilter, lastNameFilter, searchKeyword);
         int totalPages = (int) Math.ceil((double) totalUsers / pageSize);
         if (page > totalPages && totalPages > 0) {
             page = totalPages;
         }
-        // Fetch users đã filter và sort từ DAO với pagination
-        List<Users> users = usersDao.getFilteredAndSorted(sortBy, order, roleFilter, statusFilter, firstNameFilter,
-                lastNameFilter, searchKeyword, page, pageSize);
-
-        // Fetch distinct values cho drop-down
+        List<Users> users = usersDao.getBlacklistedFilteredAndSorted(sortBy, order, roleFilter, statusFilter, firstNameFilter, lastNameFilter, searchKeyword, page, pageSize);
         List<String> distinctRoles = usersDao.getDistinctRoles();
         List<String> distinctStatuses = usersDao.getDistinctStatuses();
-        List<String> distinctFirstNames = usersDao.getDistinctFirstNames();
+        List<String> distinctFirstNames = usersDao.getDistinctLastNames();
         List<String> distinctLastNames = usersDao.getDistinctLastNames();
-
-        // Set attributes cho JSP (dữ liệu và current values để giữ selected trong
-        // drop-down)
         request.setAttribute("users", users);
         request.setAttribute("distinctRoles", distinctRoles);
         request.setAttribute("distinctStatuses", distinctStatuses);
@@ -77,37 +76,44 @@ public class ViewUserController extends HttpServlet {
         request.setAttribute("distinctLastNames", distinctLastNames);
         request.setAttribute("currentSortBy", sortBy);
         request.setAttribute("currentOrder", order);
+        request.setAttribute("currentSortParam", sortParam);
         request.setAttribute("currentRole", roleFilter);
         request.setAttribute("currentStatus", statusFilter);
         request.setAttribute("currentFirstName", firstNameFilter);
         request.setAttribute("currentLastName", lastNameFilter);
         request.setAttribute("currentSearch", searchKeyword);
-        // Set pagination attributes cho JSP
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("totalUsers", totalUsers);
         request.setAttribute("pageSize", pageSize);
-        // Set currentSortParam để JSP có thể dùng
-        String currentSortParam = null;
-        if (sortBy != null && sortBy.equals("id")) {
-            if (order != null && order.equalsIgnoreCase("desc")) {
-                currentSortParam = "id_desc";
-            } else {
-                currentSortParam = "id_asc";
-            }
-        }
-        request.setAttribute("currentSortParam", currentSortParam);
-        // Forward đến JSP để render
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/pages/admin/user-list.jsp");
+
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/pages/admin/black-list.jsp");
         dispatcher.forward(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Nếu có request POST (ví dụ từ form khác), gọi doGet để xử lý giống (an toàn
-        // cho list view)
-        doGet(request, response);
+        String action = request.getParameter("action");
+        if ("ban".equals(action)) {
+            String userIdParam = request.getParameter("userId");
+            if (userIdParam != null && !userIdParam.isEmpty()) {
+                try {
+                    int userId = Integer.parseInt(userIdParam);
+                    boolean success = usersDao.delete(userId);
+                    if (success) {
+                        request.setAttribute("success", "User banned and deleted successfully");
+                    } else {
+                        request.setAttribute("error", "Failed to ban user");
+                    }
+                } catch (NumberFormatException e) {
+                    request.setAttribute("error", "Invalid User ID");
+                }
+            } else {
+                request.setAttribute("error", "User ID is required");
+            }
+        }
+        doGet(request, response);  // Reload list after action
     }
 
     @Override
