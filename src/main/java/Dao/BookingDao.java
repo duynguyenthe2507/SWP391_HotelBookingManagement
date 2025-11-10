@@ -53,11 +53,12 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
                 rs.getString("status"),
                 rs.getDouble("totalPrice"),
                 rs.getTimestamp("createdAt").toLocalDateTime(),
-                rs.getTimestamp("updatedAt") != null ? rs.getTimestamp("updatedAt").toLocalDateTime() : null
-        );
+                rs.getTimestamp("updatedAt") != null ? rs.getTimestamp("updatedAt").toLocalDateTime() : null);
     }
 
-    // ============ OFFLINE BOOKING METHODS (Code gốc của bạn - Chính xác) ============
+    // ============ OFFLINE BOOKING METHODS (from haitn/pushOfflineBooking)
+    // ============
+
     public int insertOfflineBooking(Booking booking) {
         // ... (Code gốc của bạn - Chính xác) ...
         String sql = "INSERT INTO Booking (guestName, receptionistId, roomId, checkinTime, checkoutTime, "
@@ -128,7 +129,8 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
             params.add(checkIn);
         }
         if (keyword != null && !keyword.isEmpty()) {
-            sql.append("AND (b.guestName LIKE ? OR u_guest.firstName LIKE ? OR u_guest.lastName LIKE ? OR r.name LIKE ?) ");
+            sql.append(
+                    "AND (b.guestName LIKE ? OR u_guest.firstName LIKE ? OR u_guest.lastName LIKE ? OR r.name LIKE ?) ");
             params.add("%" + keyword + "%");
             params.add("%" + keyword + "%");
             params.add("%" + keyword + "%");
@@ -283,9 +285,11 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
             if (!isExternalConn) {
                 originalAutoCommit = conn.getAutoCommit();
                 conn.setAutoCommit(false);
-                LOGGER.log(Level.INFO, "Transaction started internally for creating booking for user {0}.", booking.getUserId());
+                LOGGER.log(Level.INFO, "Transaction started internally for creating booking for user {0}.",
+                        booking.getUserId());
             } else {
-                LOGGER.log(Level.INFO, "Participating in external transaction for creating booking for user {0}.", booking.getUserId());
+                LOGGER.log(Level.INFO, "Participating in external transaction for creating booking for user {0}.",
+                        booking.getUserId());
             }
 
             try (PreparedStatement psInsertBooking = conn.prepareStatement(bookingSql, Statement.RETURN_GENERATED_KEYS)) {
@@ -310,7 +314,8 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
                 try (ResultSet generatedKeys = psInsertBooking.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
                         booking.setBookingId(generatedKeys.getInt(1));
-                        LOGGER.log(Level.INFO, "Booking inserted successfully with generated ID: {0}", booking.getBookingId());
+                        LOGGER.log(Level.INFO, "Booking inserted successfully with generated ID: {0}",
+                                booking.getBookingId());
                     } else {
                         throw new SQLException("Inserting booking failed, no ID obtained.");
                     }
@@ -339,7 +344,8 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
             return true;
 
         } catch (SQLException e) {
-            System.out.println("!!!!!!!!!!!!!! SQLException caught in BookingDao.insertBookingWithDetails !!!!!!!!!!!!!!");
+            System.out.println(
+                    "!!!!!!!!!!!!!! SQLException caught in BookingDao.insertBookingWithDetails !!!!!!!!!!!!!!");
             LOGGER.log(Level.SEVERE, "SQL Exception during insertBookingWithDetails transaction. Rolling back.", e);
             e.printStackTrace();
 
@@ -358,7 +364,8 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
                     conn.setAutoCommit(originalAutoCommit);
                 }
             } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "Error in finally block of insertBookingWithDetails while restoring autoCommit", e);
+                LOGGER.log(Level.SEVERE,
+                        "Error in finally block of insertBookingWithDetails while restoring autoCommit", e);
             }
         }
     }
@@ -782,6 +789,29 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
         return list;
     }
 
+    /**
+     * Đếm số lần no-show của user (booking confirmed nhưng checkinTime đã qua mà
+     * không check-in)
+     */
+    public int countNoShowBookings(int userId) {
+        String sql = "SELECT COUNT(*) FROM Booking " +
+                "WHERE userId = ? " +
+                "AND status = 'confirmed' " +
+                "AND checkinTime < ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+}
     // === SỬA LỖI: Thêm hàm close() (Bắt buộc bởi AutoCloseable) ===
     @Override
     public void close() throws Exception {

@@ -39,14 +39,14 @@
         <!-- Sidebar Menu and Table -->
         <div class="row">
             <!-- Sidebar begin (giống dashboard) -->
-            <nav class="sidebar d-flex flex-column col-lg-2 col-md-3 col-3 p-0 min-vh-100" style="background-color: #0056b3;">                <div class="sidebar-sticky flex-grow-1 d-flex flex-column">
+            <nav class="sidebar d-flex flex-column col-lg-2 col-md-3 col-3 p-0 min-vh-100" style="background-color: #0056b3;"> <div class="sidebar-sticky flex-grow-1 d-flex flex-column">
                     <div class="text-center mt-4 mb-4">
                         <div style="font-family: 'Lora', serif; font-style:italic; font-weight:bold; font-size:2em; color:#dfa974; letter-spacing:1px;">36</div>
                         <h5 class="font-weight-bold" style="color: #dfa974;">Admin</h5>
                     </div>
                     <ul class="nav flex-column flex-grow-1">
                         <li class="nav-item"><a href="${pageContext.request.contextPath}/viewuser" class="nav-link text-white"><i class="fa fa-sign-out mr-2"></i> User List</a></li>
-                        <li class="nav-item"><a href="${pageContext.request.contextPath}/pages/admin/black-list.jsp" class="nav-link text-white"><i class="fa fa-sign-out mr-2"></i> Black-List</a></li>
+                        <li class="nav-item"><a href="${pageContext.request.contextPath}/admin/black-list" class="nav-link text-white"><i class="fa fa-sign-out mr-2"></i> Black-List</a></li>
                         <li class="nav-item"><a href="${pageContext.request.contextPath}/login" class="nav-link text-white"><i class="fa fa-sign-out mr-2"></i> Logout</a></li>
                     </ul>
                     <div class="mt-auto mb-3"></div>
@@ -155,13 +155,14 @@
                     </div>
                     <!-- search bar -->
                     <div class="col-auto">
-                        <input type="text" name="search" class="form-control search-bar" 
-                               placeholder="Search by name..." 
-                               value="${currentSearch}"
-                               onkeyup="this.form.submit()">
+                        <div class="input-group">
+                            <input type="text" name="search" class="form-control search-bar"
+                                   placeholder="Search by name"
+                                   value="${currentSearch}">
+                            <button type="submit" class="btn btn-primary apply-button">Search</button>
+                        </div>
                     </div>
                 </form>
-
                 <table class="table table-bordered table-sm">
                     <thead>
                         <tr>
@@ -174,7 +175,6 @@
                     </thead>
                     <tbody>
                         <c:forEach var="user" items="${users}">
-
                             <tr>
                                 <td>${user.userId}</td>
                                 <td>${user.firstName} ${user.middleName} ${user.lastName}</td>
@@ -191,27 +191,81 @@
                         <!-- Add more rows as needed -->
                     </tbody>
                 </table>
-
                 <!-- Pagination -->
+                <c:if test="${totalPages > 0}">
                 <nav aria-label="Page navigation">
                     <ul class="pagination justify-content-center">
-                        <li class="page-item"><a class="page-link" href="#"><</a></li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item"><a class="page-link" href="#">4</a></li>
-                        <li class="page-item"><a class="page-link" href="#">5</a></li>
-                        <li class="page-item"><a class="page-link" href="#">6</a></li>
-                        <li class="page-item"><a class="page-link" href="#">7</a></li>
-                        <li class="page-item"><a class="page-link" href="#">8</a></li>
-                        <li class="page-item"><a class="page-link" href="#">9</a></li>
-                        <li class="page-item"><a class="page-link" href="#">></a></li>
+                        <c:choose>
+                            <c:when test="${currentPage == 1}">
+                                <li class="page-item disabled">
+                                    <span class="page-link">&laquo;</span>
+                                </li>
+                            </c:when>
+                            <c:otherwise>
+                                <li class="page-item">
+                                    <c:url var="prevUrl" value="/viewuser">
+                                        <c:param name="page" value="${currentPage - 1}"/>
+                                        <c:if test="${not empty currentSortParam}"><c:param name="sort" value="${currentSortParam}"/></c:if>
+                                        <c:if test="${not empty currentRole}"><c:param name="role" value="${currentRole}"/></c:if>
+                                        <c:if test="${not empty currentStatus}"><c:param name="status" value="${currentStatus}"/></c:if>
+                                        <c:if test="${not empty currentFirstName}"><c:param name="firstName" value="${currentFirstName}"/></c:if>
+                                        <c:if test="${not empty currentLastName}"><c:param name="lastName" value="${currentLastName}"/></c:if>
+                                        <c:if test="${not empty currentSearch}"><c:param name="search" value="${currentSearch}"/></c:if>
+                                    </c:url>
+                                    <a class="page-link" href="${prevUrl}">&laquo;</a>
+                                </li>
+                            </c:otherwise>
+                        </c:choose>
+                        <c:forEach var="i" begin="1" end="${totalPages}">
+                            <c:choose>
+                                <c:when test="${i == currentPage}">
+                                    <li class="page-item active"><span class="page-link">${i}</span></li>
+                                </c:when>
+                                <c:when test="${i <= 3 || i > totalPages - 3 || (i >= currentPage - 1 && i <= currentPage + 1)}">
+                                    <c:url var="pageUrl" value="/viewuser">
+                                        <c:param name="page" value="${i}"/>
+                                        <c:if test="${not empty currentSortParam}"><c:param name="sort" value="${currentSortParam}"/></c:if>
+                                        <c:if test="${not empty currentRole}"><c:param name="role" value="${currentRole}"/></c:if>
+                                        <c:if test="${not empty currentStatus}"><c:param name="status" value="${currentStatus}"/></c:if>
+                                        <c:if test="${not empty currentFirstName}"><c:param name="firstName" value="${currentFirstName}"/></c:if>
+                                        <c:if test="${not empty currentLastName}"><c:param name="lastName" value="${currentLastName}"/></c:if>
+                                        <c:if test="${not empty currentSearch}"><c:param name="search" value="${currentSearch}"/></c:if>
+                                    </c:url>
+                                    <li class="page-item"><a class="page-link" href="${pageUrl}">${i}</a></li>
+                                </c:when>
+                                <c:when test="${i == 4 && currentPage > 4}">
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                </c:when>
+                                <c:when test="${i == totalPages - 3 && currentPage < totalPages - 3}">
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                </c:when>
+                            </c:choose>
+                        </c:forEach>
+                        <c:choose>
+                            <c:when test="${currentPage == totalPages}">
+                                <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+                            </c:when>
+                            <c:otherwise>
+                                <li class="page-item">
+                                    <c:url var="nextUrl" value="/viewuser">
+                                        <c:param name="page" value="${currentPage + 1}"/>
+                                        <c:if test="${not empty currentSortParam}"><c:param name="sort" value="${currentSortParam}"/></c:if>
+                                        <c:if test="${not empty currentRole}"><c:param name="role" value="${currentRole}"/></c:if>
+                                        <c:if test="${not empty currentStatus}"><c:param name="status" value="${currentStatus}"/></c:if>
+                                        <c:if test="${not empty currentFirstName}"><c:param name="firstName" value="${currentFirstName}"/></c:if>
+                                        <c:if test="${not empty currentLastName}"><c:param name="lastName" value="${currentLastName}"/></c:if>
+                                        <c:if test="${not empty currentSearch}"><c:param name="search" value="${currentSearch}"/></c:if>
+                                    </c:url>
+                                    <a class="page-link" href="${nextUrl}">&raquo;</a>
+                                </li>
+                            </c:otherwise>
+                        </c:choose>
                     </ul>
                 </nav>
+            </c:if>
             </div>
         </div>
     </div>
-
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
