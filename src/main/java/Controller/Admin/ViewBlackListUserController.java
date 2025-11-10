@@ -4,7 +4,6 @@ import Dao.UsersDao;
 import Models.Users;
 import jakarta.servlet.RequestDispatcher;
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -20,6 +19,9 @@ public class ViewBlackListUserController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        // Tự động blacklist user nếu có >= 3 lần no-show
+        usersDao.autoBlacklistUsers();
+        
         String sortParam = request.getParameter("sort");
         String sortBy = request.getParameter("sortBy");
         String order = request.getParameter("order");
@@ -33,11 +35,15 @@ public class ViewBlackListUserController extends HttpServlet {
             }
         }
         String roleFilter = request.getParameter("role");
+        // Map "user" to "customer" if needed (for backward compatibility)
+        if (roleFilter != null && roleFilter.equals("user")) {
+            roleFilter = "customer";
+        }
         String statusFilter = request.getParameter("status");
         String firstNameFilter = request.getParameter("firstName");
         String lastNameFilter = request.getParameter("lastName");
         String searchKeyword = request.getParameter("search");
-
+        //code phân trang
         int page = 1;
         int pageSize = 10;
 

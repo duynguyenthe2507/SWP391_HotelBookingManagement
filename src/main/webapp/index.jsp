@@ -169,5 +169,23 @@
         <script src="js/jquery.slicknav.js"></script>
         <script src="js/owl.carousel.min.js"></script>
         <script src="js/main.js"></script>
+        <script>
+        function logout() {
+        if (confirm("Are you sure you want to logout?")) {
+          var form = document.createElement("form");
+          form.method = "post";
+          form.action = "profile";
+
+          var actionInput = document.createElement("input");
+          actionInput.type = "hidden";
+          actionInput.name = "action";
+          actionInput.value = "logout";
+
+          form.appendChild(actionInput);
+          document.body.appendChild(form);
+          form.submit();
+        }
+      }
+        </script>
     </body>
 </html>

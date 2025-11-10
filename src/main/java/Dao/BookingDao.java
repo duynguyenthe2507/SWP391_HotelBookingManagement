@@ -44,12 +44,12 @@ public class BookingDao extends DBContext {
                 rs.getString("status"),
                 rs.getDouble("totalPrice"),
                 rs.getTimestamp("createdAt").toLocalDateTime(),
-                rs.getTimestamp("updatedAt") != null ? rs.getTimestamp("updatedAt").toLocalDateTime() : null
-        );
+                rs.getTimestamp("updatedAt") != null ? rs.getTimestamp("updatedAt").toLocalDateTime() : null);
     }
 
-    // ============ OFFLINE BOOKING METHODS (from haitn/pushOfflineBooking) ============
-    
+    // ============ OFFLINE BOOKING METHODS (from haitn/pushOfflineBooking)
+    // ============
+
     public int insertOfflineBooking(Booking booking) {
         String sql = "INSERT INTO Booking (guestName, receptionistId, roomId, checkinTime, checkoutTime, " +
                 "guestCount, specialRequest, totalPrice, status, createdAt) " +
@@ -102,7 +102,8 @@ public class BookingDao extends DBContext {
         }
     }
 
-    public List<Map<String, Object>> findBookings(String status, String checkIn, String keyword, int pageNumber, int pageSize) {
+    public List<Map<String, Object>> findBookings(String status, String checkIn, String keyword, int pageNumber,
+            int pageSize) {
         List<Map<String, Object>> list = new ArrayList<>();
         List<Object> params = new ArrayList<>();
 
@@ -111,8 +112,7 @@ public class BookingDao extends DBContext {
                         "FROM Booking b " +
                         "JOIN Room r ON b.roomId = r.roomId " +
                         "LEFT JOIN Users u_guest ON b.userId = u_guest.userId " +
-                        "WHERE 1=1 "
-        );
+                        "WHERE 1=1 ");
 
         if (status != null && !status.isEmpty()) {
             sql.append("AND b.status = ? ");
@@ -123,7 +123,8 @@ public class BookingDao extends DBContext {
             params.add(checkIn);
         }
         if (keyword != null && !keyword.isEmpty()) {
-            sql.append("AND (b.guestName LIKE ? OR u_guest.firstName LIKE ? OR u_guest.lastName LIKE ? OR r.name LIKE ?) ");
+            sql.append(
+                    "AND (b.guestName LIKE ? OR u_guest.firstName LIKE ? OR u_guest.lastName LIKE ? OR r.name LIKE ?) ");
             params.add("%" + keyword + "%");
             params.add("%" + keyword + "%");
             params.add("%" + keyword + "%");
@@ -143,7 +144,8 @@ public class BookingDao extends DBContext {
                     Map<String, Object> map = new HashMap<>();
                     map.put("booking", mapResultSetToBooking(rs));
                     map.put("roomName", rs.getString("roomName"));
-                    map.put("customerName", rs.getString("guestName") != null ? rs.getString("guestName") : rs.getString("guestCustomerName"));
+                    map.put("customerName", rs.getString("guestName") != null ? rs.getString("guestName")
+                            : rs.getString("guestCustomerName"));
                     list.add(map);
                 }
             }
@@ -160,8 +162,7 @@ public class BookingDao extends DBContext {
                         "FROM Booking b " +
                         "JOIN Room r ON b.roomId = r.roomId " +
                         "LEFT JOIN Users u_guest ON b.userId = u_guest.userId " +
-                        "WHERE 1=1 "
-        );
+                        "WHERE 1=1 ");
 
         if (status != null && !status.isEmpty()) {
             sql.append("AND b.status = ? ");
@@ -172,7 +173,8 @@ public class BookingDao extends DBContext {
             params.add(checkIn);
         }
         if (keyword != null && !keyword.isEmpty()) {
-            sql.append("AND (b.guestName LIKE ? OR u_guest.firstName LIKE ? OR u_guest.lastName LIKE ? OR r.name LIKE ?) ");
+            sql.append(
+                    "AND (b.guestName LIKE ? OR u_guest.firstName LIKE ? OR u_guest.lastName LIKE ? OR r.name LIKE ?) ");
             params.add("%" + keyword + "%");
             params.add("%" + keyword + "%");
             params.add("%" + keyword + "%");
@@ -197,8 +199,10 @@ public class BookingDao extends DBContext {
     public Map<String, Object> getBookingDetailsById(int bookingId) {
         Map<String, Object> details = new HashMap<>();
         String sql = "SELECT b.*, r.*, " +
-                "r.name as roomName, r.description as roomDescription, r.imgUrl as roomImgUrl, r.updatedAt as roomUpdatedAt, " +
-                "c.name as categoryName, c.description as categoryDescription, c.imgUrl as categoryImgUrl, c.updatedAt as categoryUpdatedAt, " +
+                "r.name as roomName, r.description as roomDescription, r.imgUrl as roomImgUrl, r.updatedAt as roomUpdatedAt, "
+                +
+                "c.name as categoryName, c.description as categoryDescription, c.imgUrl as categoryImgUrl, c.updatedAt as categoryUpdatedAt, "
+                +
                 "(u_guest.firstName + ' ' + u_guest.lastName) as guestUsername, " +
                 "(u_rep.firstName + ' ' + u_rep.lastName) as receptionistUsername " +
                 "FROM Booking b " +
@@ -229,7 +233,8 @@ public class BookingDao extends DBContext {
                     room.setCategory(category);
                     details.put("room", room);
 
-                    String customerName = booking.getGuestName() != null ? booking.getGuestName() : rs.getString("guestUsername");
+                    String customerName = booking.getGuestName() != null ? booking.getGuestName()
+                            : rs.getString("guestUsername");
                     details.put("customerName", customerName);
                     details.put("receptionistName", rs.getString("receptionistUsername"));
 
@@ -262,16 +267,19 @@ public class BookingDao extends DBContext {
             if (!isExternalConn) {
                 originalAutoCommit = conn.getAutoCommit();
                 conn.setAutoCommit(false);
-                LOGGER.log(Level.INFO, "Transaction started internally for creating booking for user {0}.", booking.getUserId());
+                LOGGER.log(Level.INFO, "Transaction started internally for creating booking for user {0}.",
+                        booking.getUserId());
             } else {
-                LOGGER.log(Level.INFO, "Participating in external transaction for creating booking for user {0}.", booking.getUserId());
+                LOGGER.log(Level.INFO, "Participating in external transaction for creating booking for user {0}.",
+                        booking.getUserId());
             }
 
-            try (PreparedStatement psInsertBooking = conn.prepareStatement(bookingSql, Statement.RETURN_GENERATED_KEYS)) {
+            try (PreparedStatement psInsertBooking = conn.prepareStatement(bookingSql,
+                    Statement.RETURN_GENERATED_KEYS)) {
                 psInsertBooking.setInt(1, booking.getUserId());
                 psInsertBooking.setTimestamp(2, Timestamp.valueOf(booking.getCheckinTime()));
                 psInsertBooking.setTimestamp(3, Timestamp.valueOf(booking.getCheckoutTime()));
-                //psInsertBooking.setDouble(4, booking.getDurationHours());
+                // psInsertBooking.setDouble(4, booking.getDurationHours());
                 psInsertBooking.setString(5, booking.getStatus());
                 psInsertBooking.setDouble(6, booking.getTotalPrice());
                 psInsertBooking.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
@@ -280,12 +288,14 @@ public class BookingDao extends DBContext {
                 LOGGER.log(Level.INFO, "Executing insert booking statement...");
                 int affectedRows = psInsertBooking.executeUpdate();
 
-                if (affectedRows == 0) throw new SQLException("Inserting booking failed, no rows affected.");
+                if (affectedRows == 0)
+                    throw new SQLException("Inserting booking failed, no rows affected.");
 
                 try (ResultSet generatedKeys = psInsertBooking.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
                         booking.setBookingId(generatedKeys.getInt(1));
-                        LOGGER.log(Level.INFO, "Booking inserted successfully with generated ID: {0}", booking.getBookingId());
+                        LOGGER.log(Level.INFO, "Booking inserted successfully with generated ID: {0}",
+                                booking.getBookingId());
                     } else {
                         throw new SQLException("Inserting booking failed, no ID obtained.");
                     }
@@ -296,32 +306,39 @@ public class BookingDao extends DBContext {
 
             for (BookingDetail detail : details) {
                 detail.setBookingId(booking.getBookingId());
-                LOGGER.log(Level.INFO, "Attempting to insert booking detail for roomId {0}, bookingId {1}", new Object[]{detail.getRoomId(), booking.getBookingId()});
+                LOGGER.log(Level.INFO, "Attempting to insert booking detail for roomId {0}, bookingId {1}",
+                        new Object[] { detail.getRoomId(), booking.getBookingId() });
                 boolean detailInserted = bookingDetailDao.insertBookingDetail(detail);
 
                 if (!detailInserted) {
                     throw new SQLException("Inserting booking detail failed for roomId " + detail.getRoomId());
                 }
 
-                if ("pending".equalsIgnoreCase(booking.getStatus()) || "confirmed".equalsIgnoreCase(booking.getStatus())) {
+                if ("pending".equalsIgnoreCase(booking.getStatus())
+                        || "confirmed".equalsIgnoreCase(booking.getStatus())) {
                     LOGGER.log(Level.INFO, "Attempting to update room {0} status to 'booked'", detail.getRoomId());
                     boolean roomStatusUpdated = updateRoomStatusDirect(detail.getRoomId(), "booked", conn);
                     if (!roomStatusUpdated) {
-                        throw new SQLException("Updating room status to 'booked' failed for roomId " + detail.getRoomId());
+                        throw new SQLException(
+                                "Updating room status to 'booked' failed for roomId " + detail.getRoomId());
                     }
                 }
             }
 
             if (!isExternalConn) {
-                LOGGER.log(Level.INFO, "Committing internally managed transaction for booking {0}...", booking.getBookingId());
+                LOGGER.log(Level.INFO, "Committing internally managed transaction for booking {0}...",
+                        booking.getBookingId());
                 conn.commit();
             } else {
-                LOGGER.log(Level.INFO, "Inserts successful within external transaction for booking {0}. Commit handled externally.", booking.getBookingId());
+                LOGGER.log(Level.INFO,
+                        "Inserts successful within external transaction for booking {0}. Commit handled externally.",
+                        booking.getBookingId());
             }
             return true;
 
         } catch (SQLException e) {
-            System.out.println("!!!!!!!!!!!!!! SQLException caught in BookingDao.insertBookingWithDetails !!!!!!!!!!!!!!");
+            System.out.println(
+                    "!!!!!!!!!!!!!! SQLException caught in BookingDao.insertBookingWithDetails !!!!!!!!!!!!!!");
             LOGGER.log(Level.SEVERE, "SQL Exception during insertBookingWithDetails transaction. Rolling back.", e);
             e.printStackTrace();
 
@@ -340,7 +357,8 @@ public class BookingDao extends DBContext {
                     conn.setAutoCommit(originalAutoCommit);
                 }
             } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "Error in finally block of insertBookingWithDetails while restoring autoCommit", e);
+                LOGGER.log(Level.SEVERE,
+                        "Error in finally block of insertBookingWithDetails while restoring autoCommit", e);
             }
         }
     }
@@ -353,7 +371,8 @@ public class BookingDao extends DBContext {
 
         try {
             conn = this.connection;
-            if (conn == null || conn.isClosed()) return false;
+            if (conn == null || conn.isClosed())
+                return false;
 
             if (!isExternalConn) {
                 originalAutoCommit = conn.getAutoCommit();
@@ -375,7 +394,8 @@ public class BookingDao extends DBContext {
                     for (int roomId : roomIds) {
                         if (!hasActiveBookingsForRoom(roomId, bookingId, conn)) {
                             if (!updateRoomStatusDirect(roomId, "available", conn))
-                                throw new SQLException("Failed to update room status to available for roomId " + roomId);
+                                throw new SQLException(
+                                        "Failed to update room status to available for roomId " + roomId);
                         }
                     }
                 } else if ("confirmed".equalsIgnoreCase(newStatus) || "pending".equalsIgnoreCase(newStatus)) {
@@ -385,10 +405,12 @@ public class BookingDao extends DBContext {
                     }
                 }
 
-                if (!isExternalConn) conn.commit();
+                if (!isExternalConn)
+                    conn.commit();
                 return true;
             } else {
-                if (!isExternalConn) conn.rollback();
+                if (!isExternalConn)
+                    conn.rollback();
                 return false;
             }
 
@@ -435,7 +457,8 @@ public class BookingDao extends DBContext {
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, bookingId);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) roomIds.add(rs.getInt("roomId"));
+                while (rs.next())
+                    roomIds.add(rs.getInt("roomId"));
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "[Transaction] SQL Error getting room IDs for booking " + bookingId, e);
@@ -454,7 +477,8 @@ public class BookingDao extends DBContext {
             ps.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
             ps.setInt(3, excludeBookingId);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getInt(1) > 0;
+                if (rs.next())
+                    return rs.getInt(1) > 0;
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "[Transaction] SQL Error checking active bookings for room " + roomId, e);
@@ -469,8 +493,9 @@ public class BookingDao extends DBContext {
         List<Booking> list = new ArrayList<>();
         String sql = "SELECT * FROM Booking ORDER BY createdAt DESC";
         try (PreparedStatement ps = connection.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) list.add(mapResultSetToBooking(rs));
+                ResultSet rs = ps.executeQuery()) {
+            while (rs.next())
+                list.add(mapResultSetToBooking(rs));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -482,7 +507,8 @@ public class BookingDao extends DBContext {
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return mapResultSetToBooking(rs);
+                if (rs.next())
+                    return mapResultSetToBooking(rs);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -496,7 +522,8 @@ public class BookingDao extends DBContext {
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, userId);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) list.add(mapResultSetToBooking(rs));
+                while (rs.next())
+                    list.add(mapResultSetToBooking(rs));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -568,7 +595,8 @@ public class BookingDao extends DBContext {
             ps.setTimestamp(3, Timestamp.valueOf(checkIn));
 
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getInt(1) > 0;
+                if (rs.next())
+                    return rs.getInt(1) > 0;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -582,7 +610,8 @@ public class BookingDao extends DBContext {
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, status);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) list.add(mapResultSetToBooking(rs));
+                while (rs.next())
+                    list.add(mapResultSetToBooking(rs));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -596,7 +625,8 @@ public class BookingDao extends DBContext {
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) list.add(mapResultSetToBooking(rs));
+                while (rs.next())
+                    list.add(mapResultSetToBooking(rs));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -612,11 +642,35 @@ public class BookingDao extends DBContext {
             ps.setTimestamp(1, now);
             ps.setTimestamp(2, now);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) list.add(mapResultSetToBooking(rs));
+                while (rs.next())
+                    list.add(mapResultSetToBooking(rs));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return list;
+    }
+
+    /**
+     * Đếm số lần no-show của user (booking confirmed nhưng checkinTime đã qua mà
+     * không check-in)
+     */
+    public int countNoShowBookings(int userId) {
+        String sql = "SELECT COUNT(*) FROM Booking " +
+                "WHERE userId = ? " +
+                "AND status = 'confirmed' " +
+                "AND checkinTime < ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 }

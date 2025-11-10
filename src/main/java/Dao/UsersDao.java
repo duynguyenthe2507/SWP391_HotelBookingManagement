@@ -27,12 +27,14 @@ public class UsersDao extends DBContext {
                 rs.getString("avatar_url"));
     }
 
-    public List<Users> getFilteredAndSorted(String sortBy, String order, String roleFilter, String statusFilter, String firstNameFilter, String lastNameFilter, String searchKeyword) {
+    public List<Users> getFilteredAndSorted(String sortBy, String order, String roleFilter, String statusFilter,
+            String firstNameFilter, String lastNameFilter, String searchKeyword, int page, int pageSize) {
         List<Users> list = new ArrayList<>();
         String sql = "SELECT * FROM Users WHERE 1=1 ";
 
         if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
-            sql = sql + "AND (UPPER(firstName) LIKE UPPER(?) OR UPPER(middleName) LIKE UPPER(?) OR UPPER(lastName) LIKE UPPER(?)) ";
+            sql = sql
+                    + "AND (UPPER(firstName) LIKE UPPER(?) OR UPPER(middleName) LIKE UPPER(?) OR UPPER(lastName) LIKE UPPER(?)) ";
         }
         if (roleFilter != null && !roleFilter.isEmpty()) {
             sql = sql + "AND role = ? ";
@@ -61,6 +63,9 @@ public class UsersDao extends DBContext {
         } else if (sortBy.equals("name")) {
             sql = sql + "ORDER BY firstName " + sortDirection + ", lastName " + sortDirection + " ";
         }
+        // Add pagination
+        int offset = (page - 1) * pageSize;
+        sql += "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY ";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             int paramIndex = 1;
             // Set parameter cho search keyword
@@ -96,6 +101,9 @@ public class UsersDao extends DBContext {
                     ps.setString(paramIndex++, lastNameFilter);
                 }
             }
+            // Set pagination parameters
+            ps.setInt(paramIndex++, offset);
+            ps.setInt(paramIndex++, pageSize);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     list.add(map(rs));
@@ -108,7 +116,7 @@ public class UsersDao extends DBContext {
     }
 
     public List<String> getDistinctRoles() {
-        return Arrays.asList("admin", "user", "receptionist");
+        return Arrays.asList("admin", "customer", "receptionist");
     }
 
     public List<String> getDistinctStatuses() {
@@ -151,10 +159,11 @@ public class UsersDao extends DBContext {
         }
         return names;
     }
-    
+
     // Methods for Blacklist (tương tự nhưng filter isBlackList=1)
-    public List<Users> getBlacklistedFilteredAndSorted(String sortBy, String order, String roleFilter, String statusFilter,
-                                                      String firstNameFilter, String lastNameFilter, String searchKeyword, int page, int pageSize) {
+    public List<Users> getBlacklistedFilteredAndSorted(String sortBy, String order, String roleFilter,
+            String statusFilter,
+            String firstNameFilter, String lastNameFilter, String searchKeyword, int page, int pageSize) {
         List<Users> list = new ArrayList<>();
         String sql = "SELECT * FROM Users WHERE isBlackList = 1 ";
         if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
@@ -230,8 +239,75 @@ public class UsersDao extends DBContext {
         return list;
     }
 
-    public int countBlacklistedUsers(String roleFilter, String statusFilter, String firstNameFilter, String lastNameFilter,
-                                     String searchKeyword) {
+    public int countAllUsers(String roleFilter, String statusFilter, String firstNameFilter, String lastNameFilter,
+            String searchKeyword) {
+        String sql = "SELECT COUNT(*) FROM Users WHERE 1=1 ";
+        if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+            sql += "AND (UPPER(firstName) LIKE UPPER(?) OR UPPER(middleName) LIKE UPPER(?) OR UPPER(lastName) LIKE UPPER(?)) ";
+        }
+        if (roleFilter != null && !roleFilter.isEmpty()) {
+            sql += "AND role = ? ";
+        }
+        if (statusFilter != null && !statusFilter.isEmpty()) {
+            sql += "AND isActive = ? ";
+        }
+        if (firstNameFilter != null && !firstNameFilter.isEmpty()) {
+            if (firstNameFilter.length() == 1) {
+                sql += "AND UPPER(firstName) LIKE UPPER(?) ";
+            } else {
+                sql += "AND firstName = ? ";
+            }
+        }
+        if (lastNameFilter != null && !lastNameFilter.isEmpty()) {
+            if (lastNameFilter.length() == 1) {
+                sql += "AND UPPER(lastName) LIKE UPPER(?) ";
+            } else {
+                sql += "AND lastName = ? ";
+            }
+        }
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            int paramIndex = 1;
+            if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+                String searchPattern = "%" + searchKeyword.trim() + "%";
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+            }
+            if (roleFilter != null && !roleFilter.isEmpty()) {
+                ps.setString(paramIndex++, roleFilter);
+            }
+            if (statusFilter != null && !statusFilter.isEmpty()) {
+                boolean isActive = statusFilter.equals("active");
+                ps.setBoolean(paramIndex++, isActive);
+            }
+            if (firstNameFilter != null && !firstNameFilter.isEmpty()) {
+                if (firstNameFilter.length() == 1) {
+                    ps.setString(paramIndex++, firstNameFilter + "%");
+                } else {
+                    ps.setString(paramIndex++, firstNameFilter);
+                }
+            }
+            if (lastNameFilter != null && !lastNameFilter.isEmpty()) {
+                if (lastNameFilter.length() == 1) {
+                    ps.setString(paramIndex++, lastNameFilter + "%");
+                } else {
+                    ps.setString(paramIndex++, lastNameFilter);
+                }
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int countBlacklistedUsers(String roleFilter, String statusFilter, String firstNameFilter,
+            String lastNameFilter,
+            String searchKeyword) {
         String sql = "SELECT COUNT(*) FROM Users WHERE isBlackList = 1 ";
         if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
             sql += "AND (UPPER(firstName) LIKE UPPER(?) OR UPPER(middleName) LIKE UPPER(?) OR UPPER(lastName) LIKE UPPER(?)) ";
@@ -295,6 +371,7 @@ public class UsersDao extends DBContext {
         }
         return 0;
     }
+
     public List<Users> getAll() {
         List<Users> list = new ArrayList<>();
         String sql = "SELECT * FROM Users";
@@ -431,6 +508,7 @@ public class UsersDao extends DBContext {
         }
         return false;
     }
+
     public boolean updateRoleAndStatus(int userId, String role, boolean isActive) {
         String sql = "UPDATE Users SET role=?, isActive=? WHERE userId=?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -442,5 +520,46 @@ public class UsersDao extends DBContext {
             e.printStackTrace();
         }
         return false;
+    }
+
+    /**
+     * Set isBlackList = 1 cho user
+     */
+    public boolean setBlackList(int userId, boolean isBlackList) {
+        String sql = "UPDATE Users SET isBlackList=?, updatedAt=GETDATE() WHERE userId=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setBoolean(1, isBlackList);
+            ps.setInt(2, userId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * Tự động blacklist user nếu có >= 3 lần no-show
+     * Trả về số lượng user bị blacklist
+     */
+    public int autoBlacklistUsers() {
+        int count = 0;
+        // Lấy tất cả users (trừ admin và receptionist)
+        String sql = "SELECT userId FROM Users WHERE role = 'customer' AND isBlackList = 0";
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
+            Dao.BookingDao bookingDao = new Dao.BookingDao();
+            while (rs.next()) {
+                int userId = rs.getInt("userId");
+                int noShowCount = bookingDao.countNoShowBookings(userId);
+                if (noShowCount >= 3) {
+                    if (setBlackList(userId, true)) {
+                        count++;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return count;
     }
 }

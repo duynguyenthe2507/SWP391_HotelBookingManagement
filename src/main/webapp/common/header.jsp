@@ -18,12 +18,19 @@
                         <a href="${pageContext.request.contextPath}/register" class="bk-btn">Be our member</a>
                         <% } else { %>
                         <div class="dropdown" style="display: inline-block; position: relative">
-                            <a href="${pageContext.request.contextPath}/profile" class="bk-btn" style="padding: 5px 15px">
-                                Profile
+                            <a href="${pageContext.request.contextPath}/profile" style="padding: 5px 15px">
+                                Hi, ${user.firstName} ${user.middleName} ${user.lastName}
                             </a>
                         </div>
                         <a href="${pageContext.request.contextPath}/cart" class="bk-btn" style="padding: 5px 15px; margin-left: 5px;">Cart</a>
                         <a href="${pageContext.request.contextPath}/wishlist" class="bk-btn" style="padding: 5px 15px; margin-left: 5px;">Wishlist</a>
+                        <button
+                            class="bk-btn"
+                            type="button"
+                            onclick="logout()"
+                            >
+                            Logout
+                        </button>
                         <% } %>
                     </div>
                 </div>
@@ -39,7 +46,7 @@
                             <img src="${pageContext.request.contextPath}/img/36x.png" alt="36 Hotel Logo"
                                  style="width: 60px; height: auto; display: block; max-width: 100%; object-fit: contain;
                                  transition: transform 0.3s ease; margin: 0 auto; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);"
-                                 onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                                 onmouseover="this.style.transform = 'scale(1.05)'" onmouseout="this.style.transform = 'scale(1)'">
                         </a>
                     </div>
                 </div>
