@@ -54,17 +54,6 @@ public class VnPayConfig {
             return "";
         }
     }
-
-    /**
-     * ✅✅✅ HÀM HASH ĐÃ SỬA ĐÚNG 100%
-     * 
-     * Dùng cho 2 trường hợp:
-     * 1. TẠO REQUEST URL → VNPay (cần encode)
-     * 2. VERIFY IPN/RETURN từ VNPay (cần encode để khớp hash)
-     * 
-     * @param fields Map chứa các tham số (ĐÃ DECODED từ getParameter)
-     * @return Chuỗi hash để so sánh với vnp_SecureHash
-     */
     public static String hashAllFields(Map<String, String> fields) {
         List<String> fieldNames = new ArrayList<>(fields.keySet());
         Collections.sort(fieldNames);
@@ -79,8 +68,6 @@ public class VnPayConfig {
             if ((fieldValue != null) && (fieldValue.length() > 0)) {
                 hashData.append(fieldName);
                 hashData.append('=');
-                
-                // ✅ LUÔN LUÔN ENCODE giá trị (vì VNPay hash trên data encoded)
                 try {
                     hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()));
                 } catch (Exception e) {
@@ -98,10 +85,6 @@ public class VnPayConfig {
         
         return hmacSHA512(VNP_HASH_SECRET, dataToHash);
     }
-
-    /**
-     * ✅ Lấy IP Address (GIỮ NGUYÊN)
-     */
     public static String getIpAddress(HttpServletRequest request) {
         String ipAddress;
         try {
@@ -136,10 +119,6 @@ public class VnPayConfig {
         }
         return ipAddress;
     }
-    
-    /**
-     * ✅ Random number generator (GIỮ NGUYÊN)
-     */
     public static String getRandomNumber(int len) {
         Random rnd = new Random();
         String chars = "0123456789";

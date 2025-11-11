@@ -10,6 +10,8 @@
     <title>Booking Details</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.min.css" type="text/css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css" type="text/css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/font-awesome.min.css" type="text/css">
+    
     <style>
         .row-full-height {
             display: flex;
@@ -21,7 +23,7 @@
             width: 100%;
         }
         .panel-actions {
-            margin-top: auto; /* Mấu chốt: Đẩy khối này xuống dưới cùng */
+            margin-top: auto; 
         }
         .detail-panel {
             background-color: #fff;
@@ -44,8 +46,8 @@
         }
         .detail-panel p strong {
             color: #333;
-            display: inline-block; /* Giúp căn chỉnh tốt hơn nếu text dài */
-            width: 150px; /* Cố định chiều rộng cho label để căn đều */
+            display: inline-block; 
+            width: 150px; 
         }
         .room-img {
             max-width: 100%;
@@ -98,23 +100,43 @@
         .action-buttons form { display: inline-block; margin-right: 10px; }
         .action-buttons {
             display: flex;
-            flex-wrap: wrap; /* Cho phép rớt hàng nếu không đủ chỗ */
-            align-items: center; /* Căn các nút theo chiều dọc */
-            gap: 10px; /* Thêm khoảng cách */
-            min-height: 80px; /* CỐ ĐỊNH CHIỀU CAO TỐI THIỂU */
+            flex-wrap: wrap;
+            align-items: center; 
+            gap: 10px; 
+            min-height: 80px; 
         }
         .action-buttons form {
-            margin: 0; /* Xóa margin cũ */
+            margin: 0; 
         }
         .action-buttons a.btn {
-            margin: 0; /* Xóa margin cũ */
+            margin: 0; 
         }
         .button-row {
             display: flex;
             flex-wrap: wrap;
-            align-items: center; /* Căn các nút ngang hàng nhau */
-            gap: 10px; /* Khoảng cách giữa các nút */
+            align-items: center; 
+            gap: 10px; 
         }
+        
+        .review-box {
+            background: #fffaf0;
+            border-left: 4px solid #dfa974;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .review-box .rating {
+            color: #dfa974;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .review-box p {
+            font-style: italic;
+            color: #555;
+            margin: 0;
+            line-height: 1.6;
+        }
+        /* === KẾT THÚC CSS MỚI === */
+        
     </style>
 </head>
 <body>
@@ -147,7 +169,8 @@
                         <p><strong>Guest Count:</strong> ${details.booking.guestCount}</p>
                         <p>
                             <strong>Status:</strong>
-                            <span class="status-badge status-${fn:toLowerCase(details.booking.status)}">${details.booking.status}</span>                        </p>
+                            <span class="status-badge status-${fn:toLowerCase(details.booking.status)}">${details.booking.status}</span>
+                        </p>
                         <p><strong>Check-in Time:</strong> ${details.booking.checkinTime.format(dtFormatter)} </p>
                         <p><strong>Check-out Time:</strong> ${details.booking.checkoutTime.format(dtFormatter)} </p>
                         <p><strong>Total Price:</strong> <fmt:formatNumber value="${details.booking.totalPrice}" type="currency" currencyCode="VND"/></p>
@@ -174,9 +197,35 @@
                             </ul>
                         </c:if>
                     </div>
+                    
+                    <!-- === THÊM MỚI: Panel Feedback === -->
+                    <div class="detail-card">
+                        <h4>Customer Feedback</h4>
+                        <c:choose>
+                            <c:when test="${not empty details.feedback}">
+                                <div class="review-box">
+                                    <div class="rating">
+                                        <strong>Rating: </strong>
+                                        <c:forEach begin="1" end="${details.feedback.rating}">
+                                            <i class="fa fa-star"></i>
+                                        </c:forEach>
+                                        <c:forEach begin="${details.feedback.rating + 1}" end="5">
+                                            <i class="fa fa-star-o"></i>
+                                        </c:forEach>
+                                        (${details.feedback.rating}/5)
+                                    </div>
+                                    <p>"${details.feedback.content}"</p>
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <p>No feedback submitted for this booking.</p>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                    
                 </div>
 
-                    <%-- Cột Phòng và Actions --%>
+                <%-- Cột Phòng và Actions --%>
                 <div class="col-lg-4">
                     <div class="detail-card">
                         <h4>Room Details</h4>
@@ -207,19 +256,20 @@
                                     <input type="hidden" name="action" value="checkout">
                                     <input type="hidden" name="bookingId" value="${details.booking.bookingId}">
                                     <input type="hidden" name="roomId" value="${details.room.roomId}">
-                                    <button type="submit" class="btn btn-warning">Check-out</button>                            </form>
+                                    <button type="submit" class="btn btn-warning">Check-out</button>
+                                </form>
                             </c:if>
 
                                 <%-- Nút 3: View Bill (Hiện khi ĐÃ checkout) --%>
                             <c:if test="${fn:toLowerCase(details.booking.status) == 'checked-out'}">
                                 <c:choose>
                                     <c:when test="${not empty details.invoiceId}">
-                                     <a href="${pageContext.request.contextPath}/receptionist/bills?action=detailBill&id=${details.invoiceId}" class="btn btn-info">
+                                       <a href="${pageContext.request.contextPath}/receptionist/bills?action=detailBill&id=${details.invoiceId}" class="btn btn-info">
                                             <i class="fa fa-eye"></i> View Bill Details
                                         </a>
                                     </c:when>
                                     <c:otherwise>
-                                     <a href="${pageContext.request.contextPath}/receptionist/bills?action=createBill&bookingId=${details.booking.bookingId}" class="btn btn-primary">
+                                       <a href="${pageContext.request.contextPath}/receptionist/bills?action=createBill&bookingId=${details.booking.bookingId}" class="btn btn-primary">
                                             <i class="fa fa-plus"></i> Create Bill
                                         </a>
                                     </c:otherwise>

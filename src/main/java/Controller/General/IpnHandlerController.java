@@ -49,12 +49,11 @@ public class IpnHandlerController extends HttpServlet {
     private void processIpnRequest(HttpServletRequest req, HttpServletResponse resp) 
             throws IOException {
         
-        // ✅ CHỈ CẦN 1 MAP - getParameter() đã decode tự động
         Map<String, String> vnp_Params = new HashMap<>();
         
         for (Enumeration<String> params = req.getParameterNames(); params.hasMoreElements(); ) {
             String fieldName = params.nextElement();
-            String fieldValue = req.getParameter(fieldName); // ✅ Đã decoded
+            String fieldValue = req.getParameter(fieldName); 
             
             if (fieldValue != null && fieldValue.length() > 0) {
                 vnp_Params.put(fieldName, fieldValue);
@@ -66,7 +65,6 @@ public class IpnHandlerController extends HttpServlet {
 
         resp.setContentType("application/json");
 
-        // ✅ Hash (VnPayConfig sẽ tự encode lại để khớp)
         String signValue = VnPayConfig.hashAllFields(vnp_Params);
 
         LOGGER.log(Level.INFO, "[IPN] Calculated Hash: {0}", signValue);
@@ -90,7 +88,6 @@ public class IpnHandlerController extends HttpServlet {
         String vnp_BankCode = vnp_Params.get("vnp_BankCode");
 
         try {
-            // ✅ Parse bookingId (hỗ trợ "12" hoặc "12_timestamp")
             int bookingId;
             if (vnp_TxnRef.contains("_")) {
                 bookingId = Integer.parseInt(vnp_TxnRef.split("_")[0]);
@@ -118,7 +115,6 @@ public class IpnHandlerController extends HttpServlet {
                 return;
             }
 
-            // 2. Kiểm tra số tiền
             if (Math.abs(booking.getTotalPrice() - amountVNPAY) > 0.01) {
                 LOGGER.log(Level.SEVERE, "[IPN] Amount mismatch! DB: {0}, VNPay: {1}",
                         new Object[]{booking.getTotalPrice(), amountVNPAY});
@@ -126,7 +122,6 @@ public class IpnHandlerController extends HttpServlet {
                 return;
             }
             
-            // 3. Kiểm tra trạng thái
             if (!"pending".equalsIgnoreCase(booking.getStatus())) {
                 LOGGER.log(Level.WARNING, "[IPN] Booking {0} already processed (Status: {1})",
                         new Object[]{bookingId, booking.getStatus()});
@@ -134,7 +129,6 @@ public class IpnHandlerController extends HttpServlet {
                 return;
             }
 
-            // 4. Tạo Payment record
             Payment payment = new Payment();
             payment.setBookingId(bookingId);
             payment.setAmount(amountVNPAY);
@@ -143,10 +137,7 @@ public class IpnHandlerController extends HttpServlet {
             payment.setUpdatedAt(LocalDateTime.now());
             payment.setVnpTransactionNo(vnp_TransactionNo);
             payment.setVnpBankCode(vnp_BankCode);
-
-            // 5. Xử lý kết quả
             if ("00".equals(vnp_ResponseCode) && "00".equals(vnp_TransactionStatus)) {
-                // ✅ Thành công
                 if (bookingService.confirmBooking(bookingId)) {
                     LOGGER.log(Level.INFO, "[IPN] ✅ Booking {0} confirmed", bookingId);
                     payment.setStatus("completed");
@@ -157,7 +148,6 @@ public class IpnHandlerController extends HttpServlet {
                     resp.getWriter().write("{\"RspCode\":\"99\",\"Message\":\"Update failed\"}");
                 }
             } else {
-                // ❌ Thất bại/Hủy
                 bookingService.cancelBooking(bookingId);
                 LOGGER.log(Level.WARNING, "[IPN] ❌ Transaction failed (Code: {0}), Booking {1} cancelled",
                         new Object[]{vnp_ResponseCode, bookingId});

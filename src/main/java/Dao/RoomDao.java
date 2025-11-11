@@ -170,7 +170,6 @@ public class RoomDao extends DBContext {
             params.add(statusFilter);
         }
 
-        // ✅ Nếu có lọc theo ngày, cần loại trừ phòng đã được booking (giống trong findAllRooms)
         if (checkInDate != null && !checkInDate.trim().isEmpty()
                 && checkOutDate != null && !checkOutDate.trim().isEmpty()) {
             try {

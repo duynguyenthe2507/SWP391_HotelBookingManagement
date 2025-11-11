@@ -86,7 +86,6 @@ public class PaymentReturnController extends HttpServlet {
                 LOGGER.log(Level.SEVERE, "Invalid txnRef: " + txnRef, e);
             }
             
-            // ✅ QUAN TRỌNG: Confirm booking khi thanh toán thành công
             if ("00".equals(responseCode) && bookingId > 0) {
                 System.out.println(">>> Attempting to confirm booking ID: " + bookingId);
                 

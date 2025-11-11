@@ -4,14 +4,17 @@
 
 <%--
   File: checkout.jsp
-  Đây là trang Giai đoạn 3 (View)
+  This is the Stage 3 (View)
+  === FIX (11/11/2025) ===
+  1. Added <c:forEach> loop to display selected services.
+  2. Translated to English.
 --%>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en"> <%-- Changed to 'en' --%>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>36 Hotel - Thanh Toán</title>
+    <title>36 Hotel - Checkout</title> <%-- Translated --%>
     
     <link href="https://fonts.googleapis.com/css?family=Lora:400,700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Cabin:400,500,600,700&display=swap" rel="stylesheet">
@@ -20,7 +23,6 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/elegant-icons.css" type="text/css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css" type="text/css">
     
-    <%-- (Copy style từ file bạn gửi) --%>
     <style>
         .checkout-container { max-width: 960px; margin: 40px auto; padding: 20px; }
         .checkout-section { background: #fdfdfd; border: 1px solid #eee; border-radius: 8px; padding: 25px; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
@@ -48,6 +50,29 @@
         .alert-success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
         .close-alert { float: right; font-size: 1.5rem; font-weight: bold; line-height: 1; color: inherit; text-shadow: 0 1px 0 #fff; opacity: .5; background: transparent; border: 0; padding: 0; cursor: pointer; }
         .close-alert:hover { opacity: .75; color: inherit; }
+        
+        /* === CSS FOR SERVICES === */
+        .service-summary-list {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #eee;
+        }
+        .service-summary-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 15px;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        .service-summary-item .name {
+            font-weight: 500;
+        }
+        .service-summary-item .price {
+            font-weight: 600;
+            color: #333;
+        }
+        /* === END CSS === */
+        
     </style>
 </head>
 <body>
@@ -59,10 +84,10 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="breadcrumb-text">
-                        <h2>Thanh Toán</h2>
+                        <h2>Checkout</h2> <%-- Translated --%>
                         <div class="bt-option">
                             <a href="${pageContext.request.contextPath}/home">Home</a>
-                            <span>Thanh Toán</span>
+                            <span>Checkout</span> <%-- Translated --%>
                         </div>
                     </div>
                 </div>
@@ -74,8 +99,8 @@
         
         <c:if test="${not empty sessionScope.cartMessage}">
              <div class="alert ${sessionScope.cartMessageType == 'ERROR' ? 'alert-danger' : (sessionScope.cartMessageType == 'WARNING' ? 'alert-warning' : 'alert-success')}" role="alert">
-                  <button type="button" class="close-alert" onclick="this.parentElement.style.display='none';">&times;</button>
-                 <c:out value="${sessionScope.cartMessage}"/>
+                 <button type="button" class="close-alert" onclick="this.parentElement.style.display='none';">&times;</button>
+                <c:out value="${sessionScope.cartMessage}"/>
              </div>
              <% session.removeAttribute("cartMessage"); %>
              <% session.removeAttribute("cartMessageType"); %>
@@ -85,17 +110,17 @@
         <form action="${orderActionUrl}" method="POST">
             <div class="row">
                 <div class="col-lg-7">
-                    <!-- 1. Thông tin người đặt -->
+                    <!-- 1. Guest Information -->
                     <div class="checkout-section user-info">
-                        <h3>Thông tin Người đặt</h3>
-                        <p><strong>Họ và tên:</strong> <c:out value="${requestScope.user.lastName} ${requestScope.user.middleName} ${requestScope.user.firstName}"/></p>
+                        <h3>Guest Information</h3> <%-- Translated --%>
+                        <p><strong>Full Name:</strong> <c:out value="${requestScope.user.lastName} ${requestScope.user.middleName} ${requestScope.user.firstName}"/></p>
                         <p><strong>Email:</strong> <c:out value="${requestScope.user.email}"/></p>
-                        <p><strong>Số điện thoại:</strong> <c:out value="${requestScope.user.mobilePhone}"/></p>
+                        <p><strong>Phone:</strong> <c:out value="${requestScope.user.mobilePhone}"/></p>
                     </div>
 
-                    <!-- 2. Chi tiết Giỏ hàng -->
+                    <!-- 2. Cart Details -->
                     <div class="checkout-section cart-details">
-                        <h3>Chi tiết Đặt phòng</h3>
+                        <h3>Booking Details</h3> <%-- Translated --%>
                         <c:forEach var="item" items="${requestScope.cart}">
                             <div class="cart-item">
                                 <c:set var="imgSrc" value="${not empty item.roomImgUrl ? pageContext.request.contextPath.concat('/').concat(item.roomImgUrl) : pageContext.request.contextPath.concat('/img/placeholder.jpg')}"/>
@@ -104,8 +129,8 @@
                                      onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/img/placeholder.jpg';">
                                 <div class="cart-item-info">
                                     <h5><c:out value="${item.roomName}"/></h5>
-                                    <p>Số khách: <c:out value="${item.guestCount}"/></p>
-                                    <p>Giá / đêm: <fmt:formatNumber value="${item.priceAtBooking}" pattern="#,##0"/> VND</p>
+                                    <p>Guests: <c:out value="${item.guestCount}"/></p> <%-- Translated --%>
+                                    <p>Price / night: <fmt:formatNumber value="${item.priceAtBooking}" pattern="#,##0"/> VND</p> <%-- Translated --%>
                                 </div>
                             </div>
                         </c:forEach>
@@ -113,53 +138,60 @@
                 </div>
 
                 <div class="col-lg-5">
-                    <!-- 3. Tóm tắt Đơn hàng -->
+                    <!-- 3. Order Summary -->
                     <div class="checkout-section summary-details">
-                        <h3>Tóm tắt</h3>
+                        <h3>Summary</h3> <%-- Translated --%>
                         <div class="summary-item">
                             
-                            <!-- === SỬA LỖI: Bỏ fmt:formatDate, dùng String đã định dạng === -->
                             <p><strong>Check-in:</strong> 
                                 <c:out value="${requestScope.cartCheckInFormatted}"/>
                             </p>
                             <p><strong>Check-out:</strong> 
                                 <c:out value="${requestScope.cartCheckOutFormatted}"/>
                             </p>
-                            <!-- === KẾT THÚC SỬA LỖI === -->
                             
-                            <p><strong>Số đêm:</strong> 
-                                <c:out value="${requestScope.numberOfNights}"/> đêm
+                            <p><strong>Nights:</strong> <%-- Translated --%>
+                                <c:out value="${requestScope.numberOfNights}"/> nights
                             </p>
                             
+                            <!-- === ADDED: Display Services === -->
+                            <c:if test="${not empty requestScope.selectedServices}">
+                                <div class="service-summary-list">
+                                    <p style="margin-top: 15px;"><strong>Additional Services:</strong></p> <%-- Translated --%>
+                                    <c:forEach var="service" items="${requestScope.selectedServices}">
+                                        <div class="service-summary-item">
+                                            <span class="name">${service.name}</span>
+                                            <span class="price">
+                                                <fmt:formatNumber value="${service.price}" pattern="#,##0"/>
+                                            </span>
+                                        </div>
+                                    </c:forEach>
+                                </div>
+                            </c:if>
+                            <!-- === END ADDED === -->
+                            
                             <div class="summary-total">
-                                <h4>Tổng cộng:</h4>
+                                <h4>Total Price:</h4> <%-- Translated --%>
                                 <h4><fmt:formatNumber value="${requestScope.totalPrice}" pattern="#,##0"/> VND</h4>
-                                <span style="font-size: 13px; color: #888;">(Giá tạm tính, có thể thay đổi nếu có dịch vụ phát sinh)</span>
+                                <span style="font-size: 13px; color: #888;">(Estimated price, may change with extra services)</span> <%-- Translated --%>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 4. Phương thức Thanh toán -->
+                    <!-- 4. Payment Method -->
                     <div class="checkout-section payment-methods">
-                        <h3>Chọn Phương thức Thanh toán</h3>
+                        <h3>Payment</h3>
                         
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="paymentMethod" id="paymentCOD" value="COD" required checked>
-                            <label class="form-check-label" for="paymentCOD">
-                                <i class="fa fa-money" style="margin-right: 8px;"></i> Thanh toán tại khách sạn (COD)
-                            </label>
-                        </div>
-                        
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="paymentMethod" id="paymentVNPAY" value="VNPAY" required>
+                            <input class="form-check-input" type="radio" name="paymentMethod" id="paymentVNPAY" value="VNPAY" required checked>
                             <label class="form-check-label" for="paymentVNPAY">
                                 <img src="${pageContext.request.contextPath}/img/vnpay-logo.png" alt="VNPAY">
-                                Thanh toán qua VNPAY
+                                VNPAY Payment
                             </label>
                         </div>
 
                         <button type="submit" class="btn-proceed mt-3">
-                             <i class="fa fa-check-circle"></i> Xác nhận Đặt phòng
+                             <i class="fa fa-check-circle"></i> Confirm Booking
                         </button>
                     </div>
                 </div>
@@ -174,4 +206,3 @@
     <script src="${pageContext.request.contextPath}/js/main.js"></script>
 </body>
 </html>
-
