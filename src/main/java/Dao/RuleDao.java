@@ -7,7 +7,57 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RuleDao extends DBContext {
+    public List<Rule> findRules(String search, Boolean status) {
+        List<Rule> list = new ArrayList<>();
+        // Sử dụng một List để giữ các tham số cho PreparedStatement
+        List<Object> params = new ArrayList<>();
 
+        // Bắt đầu câu SQL
+        String sql = "SELECT * FROM Rules WHERE 1=1";
+
+        // 1. Thêm điều kiện TÌM KIẾM (nếu có)
+        if (search != null && !search.trim().isEmpty()) {
+            sql += " AND (title LIKE ? OR description LIKE ?)";
+            params.add("%" + search + "%");
+            params.add("%" + search + "%");
+        }
+
+        // 2. Thêm điều kiện TRẠNG THÁI (nếu có)
+        if (status != null) {
+            sql += " AND status = ?";
+            params.add(status); // Thêm true hoặc false
+        }
+
+        sql += " ORDER BY ruleId DESC"; // Sắp xếp
+
+        // Sử dụng try-with-resources cho Connection
+        try (Connection conn = new DBContext().connection; // Sử dụng cách kết nối của bạn
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            // Set các tham số vào câu lệnh SQL
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Rule r = new Rule(
+                            rs.getInt("ruleId"),
+                            rs.getString("title"),
+                            rs.getString("description"),
+                            rs.getBoolean("status"),
+                            rs.getTimestamp("createdAt"),
+                            rs.getTimestamp("updatedAt")
+                    );
+                    list.add(r);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error findRules: " + e.getMessage());
+            e.printStackTrace(); // In chi tiết lỗi
+        }
+        return list;
+    }
     // Lấy tất cả các Rule (cho lễ tân hoặc admin)
     public List<Rule> getAllRules() {
         List<Rule> list = new ArrayList<>();
