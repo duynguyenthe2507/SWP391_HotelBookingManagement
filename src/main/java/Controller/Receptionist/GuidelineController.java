@@ -1,4 +1,4 @@
-package Controller.Receptionist; // (Hoặc package Controllers của bạn)
+package Controller.Receptionist;
 
 import Dao.GuidelineDao;
 import Models.Guideline;
