@@ -1,3 +1,17 @@
+
+USE master;
+GO
+
+-- Ngắt tất cả kết nối đến database
+IF EXISTS (SELECT name FROM sys.databases WHERE name = 'HMBS_DB')
+BEGIN
+    ALTER DATABASE HMBS_DB SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE HMBS_DB;
+END
+GO
+
+
+
 -- Tạo database
 CREATE DATABASE HMBS_DB;
 GO
@@ -879,3 +893,40 @@ VALUES
         1 -- (1) = Active (Hiển thị)
     );
 GO
+-- GuestRequest: yêu cầu đặc biệt gắn với booking (không phải dịch vụ tính phí)
+CREATE TABLE GuestRequest (
+                              requestId   INT IDENTITY(1,1) PRIMARY KEY,
+                              bookingId   INT NOT NULL,
+                              userId      INT NOT NULL,
+                              requestType NVARCHAR(100) NOT NULL,     -- Room Service, Housekeeping, Special Inquiry, ...
+                              content     NVARCHAR(1000) NOT NULL,    -- mô tả yêu cầu
+                              status      VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK
+                                  (status IN ('pending','replied','resolved','cancelled')),
+                              replyText   NVARCHAR(1000) NULL,
+                              repliedBy   INT NULL,                    -- userId của receptionist
+                              repliedAt   DATETIME NULL,
+                              createdAt   DATETIME DEFAULT GETDATE(),
+                              updatedAt   DATETIME DEFAULT GETDATE(),
+                              CONSTRAINT FK_GuestRequest_Booking FOREIGN KEY (bookingId) REFERENCES Booking(bookingId) ON DELETE CASCADE,
+                              CONSTRAINT FK_GuestRequest_User    FOREIGN KEY (userId)    REFERENCES Users(userId)    ON DELETE NO ACTION,
+                              CONSTRAINT FK_GuestRequest_Staff   FOREIGN KEY (repliedBy) REFERENCES Users(userId)    ON DELETE NO ACTION
+);
+GO
+
+CREATE TRIGGER trg_update_guestRequest
+    ON GuestRequest
+    AFTER UPDATE
+              AS
+BEGIN
+UPDATE GuestRequest
+SET updatedAt = GETDATE()
+    FROM GuestRequest g
+  INNER JOIN inserted i ON g.requestId = i.requestId;
+END;
+GO
+ALTER TABLE GuestRequest
+    ADD isSeen BIT NOT NULL DEFAULT 0,
+    seenAt DATETIME NULL;
+GO
+
+CREATE INDEX idx_guestRequest_status_createdAt ON GuestRequest(status, createdAt DESC);
