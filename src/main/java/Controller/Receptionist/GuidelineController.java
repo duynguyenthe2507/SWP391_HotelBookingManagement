@@ -67,36 +67,13 @@ public class GuidelineController extends HttpServlet { // <-- Đã đổi tên c
                 HttpSession session = request.getSession();
                 Users user = (Users) session.getAttribute("loggedInUser");
 
-                // Logic phân chia vai trò
+                // Logic phân chia vai trò giống hệt RuleController
                 if (user != null && "receptionist".equalsIgnoreCase(user.getRole())) {
-                    // === BẮT ĐẦU PHẦN SỬA ĐỔI ===
-                    // Receptionist: Tải trang quản lý VÀ xử lý filter
-
-                    // 1. Lấy tham số filter từ JSP [cite: 150, 151]
-                    String search = request.getParameter("search");
-                    String statusParam = request.getParameter("status"); // Sẽ là "Active", "Inactive", hoặc ""
-
-                    // 2. Chuyển đổi status string ("Active") thành boolean (true) cho DAO
-                    // (Logic giống hệt RuleController)
-                    Boolean statusValue = null;
-                    if ("Active".equalsIgnoreCase(statusParam)) {
-                        statusValue = true;
-                    } else if ("Inactive".equalsIgnoreCase(statusParam)) {
-                        statusValue = false;
-                    }
-
-                    // 3. Gọi DAO với các tham số lọc (sử dụng hàm findGuidelines mới)
-                    List<Guideline> guidelines = guidelineDao.findGuidelines(search, statusValue);
-
-                    // 4. Gửi danh sách và các giá trị filter về lại JSP
-                    request.setAttribute("guidelines", guidelines);
-                    request.setAttribute("search", search);       // Để giữ giá trị trong ô search
-                    request.setAttribute("status", statusParam);  // Để giữ giá trị trong dropdown
-
+                    // Receptionist: Tải trang quản lý (lấy TẤT CẢ)
+                    List<Guideline> allGuidelines = guidelineDao.getAll();
+                    request.setAttribute("guidelines", allGuidelines);
                     // (Sửa đường dẫn file JSP cho đúng với file guidelines-edit.jsp của bạn)
                     request.getRequestDispatcher("/pages/receptionist/guidelines-edit.jsp").forward(request, response);
-                    // === KẾT THÚC PHẦN SỬA ĐỔI ===
-
                 } else {
                     // User/Guest: Tải trang xem công khai (chỉ lấy ACTIVE)
                     List<Guideline> activeGuidelines = guidelineDao.getAllActive();
@@ -105,6 +82,7 @@ public class GuidelineController extends HttpServlet { // <-- Đã đổi tên c
                     request.getRequestDispatcher("/pages/user/guidelines.jsp").forward(request, response);
                 }
                 break;
+
             case "/guidelines/delete":
                 // Bắt buộc phải có bảo mật ở đây (RuleController của bạn đang thiếu)
                 if (!isReceptionist(request)) {
