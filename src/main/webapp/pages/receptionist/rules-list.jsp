@@ -125,123 +125,6 @@
             overflow-wrap: break-word;
             line-height: 1.4;
         }
-        /* CSS để làm cho bộ lọc giống như hình ảnh */
-        .filter-section {
-            background: #ffffff;
-            border-radius: 12px;
-            padding: 20px 25px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            margin-bottom: 30px;
-        }
-
-        .filter-form {
-            display: flex;
-            flex-wrap: wrap; /* Cho phép xuống dòng trên di động */
-            gap: 15px;
-            align-items: center;
-        }
-
-        .filter-form .form-group {
-            flex: 1; /* Các trường co giãn */
-            min-width: 150px; /* Độ rộng tối thiểu */
-        }
-
-        /* Trường tìm kiếm tên */
-        .filter-form .search-group {
-            flex-grow: 3; /* Ưu tiên độ rộng cho trường tìm kiếm */
-            min-width: 250px;
-        }
-
-        .filter-form .form-control {
-            width: 100%;
-            height: 46px;
-            padding: 10px 15px;
-            border: 1px solid #e5e5e5;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-
-        .filter-form .form-control:focus {
-            border-color: #dfa974;
-            box-shadow: 0 0 0 2px rgba(223, 169, 116, 0.2);
-            outline: none;
-        }
-
-        .filter-form .btn-filter {
-            height: 46px;
-            border: none;
-            background: #dfa974; /* Màu cam từ hình ảnh */
-            color: white;
-            padding: 0 25px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .filter-form .btn-filter:hover {
-            background: #c8965a;
-        }/* CSS để làm cho bộ lọc giống như hình ảnh */
-        .filter-section {
-            background: #ffffff;
-            border-radius: 12px;
-            padding: 20px 25px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            margin-bottom: 30px;
-        }
-
-        .filter-form {
-            display: flex;
-            flex-wrap: wrap; /* Cho phép xuống dòng trên di động */
-            gap: 15px;
-            align-items: center;
-        }
-
-        .filter-form .form-group {
-            flex: 1; /* Các trường co giãn */
-            min-width: 150px; /* Độ rộng tối thiểu */
-        }
-
-        /* Trường tìm kiếm tên */
-        .filter-form .search-group {
-            flex-grow: 3; /* Ưu tiên độ rộng cho trường tìm kiếm */
-            min-width: 250px;
-        }
-
-        .filter-form .form-control {
-            width: 100%;
-            height: 46px;
-            padding: 10px 15px;
-            border: 1px solid #e5e5e5;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-
-        .filter-form .form-control:focus {
-            border-color: #dfa974;
-            box-shadow: 0 0 0 2px rgba(223, 169, 116, 0.2);
-            outline: none;
-        }
-
-        .filter-form .btn-filter {
-            height: 46px;
-            border: none;
-            background: #dfa974; /* Màu cam từ hình ảnh */
-            color: white;
-            padding: 0 25px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .filter-form .btn-filter:hover {
-            background: #c8965a;
-        }
     </style>
 </head>
 
@@ -265,31 +148,14 @@
                         <i class="fa fa-times-circle"></i> ${error}
                     </div>
                 </c:if>
-
-                <div class="filter-section">
-                    <form action="${pageContext.request.contextPath}/rules" method="get" class="filter-form">
-
-                        <div class="form-group search-group">
-                            <input type="text" name="search" class="form-control"
-                                   placeholder="Search by rule title..." value="${search}">
-                        </div>
-
-                        <div class="form-group">
-                            <select name="status" class="form-control">
-                                <option value="">All Statuses</option>
-                                <option value="Active" ${status == 'Active' ? 'selected' : ''}>Active</option>
-                                <option value="Inactive" ${status == 'Inactive' ? 'selected' : ''}>Inactive</option>
-                            </select>
-                        </div>
-
-                        <button type="submit" class="btn-filter">
+                <div class="search-section">
+                    <form action="${pageContext.request.contextPath}/rules" method="get" class="search-form">
+                        <input type="text" name="search" class="search-input" placeholder="Search by rule title..." value="${search}">
+                        <button type="submit" class="search-btn">
                             <i class="fa fa-search"></i> Filter
                         </button>
-
-                        <c:if test="${not empty search || not empty status}">
-                            <a href="${pageContext.request.contextPath}/rules"
-                               class="btn-filter"
-                               style="text-decoration: none; display:inline-flex; align-items: center; background: #6c757d;">
+                        <c:if test="${not empty search}">
+                            <a href="${pageContext.request.contextPath}/rules" class="action-btn secondary">
                                 <i class="fa fa-times"></i> Clear
                             </a>
                         </c:if>

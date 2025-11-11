@@ -92,9 +92,6 @@
                                         <li <c:if test="${pageContext.request.servletPath eq '/rules'}">class="active"</c:if>>
                                             <a href="${pageContext.request.contextPath}/rules">Rules</a>
                                         </li>
-                                        <li <c:if test="${pageContext.request.servletPath eq '/user/requests'}">class="active"</c:if>>
-                                            <a href="${pageContext.request.contextPath}/user/requests">My Requests</a>
-                                        </li>
                                     </ul>
                                 </c:otherwise>
                             </c:choose>
