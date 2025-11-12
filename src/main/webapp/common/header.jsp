@@ -106,6 +106,9 @@
                                         <li <c:if test="${pageContext.request.servletPath eq '/rules'}">class="active"</c:if>>
                                             <a href="${pageContext.request.contextPath}/rules">Rules</a>
                                         </li>
+                                        <li <c:if test="${pageContext.request.servletPath eq '/user/requests'}">class="active"</c:if>>
+                                            <a href="${pageContext.request.contextPath}/user/requests">My Requests</a>
+                                        </li>
                                         
                                         <!-- === THÊM MỚI (2/2): Link "My Bookings" cho mobile menu === -->
                                         <c:if test="${not empty sessionScope.user}">

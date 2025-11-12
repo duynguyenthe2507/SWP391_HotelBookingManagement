@@ -1,3 +1,17 @@
+
+USE master;
+GO
+
+-- Ngắt tất cả kết nối đến database
+IF EXISTS (SELECT name FROM sys.databases WHERE name = 'HMBS_DB')
+BEGIN
+    ALTER DATABASE HMBS_DB SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE HMBS_DB;
+END
+GO
+
+
+
 -- Tạo database
 CREATE DATABASE HMBS_DB;
 GO
@@ -878,4 +892,95 @@ VALUES
         'img/guidelines/guidelines-1.jpg',
         1 -- (1) = Active (Hiển thị)
     );
+GO
+-- GuestRequest: yêu cầu đặc biệt gắn với booking (không phải dịch vụ tính phí)
+CREATE TABLE GuestRequest (
+                              requestId   INT IDENTITY(1,1) PRIMARY KEY,
+                              bookingId   INT NOT NULL,
+                              userId      INT NOT NULL,
+                              requestType NVARCHAR(100) NOT NULL,     -- Room Service, Housekeeping, Special Inquiry, ...
+                              content     NVARCHAR(1000) NOT NULL,    -- mô tả yêu cầu
+                              status      VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK
+                                  (status IN ('pending','replied','resolved','cancelled')),
+                              replyText   NVARCHAR(1000) NULL,
+                              repliedBy   INT NULL,                    -- userId của receptionist
+                              repliedAt   DATETIME NULL,
+                              createdAt   DATETIME DEFAULT GETDATE(),
+                              updatedAt   DATETIME DEFAULT GETDATE(),
+                              CONSTRAINT FK_GuestRequest_Booking FOREIGN KEY (bookingId) REFERENCES Booking(bookingId) ON DELETE CASCADE,
+                              CONSTRAINT FK_GuestRequest_User    FOREIGN KEY (userId)    REFERENCES Users(userId)    ON DELETE NO ACTION,
+                              CONSTRAINT FK_GuestRequest_Staff   FOREIGN KEY (repliedBy) REFERENCES Users(userId)    ON DELETE NO ACTION
+);
+GO
+
+CREATE TRIGGER trg_update_guestRequest
+    ON GuestRequest
+    AFTER UPDATE
+              AS
+BEGIN
+UPDATE GuestRequest
+SET updatedAt = GETDATE()
+    FROM GuestRequest g
+  INNER JOIN inserted i ON g.requestId = i.requestId;
+END;
+GO
+ALTER TABLE GuestRequest
+    ADD isSeen BIT NOT NULL DEFAULT 0,
+    seenAt DATETIME NULL;
+GO
+
+CREATE INDEX idx_guestRequest_status_createdAt ON GuestRequest(status, createdAt DESC);
+
+INSERT INTO GuestRequest
+(bookingId, userId, requestType, content, status, replyText, repliedBy, repliedAt, isSeen, seenAt, createdAt)
+VALUES
+-- B1 (John - userId 4): yêu cầu thêm gối -> resolved bởi lễ tân
+(1, 4, N'Room Service', N'Vui lòng thêm 2 chiếc gối và 1 chăn mỏng.', 'resolved',
+ N'Đã gửi thêm 2 gối và chăn đến phòng.', 3, DATEADD(MINUTE, -120, GETDATE()), 1, DATEADD(MINUTE, -125, GETDATE()),
+ DATEADD(DAY, -5, GETDATE())),
+
+-- B1 (John): nước suối bổ sung -> replied (đang trên đường)
+(1, 4, N'Room Service', N'Bổ sung 4 chai nước suối.', 'replied',
+ N'Nhân viên đang mang nước suối lên trong 5 phút.', 3, DATEADD(MINUTE, -30, GETDATE()), 1, DATEADD(MINUTE, -35, GETDATE()),
+ DATEADD(DAY, -5, GETDATE())),
+
+-- B2 (Jane - userId 5): dọn phòng -> pending (chưa xử lý)
+(2, 5, N'Housekeeping', N'Xin dọn phòng và thay khăn lúc 14:00.', 'pending',
+ NULL, NULL, NULL, 0, NULL,
+ DATEADD(DAY, -7, GETDATE())),
+
+-- B2 (Jane): mượn bàn ủi -> replied (xác nhận)
+(2, 5, N'Special Inquiry', N'Cho mượn bàn ủi trong 1 giờ.', 'replied',
+ N'Khách vui lòng nhận bàn ủi tại quầy lễ tân.', 3, DATEADD(DAY, -6, GETDATE()), 1, DATEADD(DAY, -6, GETDATE()),
+ DATEADD(DAY, -6, GETDATE())),
+
+-- B3 (Robert - userId 6): trả phòng trễ -> resolved
+(3, 6, N'Special Inquiry', N'Xin trả phòng muộn đến 13:30.', 'resolved',
+ N'Khách sạn đã gia hạn đến 13:30, không phụ thu.', 3, DATEADD(DAY, -9, GETDATE()), 1, DATEADD(DAY, -9, GETDATE()),
+ DATEADD(DAY, -10, GETDATE())),
+
+-- B4 (John): yêu cầu phòng yên tĩnh -> cancelled (khách tự hủy)
+(4, 4, N'Housekeeping', N'Xin chuyển sang phòng yên tĩnh hơn nếu có.', 'cancelled',
+ N'Khách báo không cần đổi phòng nữa.', 3, DATEADD(DAY, -14, GETDATE()), 1, DATEADD(DAY, -14, GETDATE()),
+ DATEADD(DAY, -15, GETDATE())),
+
+-- B5 (Jane): thêm nôi em bé -> replied bởi Admin
+(5, 5, N'Special Inquiry', N'Xin thêm nôi em bé trong phòng.', 'replied',
+ N'Đã ghi nhận. Nôi sẽ được mang lên trước 18:00.', 7, DATEADD(DAY, -19, GETDATE()), 1, DATEADD(DAY, -19, GETDATE()),
+ DATEADD(DAY, -20, GETDATE())),
+
+-- B6 (John): thêm khăn & dép -> pending, chưa xem
+(6, 4, N'Housekeeping', N'Xin thêm 2 khăn tắm và 2 đôi dép.', 'pending',
+ NULL, NULL, NULL, 0, NULL,
+ DATEADD(DAY, -2, GETDATE())),
+
+-- B7 (Jane): taxi ra sân bay -> resolved bởi Admin
+(7, 5, N'Special Inquiry', N'Đặt taxi ra sân bay lúc 22:15.', 'resolved',
+ N'Đã đặt taxi. Tài xế sẽ chờ tại sảnh 22:10.', 7, DATEADD(HOUR, -3, GETDATE()), 1, DATEADD(HOUR, -3, GETDATE()),
+ DATEADD(DAY, -1, GETDATE())),
+
+-- B8 (Robert): chuẩn bị rượu vang -> replied (đang xử lý)
+(8, 6, N'Room Service', N'Xin chuẩn bị 1 chai rượu vang đỏ và 2 ly.', 'replied',
+ N'Bar đang chuẩn bị, dự kiến giao phòng trong 10 phút.', 3, DATEADD(MINUTE, -20, GETDATE()), 1, DATEADD(MINUTE, -22, GETDATE()),
+ DATEADD(DAY, -3, GETDATE()));
 GO
