@@ -121,7 +121,7 @@ public class UserRequestController extends HttpServlet {
                         try {
                             int bookingId = Integer.parseInt(bookingIdParam);
 
-                            // ===== KIỂM TRA QUAN TRỌNG: Booking có thuộc về user này không? =====
+                            // KIỂM TRA QUAN TRỌNG: Booking có thuộc về user này không? =====
                             Booking booking = bookingDao.getBookingById(bookingId);
 
                             if (booking == null) {
@@ -130,7 +130,6 @@ public class UserRequestController extends HttpServlet {
                                 resp.sendRedirect(req.getContextPath() + "/user/requests");
                                 return;
                             }
-
                             // Kiểm tra booking có thuộc về user hiện tại không
                             if (booking.getUserId() == null || booking.getUserId() != userId) {
                                 req.getSession().setAttribute("flash_error",
@@ -139,8 +138,6 @@ public class UserRequestController extends HttpServlet {
                                 resp.sendRedirect(req.getContextPath() + "/user/requests");
                                 return;
                             }
-                            // ===== KẾT THÚC KIỂM TRA =====
-
                             // Nếu hợp lệ, set thông tin booking để hiển thị
                             req.setAttribute("booking", booking);
                             req.setAttribute("bookingId", bookingId);
@@ -165,13 +162,6 @@ public class UserRequestController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String path = req.getServletPath();
         Integer userId = currentUserId(req);
-
-        // Kiểm tra đăng nhập
-        if (userId == null) {
-            resp.sendError(401, "Bạn cần đăng nhập để sử dụng chức năng này");
-            return;
-        }
-
         // Kiểm tra role và chuyển hướng nếu cần
         if (!checkRoleAndRedirect(req, resp)) {
             return;
@@ -195,7 +185,7 @@ public class UserRequestController extends HttpServlet {
                         return;
                     }
 
-                    // ===== KIỂM TRA QUAN TRỌNG NHẤT: Booking có thuộc về user này không? =====
+                    // KIỂM TRA QUAN TRỌNG NHẤT: Booking có thuộc về user này không?
                     Booking booking = bookingDao.getBookingById(bookingId);
 
                     if (booking == null) {
@@ -214,7 +204,6 @@ public class UserRequestController extends HttpServlet {
                         resp.sendRedirect(req.getContextPath() + "/user/requests");
                         return;
                     }
-                    // ===== KẾT THÚC KIỂM TRA =====
 
                     // Validation 2: Request Type
                     if (requestType == null || requestType.trim().isEmpty()) {

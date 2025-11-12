@@ -2,7 +2,7 @@ package Controller.Receptionist;
 
 import Dao.GuidelineDao;
 import Models.Guideline;
-import Models.Users; // Sử dụng Model 'Users' giống như RuleController
+import Models.Users;
 import Services.CloudinaryService;
 
 import jakarta.servlet.ServletException;
@@ -18,12 +18,12 @@ import java.io.IOException;
 import java.util.List;
 
 @MultipartConfig // Bắt buộc phải có để upload ảnh
-@WebServlet(name = "GuidelineController", urlPatterns = { // <-- Đã đổi name
+@WebServlet(name = "GuidelineController", urlPatterns = {
         "/guidelines",
         "/guidelines/save",
         "/guidelines/delete"
 })
-public class GuidelineController extends HttpServlet { // <-- Đã đổi tên class
+public class GuidelineController extends HttpServlet {
 
     private GuidelineDao guidelineDao;
     private CloudinaryService cloudinaryService;
@@ -66,19 +66,15 @@ public class GuidelineController extends HttpServlet { // <-- Đã đổi tên c
             case "/guidelines":
                 HttpSession session = request.getSession();
                 Users user = (Users) session.getAttribute("loggedInUser");
-
-                // Logic phân chia vai trò giống hệt RuleController
                 if (user != null && "receptionist".equalsIgnoreCase(user.getRole())) {
                     // Receptionist: Tải trang quản lý (lấy TẤT CẢ)
                     List<Guideline> allGuidelines = guidelineDao.getAll();
                     request.setAttribute("guidelines", allGuidelines);
-                    // (Sửa đường dẫn file JSP cho đúng với file guidelines-edit.jsp của bạn)
                     request.getRequestDispatcher("/pages/receptionist/guidelines-edit.jsp").forward(request, response);
                 } else {
                     // User/Guest: Tải trang xem công khai (chỉ lấy ACTIVE)
                     List<Guideline> activeGuidelines = guidelineDao.getAllActive();
                     request.setAttribute("guidelines", activeGuidelines);
-                    // (Sửa đường dẫn file JSP cho đúng với file guidelines.jsp của bạn)
                     request.getRequestDispatcher("/pages/user/guidelines.jsp").forward(request, response);
                 }
                 break;
@@ -116,16 +112,12 @@ public class GuidelineController extends HttpServlet { // <-- Đã đổi tên c
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-
-        // Bắt buộc phải có bảo mật ở đây (RuleController của bạn đang thiếu)
         if (!isReceptionist(request)) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
         HttpSession session = request.getSession();
-
-        // Đưa toàn bộ logic vào try-catch giống RuleController
         try {
             // 1. Lấy các tham số từ form
             String idStr = request.getParameter("guidelineId");
@@ -135,12 +127,12 @@ public class GuidelineController extends HttpServlet { // <-- Đã đổi tên c
             String statusStr = request.getParameter("status");
             String existingImageUrl = request.getParameter("existingImageUrl");
 
-            // 2. Xử lý file upload (ảnh) - Đây là phần Guideline có mà Rule không có
+            // 2. Xử lý file upload (ảnh)
             Part filePart = request.getPart("image");
             String newImageUrl = cloudinaryService.uploadFile(filePart);
 
             // 3. Quyết định URL ảnh cuối cùng
-            String finalImageUrl = existingImageUrl; // Mặc định là ảnh cũ
+            String finalImageUrl = existingImageUrl;
             if (newImageUrl != null) {
                 // Nếu có ảnh mới được upload, dùng ảnh mới
                 finalImageUrl = newImageUrl;
@@ -161,9 +153,6 @@ public class GuidelineController extends HttpServlet { // <-- Đã đổi tên c
             }
 
             // 5. Quyết định Thêm mới (Insert) hay Cập nhật (Update)
-            // (Lưu ý: GuidelineDao tự xử lý 'createdAt' và 'updatedAt' bằng GETDATE()
-            // nên chúng ta không cần set Timestamp thủ công như trong RuleController)
-
             if (idStr == null || idStr.trim().isEmpty()) {
                 // === TẠO MỚI ===
                 guidelineDao.insert(g);
@@ -178,7 +167,6 @@ public class GuidelineController extends HttpServlet { // <-- Đã đổi tên c
         } catch (Exception e) {
             e.printStackTrace();
             session.setAttribute("error", "Lưu thất bại: " + e.getMessage());
-
             // Tải lại danh sách và chuyển về trang edit
             request.setAttribute("guidelines", guidelineDao.getAll());
             request.getRequestDispatcher("/guidelines-edit.jsp").forward(request, response);

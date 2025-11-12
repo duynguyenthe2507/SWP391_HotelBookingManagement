@@ -30,7 +30,6 @@ public class RuleController extends HttpServlet {
                 request.setAttribute("rules", ruleDao.getAllRules());
 
                 if (user != null && "receptionist".equalsIgnoreCase(user.getRole())) {
-                    // Đã sửa ở file JSP, nên chuyển đến file JSP đã sửa
                     request.getRequestDispatcher("/pages/receptionist/rules-list.jsp").forward(request, response);
                 } else {
                     // User chỉ xem
@@ -39,12 +38,10 @@ public class RuleController extends HttpServlet {
                 break;
 
             case "/rules/edit":
-                // Logic này không được dùng bởi rules-list.jsp mới, nhưng vẫn sửa cho đúng
                 try {
                     int id = Integer.parseInt(request.getParameter("id"));
                     Rule rule = ruleDao.getRuleById(id);
                     request.setAttribute("rule", rule);
-                    // Giả sử bạn có trang rules-edit.jsp
                     request.getRequestDispatcher("/pages/receptionist/rules-edit.jsp").forward(request, response);
                 } catch (Exception e) {
                     e.printStackTrace();
