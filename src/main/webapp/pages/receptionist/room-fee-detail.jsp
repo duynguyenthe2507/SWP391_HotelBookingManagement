@@ -35,52 +35,30 @@
             font-family: "Cabin", sans-serif;
         }
 
-        .room-detail-header {
-            background: linear-gradient(135deg, #dfa974 0%, #c8965a 100%);
-            color: white;
-            padding: 40px 0;
-            margin-bottom: 0;
-            position: relative;
-            overflow: hidden;
+        /* Dashboard Layout */
+        .dashboard-wrapper {
+            display: flex;
+            min-height: 100vh;
         }
 
-        .room-detail-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-            opacity: 0.3;
+        .dashboard-content {
+            flex: 1;
+            margin-left: 250px; /* Width of sidebar */
+            width: calc(100% - 250px);
+            padding: 40px;
+            padding-bottom: 80px; /* Extra space at bottom to prevent footer overlap */
+            min-height: 100vh;
         }
 
-        .room-detail-header .container {
-            position: relative;
-            z-index: 2;
-        }
-
-        .room-detail-header h2 {
-            color: white;
-            margin: 0;
-            font-size: 2.5rem;
-            font-weight: 600;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .room-detail-header p {
-            color: rgba(255, 255, 255, 0.9);
-            margin: 10px 0 0 0;
-            font-size: 1.1rem;
-            font-weight: 300;
-        }
+        /* Room Detail Header - Removed */
 
         .main-content {
-            background: white;
-            margin: -20px 0 0 0;
-            border-radius: 20px 20px 0 0;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
-            padding: 40px 0;
+            background: transparent;
+            margin: 0;
+            border-radius: 0;
+            box-shadow: none;
+            padding: 0;
+            padding-bottom: 80px;
             position: relative;
             z-index: 1;
         }
@@ -365,150 +343,16 @@
 </head>
 
 <body>
+<c:set var="pageActive" value="room-fees"/>
+<div class="dashboard-wrapper">
+    <jsp:include page="/common/sidebar.jsp"/>
+    <div class="dashboard-content">
     <!-- Page Preloder -->
     <div id="preloder">
         <div class="loader"></div>
     </div>
 
-    <!-- Offcanvas Menu Section Begin -->
-    <div class="offcanvas-menu-overlay"></div>
-    <div class="canvas-open">
-        <i class="icon_menu"></i>
-    </div>
-    <div class="offcanvas-menu-wrapper">
-        <div class="canvas-close">
-            <i class="icon_close"></i>
-        </div>
-        <div class="search-icon  search-switch">
-            <i class="icon_search"></i>
-        </div>
-        <div class="header-configure-area">
-            <div class="language-option">
-                <img src="${pageContext.request.contextPath}/img/flag.jpg" alt="">
-                <span>EN <i class="fa fa-angle-down"></i></span>
-                <div class="flag-dropdown">
-                    <ul>
-                        <li><a href="#">Zi</a></li>
-                        <li><a href="#">Fr</a></li>
-                    </ul>
-                </div>
-            </div>
-            <a href="${pageContext.request.contextPath}/login" class="bk-btn">Logout</a>
-        </div>
-        <nav class="mainmenu mobile-menu">
-            <ul>
-                <li class="active"><a href="${pageContext.request.contextPath}/home">Home</a></li>
-                <li><a href="${pageContext.request.contextPath}/rooms">Rooms</a></li>
-                <li><a href="${pageContext.request.contextPath}/about-us">About Us</a></li>
-                <li><a href="#">Pages</a>
-                    <ul class="dropdown">
-                        <li><a href="${pageContext.request.contextPath}/room-details">Room Details</a></li>
-                        <li><a href="${pageContext.request.contextPath}/blog-details">Blog Details</a></li>
-                    </ul>
-                </li>
-                <li><a href="${pageContext.request.contextPath}/blog">News</a></li>
-                <li><a href="${pageContext.request.contextPath}/contact">Contact</a></li>
-            </ul>
-        </nav>
-        <div id="mobile-menu-wrap"></div>
-        <div class="top-social">
-            <a href="#"><i class="fa fa-facebook"></i></a>
-            <a href="#"><i class="fa fa-twitter"></i></a>
-            <a href="#"><i class="fa fa-tripadvisor"></i></a>
-            <a href="#"><i class="fa fa-instagram"></i></a>
-        </div>
-        <ul class="top-widget">
-            <li><i class="fa fa-phone"></i> (84) 359 797 703</li>
-            <li><i class="fa fa-envelope"></i> 36hotel@gmail.com</li>
-        </ul>
-    </div>
-    <!-- Offcanvas Menu Section End -->
-
-    <!-- Header Section Begin -->
-    <header class="header-section">
-        <div class="top-nav">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-6">
-                        <ul class="tn-left">
-                            <li><i class="fa fa-phone"></i> (84) 359 797 703</li>
-                            <li><i class="fa fa-envelope"></i> 36hotel@gmail.com</li>
-                        </ul>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="tn-right">
-                            <div class="top-social">
-                                <a href="#"><i class="fa fa-facebook"></i></a>
-                                <a href="#"><i class="fa fa-twitter"></i></a>
-                                <a href="#"><i class="fa fa-tripadvisor"></i></a>
-                                <a href="#"><i class="fa fa-instagram"></i></a>
-                            </div>
-                            <a href="${pageContext.request.contextPath}/login" class="bk-btn">Logout</a>
-                            <div class="language-option">
-                                <img src="${pageContext.request.contextPath}/img/flag.jpg" alt="">
-                                <span>EN <i class="fa fa-angle-down"></i></span>
-                                <div class="flag-dropdown">
-                                    <ul>
-                                        <li><a href="#">Zi</a></li>
-                                        <li><a href="#">Fr</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="menu-item">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-2">
-                        <div class="logo">
-                            <a href="${pageContext.request.contextPath}/home">
-                                <img src="${pageContext.request.contextPath}/img/logo.png" alt="">
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-lg-10">
-                        <div class="nav-menu">
-                            <nav class="mainmenu">
-                                <ul>
-                                    <li class="active"><a href="${pageContext.request.contextPath}/home">Home</a></li>
-                                    <li><a href="${pageContext.request.contextPath}/rooms">Rooms</a></li>
-                                    <li><a href="${pageContext.request.contextPath}/about-us">About Us</a></li>
-                                    <li><a href="#">Pages</a>
-                                        <ul class="dropdown">
-                                            <li><a href="${pageContext.request.contextPath}/room-details">Room Details</a></li>
-                                            <li><a href="${pageContext.request.contextPath}/blog-details">Blog Details</a></li>
-                                        </ul>
-                                    </li>
-                                    <li><a href="${pageContext.request.contextPath}/blog">News</a></li>
-                                    <li><a href="${pageContext.request.contextPath}/contact">Contact</a></li>
-                                </ul>
-                            </nav>
-                            <div class="nav-right search-switch">
-                                <i class="icon_search"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-    <!-- Header End -->
-
-    <!-- Room Detail Header Section Begin -->
-    <div class="room-detail-header">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <h2><i class="fa fa-home"></i> Room Fee Detail</h2>
-                    <p>Detailed information about room pricing and specifications</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Room Detail Header Section End -->
+    <!-- Header removed to match booking-list.jsp layout -->
 
     <!-- Room Detail Section Begin -->
     <section class="main-content">
@@ -629,7 +473,7 @@
                             <c:forEach var="similarRoom" items="${similarRooms}" varStatus="status">
                                 <c:if test="${status.index < 3}">
                                     <div class="col-lg-4 col-md-6">
-                                        <div class="similar-room-card" onclick="viewRoomDetail(${similarRoom.roomId})">
+                                        <div class="similar-room-card" onclick="viewRoomDetail('${similarRoom.roomId}')">
                                             <h5>${similarRoom.name}</h5>
                                             <p class="price">
                                                 <fmt:formatNumber value="${similarRoom.price}" type="currency" currencyCode="VND"/>
@@ -653,86 +497,7 @@
     </section>
     <!-- Room Detail Section End -->
 
-    <!-- Footer Section Begin -->
-    <footer class="footer-section">
-        <div class="container">
-            <div class="footer-text">
-                <div class="row">
-                    <div class="col-lg-4">
-                        <div class="ft-about">
-                            <div class="logo">
-                                <a href="${pageContext.request.contextPath}/home">
-                                    <img src="${pageContext.request.contextPath}/img/footer-logo.png" alt="">
-                                </a>
-                            </div>
-                            <p>We inspire and reach millions of travelers<br /> across 90 local websites</p>
-                            <div class="fa-social">
-                                <a href="#"><i class="fa fa-facebook"></i></a>
-                                <a href="#"><i class="fa fa-twitter"></i></a>
-                                <a href="#"><i class="fa fa-tripadvisor"></i></a>
-                                <a href="#"><i class="fa fa-instagram"></i></a>
-                                <a href="#"><i class="fa fa-youtube-play"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 offset-lg-1">
-                        <div class="ft-contact">
-                            <h6>Contact Us</h6>
-                            <ul>
-                                <li>(84) 359 797 703</li>
-                                <li>36hotel@gmail.com</li>
-                                <li>Thanh Hoa, Viet Nam</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 offset-lg-1">
-                        <div class="ft-newslatter">
-                            <h6>New latest</h6>
-                            <p>Get the latest updates and offers.</p>
-                            <form action="post" class="fn-form">
-                                <input type="text" placeholder="Email">
-                                <button type="submit"><i class="fa fa-send"></i></button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="copyright-option">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-7">
-                        <ul>
-                            <li><a href="${pageContext.request.contextPath}/contact">Contact</a></li>
-                            <li><a href="#">Terms of use</a></li>
-                            <li><a href="#">Privacy</a></li>
-                            <li><a href="#">Environmental Policy</a></li>
-                        </ul>
-                    </div>
-                    <div class="col-lg-5">
-                        <div class="co-text">
-                            <p>
-                                Copyright &copy;<script>document.write(new Date().getFullYear());</script>
-                                All rights reserved by 36 Hotel
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer>
-    <!-- Footer Section End -->
-
-    <!-- Search model Begin -->
-    <div class="search-model">
-        <div class="h-100 d-flex align-items-center justify-content-center">
-            <div class="search-close-switch"><i class="icon_close"></i></div>
-            <form class="search-model-form">
-                <input type="text" id="search-input" placeholder="Search here.....">
-            </form>
-        </div>
-    </div>
-    <!-- Search model end -->
+    <!-- Footer removed to match booking-list.jsp layout -->
 
     <!-- Js Plugins -->
     <script src="${pageContext.request.contextPath}/js/jquery-3.3.1.min.js"></script>
@@ -786,5 +551,7 @@
             });
         });
     </script>
+    </div>
+</div>
 </body>
 </html>

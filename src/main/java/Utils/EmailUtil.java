@@ -1,15 +1,40 @@
 package Utils;
 
+import java.io.InputStream;
 import java.util.Properties;
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
 
 public class EmailUtil {
 
-    private static final String SMTP_HOST = "smtp.gmail.com";
-    private static final String SMTP_PORT = "587";
-    private static final String EMAIL_USERNAME = "duynguyenthe777@gmail.com"; // email gửi
-    private static final String EMAIL_PASSWORD = "xhak guen zpeo iqgx"; // app password của email
+    private static final String SMTP_HOST;
+    private static final String SMTP_PORT;
+    private static final String EMAIL_USERNAME; // email gửi
+    private static final String EMAIL_PASSWORD; // app password của email
+
+    static {
+        Properties props = new Properties();
+        String host = "";
+        String port = "";
+        String username = "";
+        String password = "";
+
+        try (InputStream input = EmailUtil.class.getClassLoader().getResourceAsStream("config.properties")) {
+            props.load(input);
+            host = props.getProperty("smtp.host");
+            port = props.getProperty("smtp.port");
+            username = props.getProperty("smtp.username");
+            password = props.getProperty("smtp.password");
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Cannot load properties");
+        }
+
+        SMTP_HOST = host;
+        SMTP_PORT = port;
+        EMAIL_USERNAME = username;
+        EMAIL_PASSWORD = password;
+    }
 
     public static boolean sendOTPEmail(String toEmail, String otp) {
         try {
@@ -86,5 +111,36 @@ public class EmailUtil {
                 + "</div>"
                 + "</body>"
                 + "</html>";
+    }
+
+    public static boolean sendEmail(String toEmail, String subject, String htmlContent) {
+        try {
+            Properties props = new Properties();
+            props.put("mail.smtp.auth", "true");
+            props.put("mail.smtp.starttls.enable", "true");
+            props.put("mail.smtp.host", SMTP_HOST);
+            props.put("mail.smtp.port", SMTP_PORT);
+            props.put("mail.smtp.ssl.trust", SMTP_HOST);
+
+            Session session = Session.getInstance(props, new Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(EMAIL_USERNAME, EMAIL_PASSWORD);
+                }
+            });
+
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(EMAIL_USERNAME));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
+            message.setSubject(subject);
+            message.setContent(htmlContent, "text/html; charset=utf-8");
+
+            Transport.send(message);
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

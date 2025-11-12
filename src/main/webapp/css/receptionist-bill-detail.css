@@ -6,60 +6,32 @@ body {
     font-family: "Cabin", sans-serif;
 }
 
-/* Professional Header Section */
-.receptionist-header {
-    background: linear-gradient(135deg, #dfa974 0%, #c8965a 100%);
-    color: white;
-    padding: 40px 0;
-    margin-bottom: 0;
-    position: relative;
-    overflow: hidden;
+/* Dashboard Layout */
+.dashboard-wrapper {
+    display: flex;
+    min-height: 100vh;
 }
 
-.receptionist-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-    opacity: 0.3;
+.dashboard-content {
+    flex: 1;
+    margin-left: 250px; /* Width of sidebar */
+    width: calc(100% - 250px);
+    padding: 40px;
+    padding-bottom: 80px; /* Extra space at bottom to prevent footer overlap */
+    overflow-y: auto;
+    min-height: 100vh;
 }
 
-.receptionist-header .container {
-    position: relative;
-    z-index: 2;
-}
-
-.receptionist-header h2 {
-    color: white;
-    margin: 0;
-    font-size: 2.5rem;
-    font-weight: 600;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.receptionist-header p {
-    color: rgba(255, 255, 255, 0.9);
-    margin: 10px 0 0 0;
-    font-size: 1.1rem;
-    font-weight: 300;
-}
-
-.receptionist-header .fa {
-    margin-right: 10px;
-    font-size: 2rem;
-    vertical-align: middle;
-}
+/* Professional Header Section - Removed */
 
 /* Main Content Area */
 .main-content {
-    background: white;
-    margin: -20px 0 0 0;
-    border-radius: 20px 20px 0 0;
-    box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
-    padding: 40px 0;
+    background: transparent;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+    padding-bottom: 80px;
     position: relative;
     z-index: 1;
 }
