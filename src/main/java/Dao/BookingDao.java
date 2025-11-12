@@ -56,11 +56,8 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
                 rs.getTimestamp("updatedAt") != null ? rs.getTimestamp("updatedAt").toLocalDateTime() : null);
     }
 
-    // ============ OFFLINE BOOKING METHODS (from haitn/pushOfflineBooking)
-    // ============
 
     public int insertOfflineBooking(Booking booking) {
-        // ... (Code gốc của bạn - Chính xác) ...
         String sql = "INSERT INTO Booking (guestName, receptionistId, roomId, checkinTime, checkoutTime, "
                 + "guestCount, specialRequest, totalPrice, status, createdAt) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE())";
@@ -89,7 +86,6 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
     }
 
     public void linkServicesToBooking(int bookingId, String[] serviceIds, Map<Integer, Services> servicesMap) {
-        // ... (Code gốc của bạn - Chính xác) ...
         String sql = "INSERT INTO BookingServiceLink (bookingId, serviceId, quantity, priceAtBooking) VALUES (?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             for (String serviceIdStr : serviceIds) {
@@ -98,8 +94,8 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
                 if (service != null) {
                     ps.setInt(1, bookingId);
                     ps.setInt(2, serviceId);
-                    ps.setInt(3, 1);
-                    ps.setDouble(4, service.getPrice());
+                    ps.setDouble(3, service.getPrice());
+                    ps.setString(4, "requested"); // Trạng thái ban đầu
                     ps.addBatch();
                 }
             }
@@ -812,6 +808,11 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
         return 0;
     }
 
+    @Override
+    public void close() throws Exception {
+        super.closeConnection();
+    }
+
     public boolean updateBookingStatusAndCheckInTime(int bookingId, String newStatus, LocalDateTime checkInTime) {
         String sql = "UPDATE Booking SET status = ?, checkinTime = ?, updatedAt = GETDATE() WHERE bookingId = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -841,10 +842,53 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
         }
     }
 
-    // === SỬA LỖI: Thêm hàm close() (Bắt buộc bởi AutoCloseable) ===
-    @Override
-    public void close() throws Exception {
-        super.closeConnection(); // Gọi hàm close() từ DBContext cha
-    }
-}
 
+    public List<Map<String, Object>> getDetailedBookingsByUserId(int userId) {
+        List<Map<String, Object>> list = new ArrayList<>();
+        String sql = "SELECT b.*, r.name as roomName, r.imgUrl as roomImgUrl "
+                + "FROM Booking b "
+                + "JOIN Room r ON b.roomId = r.roomId "
+                + // Join với Room
+                "WHERE b.userId = ? "
+                + "ORDER BY b.checkinTime DESC";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> item = new HashMap<>();
+                    item.put("booking", mapResultSetToBooking(rs));
+                    item.put("roomName", rs.getString("roomName"));
+                    item.put("roomImgUrl", rs.getString("roomImgUrl"));
+                    list.add(item);
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error getting detailed bookings for user: " + userId, e);
+        }
+        return list;
+    }
+
+    public int findCompletedBookingId(int userId, int roomId) {
+        // Chỉ cho phép review khi đã 'checked-out'
+        String sql = "SELECT TOP 1 bookingId FROM Booking "
+                + "WHERE userId = ? AND roomId = ? "
+                + "AND status = 'checked-out' "
+                + "ORDER BY checkoutTime DESC";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setInt(2, roomId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error checking completed booking for user " + userId + " and room " + roomId, e);
+        }
+        return 0;
+    }
+
+
+}

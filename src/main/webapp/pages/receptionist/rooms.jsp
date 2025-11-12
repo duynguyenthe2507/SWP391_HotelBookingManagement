@@ -321,7 +321,7 @@
             <form method="post" id="roomForm" enctype="multipart/form-data">
                 <div class="panel-header">
                     <span id="panelTitle">Add New Room</span>
-                    <span class="panel-close" onclick="closePanel()">&times;</span>
+                    <span class="panel-close" onclick="window.location.href='${pageContext.request.contextPath}/receptionist/rooms'">&times;</span>
                 </div>
 
                 <div class="panel-body">
@@ -376,7 +376,7 @@
                 </div>
 
                 <div class="panel-footer">
-                    <button type="button" class="btn-cancel" onclick="closePanel()">Cancel</button>
+                    <a href="${pageContext.request.contextPath}/receptionist/rooms" class="btn-cancel">Cancel</a>
                     <button type="submit" class="btn-save">Save Changes</button>
                 </div>
             </form>
@@ -443,14 +443,14 @@
         panel.classList.add("active");
     }
 
-    <div class="search-model">
-        <div class="h-100 d-flex align-items-center justify-content-center">
-            <div class="search-close-switch"><i class="icon_close"></i></div>
-            <form class="search-model-form">
-                <input type="text" id="search-input" placeholder="Search here.....">
-            </form>
-        </div>
-    </div>
+    // <div class="search-model">
+    //     <div class="h-100 d-flex align-items-center justify-content-center">
+    //         <div class="search-close-switch"><i class="icon_close"></i></div>
+    //         <form class="search-model-form">
+    //             <input type="text" id="search-input" placeholder="Search here....."/>
+    //         </form>
+    //     </div>
+    // </div>
 
     form.addEventListener('submit', function(e) {
         e.preventDefault();
