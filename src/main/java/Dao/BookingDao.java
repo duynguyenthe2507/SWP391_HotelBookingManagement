@@ -811,12 +811,6 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
         }
         return 0;
     }
-}
-    // === SỬA LỖI: Thêm hàm close() (Bắt buộc bởi AutoCloseable) ===
-    @Override
-    public void close() throws Exception {
-        super.closeConnection(); // Gọi hàm close() từ DBContext cha
-    }
 
     public boolean updateBookingStatusAndCheckInTime(int bookingId, String newStatus, LocalDateTime checkInTime) {
         String sql = "UPDATE Booking SET status = ?, checkinTime = ?, updatedAt = GETDATE() WHERE bookingId = ?";
@@ -846,4 +840,11 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
             return false;
         }
     }
+
+    // === SỬA LỖI: Thêm hàm close() (Bắt buộc bởi AutoCloseable) ===
+    @Override
+    public void close() throws Exception {
+        super.closeConnection(); // Gọi hàm close() từ DBContext cha
+    }
 }
+
