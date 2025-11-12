@@ -12,18 +12,56 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
     <style>
         body { background-color: #f9f9f9; font-family: 'Cabin', sans-serif; }
-        .dashboard-wrapper { display: flex; min-height: calc(100vh - 70px);
+        .dashboard-wrapper { display: flex; min-height: calc(100vh - 70px); }
         .sidebar h3 { color: #dfa974; text-align: center; margin-bottom: 30px; font-weight: 700; }
         .sidebar a { display: block; color: #fff; padding: 12px 15px; border-radius: 6px; margin-bottom: 8px; text-decoration: none; transition: all 0.3s ease; }
         .sidebar a:hover, .sidebar a.active { background: #dfa974; color: #fff; }
-        .dashboard-content { flex: 1; margin-left: 250px; /* Đẩy nội dung sang phải */ padding: 40px; }
+        .dashboard-content { flex: 1; margin-left: 250px; padding: 40px; }
         .logout-link { color: #dfa974 !important; font-weight: bold; text-decoration: none !important; }
         .logout-link:hover { text-decoration: underline !important; }
         .booking-form .form-group label { font-weight: 600; color: #19191a; margin-bottom: 8px;}
         .booking-form .form-control, .booking-form select { border-radius: 8px; border: 1px solid #ced4da; padding: 10px 15px; }
         .booking-form .form-control:focus { border-color: #dfa974; box-shadow: 0 0 0 0.2rem rgba(223, 169, 116, 0.25); }
         .booking-form button[type="submit"] { background-color: #dfa974; border-color: #dfa974; padding: 12px 30px; border-radius: 20px; font-weight: 600; }
-        .booking-form button[type="submit"]:hover { background-color: #c8965a; border-color: #c8965a; }}
+        .booking-form button[type="submit"]:hover { background-color: #c8965a; border-color: #c8965a; }
+
+        /* Price Breakdown Styles */
+        .price-breakdown {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid #dfa974;
+        }
+        .price-breakdown h5 {
+            color: #19191a;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #dee2e6;
+        }
+        .price-item:last-child {
+            border-bottom: none;
+            padding-top: 15px;
+            margin-top: 10px;
+            border-top: 2px solid #dfa974;
+        }
+        .price-item.total {
+            font-size: 18px;
+            font-weight: 700;
+            color: #dfa974;
+        }
+        .price-label {
+            color: #666;
+        }
+        .price-value {
+            font-weight: 600;
+            color: #333;
+        }
     </style>
 </head>
 
@@ -62,7 +100,9 @@
                                         <select class="form-control" name="roomId" id="roomSelector" required>
                                             <option value="" data-price="0">-- Select an available room --</option>
                                             <c:forEach var="room" items="${availableRooms}">
-                                                <option value="${room.roomId}" data-price="${room.price}">${room.name} (<fmt:formatNumber value="${room.price}" type="currency" currencyCode="VND"/>)</option>
+                                                <option value="${room.roomId}" data-price="${room.price}">
+                                                        ${room.name} (<fmt:formatNumber value="${room.price}" type="currency" currencyCode="VND"/> / night)
+                                                </option>
                                             </c:forEach>
                                         </select>
                                     </div>
@@ -70,19 +110,15 @@
                                         <label>Guest Count</label>
                                         <input type="number" class="form-control" name="guestCount" value="1" min="1" required>
                                     </div>
-                                    <div class="form-group">
-                                        <label>Price at Booking (VND)</label>
-                                        <input type="number" class="form-control" name="priceAtBooking" id="priceAtBooking" step="1000" required readonly>
-                                    </div>
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="form-group">
-                                        <label>Check-in Datetime</label>
-                                        <input type="datetime-local" class="form-control" name="checkInDate" required>
+                                        <label>Check-in Date & Time</label>
+                                        <input type="datetime-local" class="form-control" name="checkInDate" id="checkInDate" required>
                                     </div>
                                     <div class="form-group">
-                                        <label>Check-out Datetime</label>
-                                        <input type="datetime-local" class="form-control" name="checkOutDate" required>
+                                        <label>Check-out Date & Time</label>
+                                        <input type="datetime-local" class="form-control" name="checkOutDate" id="checkOutDate" required>
                                     </div>
                                     <div class="form-group">
                                         <label>Special Request</label>
@@ -94,19 +130,49 @@
                                     <h5>Additional Services</h5>
                                     <div class="row">
                                         <c:forEach var="service" items="${allServices}">
-                                        <div class="col-lg-4 col-md-6">
-                                            <div class="form-check mb-2">
-                                                <input class="form-check-input service-checkbox" type="checkbox" name="serviceIds"
-                                                       value="${service.serviceId}" id="service${service.serviceId}" data-price="${service.price}">
-
-                                                <label class="form-check-label" for="service${service.serviceId}">
-                                                    ${service.name} (<fmt:formatNumber value="${service.price}" type="currency" currencyCode="VND"/>)
-                                                </label>
+                                            <div class="col-lg-4 col-md-6">
+                                                <div class="form-check mb-2">
+                                                    <input class="form-check-input service-checkbox" type="checkbox" name="serviceIds"
+                                                           value="${service.serviceId}" id="service${service.serviceId}" data-price="${service.price}">
+                                                    <label class="form-check-label" for="service${service.serviceId}">
+                                                            ${service.name} (<fmt:formatNumber value="${service.price}" type="currency" currencyCode="VND"/>)
+                                                    </label>
+                                                </div>
                                             </div>
-                                        </div>
                                         </c:forEach>
                                     </div>
                                 </div>
+
+                                <!-- Price Breakdown Section -->
+                                <div class="col-lg-12">
+                                    <div class="price-breakdown">
+                                        <h5><i class="fa fa-calculator"></i> Price Breakdown</h5>
+                                        <div class="price-item">
+                                            <span class="price-label">Room Price / Night:</span>
+                                            <span class="price-value" id="roomPriceDisplay">0 VND</span>
+                                        </div>
+                                        <div class="price-item">
+                                            <span class="price-label">Number of Nights:</span>
+                                            <span class="price-value" id="nightsDisplay">0</span>
+                                        </div>
+                                        <div class="price-item">
+                                            <span class="price-label">Room Subtotal:</span>
+                                            <span class="price-value" id="roomSubtotalDisplay">0 VND</span>
+                                        </div>
+                                        <div class="price-item">
+                                            <span class="price-label">Services:</span>
+                                            <span class="price-value" id="servicesDisplay">0 VND</span>
+                                        </div>
+                                        <div class="price-item total">
+                                            <span class="price-label">TOTAL PRICE:</span>
+                                            <span class="price-value" id="totalPriceDisplay">0 VND</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Hidden input for form submission -->
+                                    <input type="hidden" name="priceAtBooking" id="priceAtBooking" value="0">
+                                </div>
+
                                 <div class="col-lg-12 text-center mt-4">
                                     <button type="submit" class="btn btn-primary"><i class="fa fa-check"></i> Submit Booking</button>
                                 </div>
@@ -117,7 +183,7 @@
             </div>
         </section>
     </div>
-</div> <%-- End dashboard-wrapper --%>
+</div>
 
 <script src="${pageContext.request.contextPath}/js/jquery-3.3.1.min.js"></script>
 <script src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>
@@ -126,49 +192,87 @@
     document.addEventListener('DOMContentLoaded', function() {
         const roomSelector = document.getElementById('roomSelector');
         const serviceCheckboxes = document.querySelectorAll('.service-checkbox');
+        const checkInInput = document.getElementById('checkInDate');
+        const checkOutInput = document.getElementById('checkOutDate');
         const priceInput = document.getElementById('priceAtBooking');
 
-        function updateTotalPrice() {
-            let total = 0;
+        // Display elements
+        const roomPriceDisplay = document.getElementById('roomPriceDisplay');
+        const nightsDisplay = document.getElementById('nightsDisplay');
+        const roomSubtotalDisplay = document.getElementById('roomSubtotalDisplay');
+        const servicesDisplay = document.getElementById('servicesDisplay');
+        const totalPriceDisplay = document.getElementById('totalPriceDisplay');
 
-            // Lấy giá phòng
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('vi-VN').format(value) + ' VND';
+        }
+
+        function calculateNights() {
+            const checkIn = new Date(checkInInput.value);
+            const checkOut = new Date(checkOutInput.value);
+
+            if (checkIn && checkOut && checkOut > checkIn) {
+                const diffTime = Math.abs(checkOut - checkIn);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return diffDays;
+            }
+            return 0;
+        }
+
+        function updateTotalPrice() {
+            // Get room price
             const selectedRoomOption = roomSelector.options[roomSelector.selectedIndex];
             const roomPrice = parseFloat(selectedRoomOption.getAttribute('data-price')) || 0;
-            total += roomPrice;
 
-            // Cộng giá các dịch vụ được chọn
+            // Calculate nights
+            const nights = calculateNights();
+
+            // Calculate room subtotal
+            const roomSubtotal = roomPrice * nights;
+
+            // Calculate services total
+            let servicesTotal = 0;
             serviceCheckboxes.forEach(function(checkbox) {
                 if (checkbox.checked) {
-                    const servicePrice = parseFloat(checkbox.getAttribute('data-price')) || 0;
-                    total += servicePrice;
+                    servicesTotal += parseFloat(checkbox.getAttribute('data-price')) || 0;
                 }
             });
 
-            // Cập nhật vào ô input
-            priceInput.value = total.toFixed(0); // Làm tròn đến 0 số thập phân cho VND
+            // Calculate grand total
+            const grandTotal = roomSubtotal + servicesTotal;
+
+            // Update displays
+            roomPriceDisplay.textContent = formatCurrency(roomPrice);
+            nightsDisplay.textContent = nights;
+            roomSubtotalDisplay.textContent = formatCurrency(roomSubtotal);
+            servicesDisplay.textContent = formatCurrency(servicesTotal);
+            totalPriceDisplay.textContent = formatCurrency(grandTotal);
+
+            // Update hidden input
+            priceInput.value = grandTotal.toFixed(0);
         }
 
-        // Gán sự kiện
+        // Event listeners
         roomSelector.addEventListener('change', updateTotalPrice);
+        checkInInput.addEventListener('change', updateTotalPrice);
+        checkOutInput.addEventListener('change', updateTotalPrice);
         serviceCheckboxes.forEach(function(checkbox) {
             checkbox.addEventListener('change', updateTotalPrice);
         });
 
-        // Tính tổng tiền lần đầu khi tải trang
-        updateTotalPrice();
-
-        const checkInInput = document.querySelector('input[name="checkInDate"]');
-        const checkOutInput = document.querySelector('input[name="checkOutDate"]');
-
+        // Set minimum dates
         checkInInput.addEventListener('change', function() {
-            // Đặt ngày check-out tối thiểu là ngày check-in
             checkOutInput.min = checkInInput.value;
 
-            // Nếu ngày check-out hiện tại sớm hơn thì xoá nó
+            // Clear check-out if it's before check-in
             if (checkOutInput.value && checkOutInput.value < checkInInput.value) {
                 checkOutInput.value = '';
             }
+            updateTotalPrice();
         });
+
+        // Initial calculation
+        updateTotalPrice();
     });
 </script>
 </body>
