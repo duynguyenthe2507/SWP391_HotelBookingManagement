@@ -60,6 +60,13 @@ public class LoginController extends HttpServlet {
                 return;
             }
 
+            // Check if account is active
+            if (!u.isActive()) {
+                request.setAttribute("error", "Your account has been deactivated!");
+                request.setAttribute("phone", phone);
+                request.getRequestDispatcher("/pages/auth/login.jsp").forward(request, response);
+                return;
+            }
             // Verify password (check if hashed or plain text)
             boolean passwordMatch = false;
             if (u.getPassword().startsWith("$2a$")) {
@@ -102,8 +109,7 @@ public class LoginController extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/pages/receptionist/booking-list.jsp");
             } else if ("Admin".equalsIgnoreCase(role)) {
                 response.sendRedirect(request.getContextPath() + "/viewuser");
-            }
-            else {
+            } else {
                 LOGGER.log(Level.INFO, "Redirecting Customer to home page.");
                 response.sendRedirect(request.getContextPath() + "/home");
             }

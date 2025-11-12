@@ -126,24 +126,26 @@
                     </div>
                 </form>
                
-                <!-- Toggle Status Form -->
-                <h5 class="mb-3">Change Status</h5>
-                <form method="post" action="${pageContext.request.contextPath}/admin/user-details">
-                    <input type="hidden" name="userId" value="${user.userId}">
-                    <input type="hidden" name="action" value="toggleStatus">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <c:choose>
-                                <c:when test="${user.active}">
-                                    <button type="submit" class="btn btn-danger">Deactivate Account</button>
-                                </c:when>
-                                <c:otherwise>
-                                    <button type="submit" class="btn btn-success">Activate Account</button>
-                                </c:otherwise>
-                            </c:choose>
+                <!-- Toggle Status Form - Only for Receptionist -->
+                <c:if test="${user.role == 'receptionist'}">
+                    <h5 class="mb-3">Change Status</h5>
+                    <form method="post" action="${pageContext.request.contextPath}/admin/user-details">
+                        <input type="hidden" name="userId" value="${user.userId}">
+                        <input type="hidden" name="action" value="toggleStatus">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <c:choose>
+                                    <c:when test="${user.active}">
+                                        <button type="submit" class="btn btn-danger">Deactivate Account</button>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <button type="submit" class="btn btn-success">Activate Account</button>
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </c:if>
             </c:if>
            
             <c:if test="${empty user}">
