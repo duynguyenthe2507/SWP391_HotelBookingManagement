@@ -12,36 +12,50 @@
                     </ul>
                 </div>
                 <div class="col-lg-6">
+                    <%-- === PHẦN ĐIỀU HƯỚNG USER ĐÃ SỬA LẠI === --%>
                     <div class="tn-right">
-                        <% if (session.getAttribute("loggedInUser") == null) { %>
-                        <a href="${pageContext.request.contextPath}/login" class="bk-btn">Login</a>
-                        <a href="${pageContext.request.contextPath}/register" class="bk-btn">Be our member</a>
-                        <% } else { %>
-                        <div class="dropdown" style="display: inline-block; position: relative">
-                            <a href="${pageContext.request.contextPath}/profile" style="padding: 5px 15px">
-                                Hi, ${user.firstName} ${user.middleName} ${user.lastName}
+                        
+                        <c:if test="${empty sessionScope.user}">
+                            <a href="${pageContext.request.contextPath}/login" class="user-nav-link">
+                                <i class="fa fa-sign-in"></i> Login
                             </a>
-                        </div>
-                        <a href="${pageContext.request.contextPath}/cart" class="bk-btn" style="padding: 5px 15px; margin-left: 5px;">Cart</a>
-                        <a href="${pageContext.request.contextPath}/wishlist" class="bk-btn" style="padding: 5px 15px; margin-left: 5px;">Wishlist</a>
-                        <button
-                            class="bk-btn"
-                            type="button"
-                            onclick="logout()"
-                            >
-                            Logout
-                        </button>
-                        <% } %>
+                            <a href="${pageContext.request.contextPath}/register" class="user-nav-link register-btn">
+                                <i class="fa fa-user-plus"></i> Be our member
+                            </a>
+                        </c:if>
+                        
+                        <c:if test="${not empty sessionScope.user}">
+                            <div class="user-nav-link user-welcome">
+                                <a href="${pageContext.request.contextPath}/profile">
+                                    <i class="fa fa-user-circle-o"></i> Hi, ${sessionScope.user.firstName}
+                                </a>
+                            </div>
+                            <a href="${pageContext.request.contextPath}/cart" class="user-nav-link">
+                                <i class="fa fa-shopping-cart"></i> Cart
+                            </a>
+                            <a href="${pageContext.request.contextPath}/wishlist" class="user-nav-link">
+                                <i class="fa fa-heart-o"></i> Wishlist
+                            </a>
+                            <a href="${pageContext.request.contextPath}/my-bookings" class="user-nav-link">
+                                <i class="fa fa-book"></i> My Bookings
+                            </a>
+                            <a href="${pageContext.request.contextPath}/logout" class="user-nav-link">
+                                <i class="fa fa-sign-out"></i> Logout
+                            </a>
+                        </c:if>
+                        
                     </div>
+                    <%-- === KẾT THÚC SỬA LỖI === --%>
                 </div>
             </div>
         </div>
     </div>
     <div class="menu-item">
         <div class="container">
-            <div class="row">
+            <%-- === SỬA LỖI CĂN CHỈNH === --%>
+            <div class="row" style="align-items: center;">
                 <div class="col-lg-2" style="padding: 0; margin-bottom: 0;">
-                    <div class="logo" style="padding: 0; margin: 0 0; text-align: center;">
+                    <div class="logo" style="padding: 15px 0; margin: 0; text-align: center;">
                         <a href="${pageContext.request.contextPath}/home">
                             <img src="${pageContext.request.contextPath}/img/36x.png" alt="36 Hotel Logo"
                                  style="width: 60px; height: auto; display: block; max-width: 100%; object-fit: contain;
@@ -95,6 +109,16 @@
                                         <li <c:if test="${pageContext.request.servletPath eq '/user/requests'}">class="active"</c:if>>
                                             <a href="${pageContext.request.contextPath}/user/requests">My Requests</a>
                                         </li>
+                                        
+                                        <!-- === THÊM MỚI (2/2): Link "My Bookings" cho mobile menu === -->
+                                        <c:if test="${not empty sessionScope.user}">
+                                             <li <c:if test="${pageContext.request.servletPath eq '/my-bookings'}">class="active"</c:if>
+                                                 style="display: none;" class="mobile-only-link">
+                                                 <a href="${pageContext.request.contextPath}/my-bookings">My Bookings</a>
+                                             </li>
+                                        </c:if>
+                                        <!-- === KẾT THÚC THÊM MỚI (2/2) === -->
+                                        
                                     </ul>
                                 </c:otherwise>
                             </c:choose>
@@ -105,6 +129,8 @@
         </div>
     </div>
 </header>
+
+<%-- Script logout() (nếu cần) đã được xóa vì chúng ta dùng <a> --%>
 
 <style>
     .mainmenu ul {
@@ -141,7 +167,6 @@
         border-bottom-color: #dfa974 !important;
     }
 
-    /* Fix button padding issue */
     .bk-btn {
         padding: 8px 20px !important;
         display: inline-block;
@@ -150,7 +175,7 @@
 
     .top-nav {
         background-color: #f8f9fa;
-        padding: 10px 0;
+        padding: 12px 0; 
     }
 
     .tn-left {
@@ -175,7 +200,7 @@
         display: flex;
         align-items: center;
         justify-content: flex-end;
-        gap: 15px;
+        gap: 22px; 
     }
 
     .top-social a {
@@ -188,4 +213,49 @@
     .top-social a:hover {
         color: #dfa974;
     }
+    
+    @media (min-width: 992px) {
+        .mobile-only-link {
+            display: none !important;
+        }
+    }
+    
+    .user-nav-link {
+        color: #666;
+        font-size: 18px; 
+        text-decoration: none;
+        transition: all 0.3s;
+        position: relative;
+        padding-bottom: 3px; 
+        border-bottom: 1px solid transparent; 
+    }
+    .user-nav-link:hover {
+        color: #dfa974;
+        text-decoration: none;
+        border-bottom-color: #dfa974; 
+    }
+    .user-nav-link i {
+        margin-right: 6px;
+        color: #dfa974; 
+        font-size: 17px; 
+        vertical-align: middle; 
+    }
+    
+    .user-welcome a {
+        color: #333; 
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s;
+        font-size: 18px; 
+    }
+    .user-welcome a:hover {
+        color: #dfa974;
+        text-decoration: none;
+    }
+    
+    .user-nav-link.register-btn {
+        font-weight: 600;
+        color: #333;
+    }
+    
 </style>

@@ -19,7 +19,6 @@ public class ViewBlackListUserController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Tự động blacklist user nếu có >= 3 lần no-show
         usersDao.autoBlacklistUsers();
         
         String sortParam = request.getParameter("sort");
@@ -35,7 +34,6 @@ public class ViewBlackListUserController extends HttpServlet {
             }
         }
         String roleFilter = request.getParameter("role");
-        // Map "user" to "customer" if needed (for backward compatibility)
         if (roleFilter != null && roleFilter.equals("user")) {
             roleFilter = "customer";
         }
@@ -113,7 +111,7 @@ public class ViewBlackListUserController extends HttpServlet {
                 request.setAttribute("error", "User ID is required");
             }
         }
-        doGet(request, response);  // Reload list after action
+        doGet(request, response);  
     }
 
     @Override

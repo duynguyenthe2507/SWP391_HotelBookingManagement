@@ -70,21 +70,19 @@ public class RoomsController extends HttpServlet {
             
             List<Room> rooms = roomService.findAllRooms(
                 searchKeyword, categoryId, minPrice, maxPrice, minCapacity,
-                checkInDate, checkOutDate, statusFilter, // Truyền String
+                checkInDate, checkOutDate, statusFilter,
                 pageNumber, pageSize
             );
 
             int totalRooms = roomService.getTotalRoomsCount(
                 searchKeyword, categoryId, minPrice, maxPrice, minCapacity,
-                checkInDate, checkOutDate, statusFilter // Truyền String
+                checkInDate, checkOutDate, statusFilter
             );
 
             int noOfPages = totalRooms == 0 ? 1 : (int) Math.ceil((double) totalRooms / pageSize);
             
-            // Đảm bảo pageNumber không vượt quá noOfPages sau khi tính toán
             if (pageNumber > noOfPages && noOfPages > 0) {
                  pageNumber = noOfPages;
-                 // Cần lấy lại phòng với số trang chính xác
                  rooms = roomService.findAllRooms(
                     searchKeyword, categoryId, minPrice, maxPrice, minCapacity,
                     checkInDate, checkOutDate, statusFilter,
@@ -96,11 +94,9 @@ public class RoomsController extends HttpServlet {
 
             request.setAttribute("rooms", rooms);
             request.setAttribute("categories", categories);
-            request.setAttribute("currentPage", pageNumber); // Đổi tên: khớp với JSP (rooms.jsp dùng 'currentPage')
+            request.setAttribute("currentPage", pageNumber); 
             request.setAttribute("noOfPages", noOfPages);
             request.setAttribute("pageSize", pageSize);
-            
-            // Gửi lại các tham số đã parse (hoặc JSP có thể dùng ${param.xx} cũng được)
             request.setAttribute("search", searchKeyword);
             request.setAttribute("categoryId", categoryId);
             request.setAttribute("minPrice", minPrice);
@@ -124,7 +120,7 @@ public class RoomsController extends HttpServlet {
             LOGGER.log(Level.SEVERE, "Unexpected error in RoomsController", e);
             e.printStackTrace(); // In lỗi ra log
             request.setAttribute("errorMessage", "Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau.");
-            request.getRequestDispatcher("/pages/error.jsp").forward(request, response); // Chuyển sang trang lỗi chung
+            request.getRequestDispatcher("/pages/error.jsp").forward(request, response); 
         }
     }
 

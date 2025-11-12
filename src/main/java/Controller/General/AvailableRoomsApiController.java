@@ -1,8 +1,8 @@
 package Controller.General;
 
 import Models.Room;
-import Services.RoomService; // Dùng RoomService từ Nguồn 3
-import com.google.gson.Gson; // DÙNG GSON
+import Services.RoomService; 
+import com.google.gson.Gson; 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -25,7 +25,7 @@ public class AvailableRoomsApiController extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        this.roomService = new RoomService(); // Khởi tạo RoomService (Nguồn 3)
+        this.roomService = new RoomService(); 
     }
 
     @Override
@@ -49,15 +49,12 @@ public class AvailableRoomsApiController extends HttpServlet {
             }
 
             Integer categoryId = Integer.parseInt(categoryIdParam);
-
-            // Gọi RoomService (Nguồn 3) để tìm phòng
             List<Room> rooms = roomService.findAllRooms(
                     null, categoryId, null, null, null,
                     checkInDate, checkOutDate, "available",
-                    1, 100 // Lấy tối đa 100 phòng
+                    1, 100 
             );
 
-            // Chuyển đổi thành JSON đơn giản
             List<Map<String, String>> availableRoomsJson = rooms.stream()
                     .map(room -> Map.of(
                             "id", String.valueOf(room.getRoomId()),
