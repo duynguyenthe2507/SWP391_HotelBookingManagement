@@ -19,10 +19,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-/**
- * Servlet này xử lý Giai đoạn 4: Tạo đơn hàng từ Giỏ hàng (Session).
- * URL: /order/create
- */
 @WebServlet(name = "OrderController", urlPatterns = {"/order/create"})
 public class OrderController extends HttpServlet {
 
@@ -54,16 +50,25 @@ public class OrderController extends HttpServlet {
         List<BookingDetail> cart = (List<BookingDetail>) session.getAttribute("cart");
         LocalDateTime cartCheckIn = (LocalDateTime) session.getAttribute("cartCheckIn");
         LocalDateTime cartCheckOut = (LocalDateTime) session.getAttribute("cartCheckOut");
-        List<String> serviceIds = (List<String>) session.getAttribute("cartServices");
-        List<String> specialRequests = cart.stream()
+        
+        List<String> serviceIds = (List<String>) session.getAttribute("cartServiceIds"); 
+
+        List<String> specialRequests = (cart != null) ? cart.stream()
                 .map(BookingDetail::getSpecialRequest)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()) : new ArrayList<>();
+        
         String paymentMethod = request.getParameter("paymentMethod");
 
         System.out.println("Order Data Check: UserID=" + (user != null ? user.getUserId() : "null") +
                            ", CartItems=" + (cart != null ? cart.size() : "null") +
                            ", CheckIn=" + cartCheckIn + ", CheckOut=" + cartCheckOut +
                            ", PaymentMethod=" + paymentMethod);
+        if (serviceIds != null) {
+            LOGGER.log(Level.INFO, "[OrderController] Found {0} serviceIds in session: {1}", 
+                       new Object[]{serviceIds.size(), String.join(", ", serviceIds)});
+        } else {
+            LOGGER.log(Level.WARNING, "[OrderController] serviceIds in session is NULL.");
+        }
 
 
         if (user == null || cart == null || cart.isEmpty() || cartCheckIn == null || cartCheckOut == null || paymentMethod == null || paymentMethod.isEmpty()) {
@@ -89,7 +94,7 @@ public class OrderController extends HttpServlet {
                     quantities,
                     specialRequests,
                     "pending",
-                    serviceIds
+                    serviceIds 
             );
             System.out.println(">>> OrderController: bookingService.createBooking() trả về: " + bookingId);
 
@@ -98,14 +103,17 @@ public class OrderController extends HttpServlet {
                 System.out.println(">>> OrderController: TẠO BOOKING THÀNH CÔNG (ID: " + bookingId + ")");
                 LOGGER.info("Booking created successfully with ID: " + bookingId);
 
-                session.removeAttribute("cartServices");
+                session.removeAttribute("cart");
+                session.removeAttribute("cartCheckIn");
+                session.removeAttribute("cartCheckOut");
+                session.removeAttribute("cartServiceIds"); // Xóa service IDs
 
                 if ("COD".equalsIgnoreCase(paymentMethod)) {
                     System.out.println(">>> OrderController: Thanh toán COD. Redirect sang success page.");
-                    // Cập nhật trạng thái thành "confirmed" luôn cho COD
-                    bookingService.confirmBooking(bookingId); // Tự confirm đơn COD
+                    
+                    bookingService.confirmBooking(bookingId); 
                     session.setAttribute("successMessage", "Your booking #" + bookingId + " has been placed successfully! Please pay upon check-in.");
-                    // Chuyển hướng sang trang kết quả chung (để hiển thị thông báo COD)
+                    
                     response.sendRedirect(request.getContextPath() + "/paymentResult.jsp?bookingId=" + bookingId + "&RspCode=00&cod=true");
                     return;
 
@@ -118,16 +126,16 @@ public class OrderController extends HttpServlet {
                      }
 
                     request.setAttribute("bookingId", bookingId);
-                    request.setAttribute("totalPrice", createdBooking.getTotalPrice());
+                    request.setAttribute("totalPrice", createdBooking.getTotalPrice()); // Gửi tổng tiền ĐÚNG (đã tính bởi BookingService)
                     request.getRequestDispatcher("/createPayment").forward(request, response);
                     return;
 
                 } else {
                      System.out.println("!!! ORDER CONTROLLER LỖI: Phương thức thanh toán không hợp lệ: " + paymentMethod + " !!!");
-                    session.setAttribute("cartMessage", "Invalid payment method selected.");
-                    session.setAttribute("cartMessageType", "ERROR");
-                    response.sendRedirect(request.getContextPath() + "/checkout");
-                    return;
+                     session.setAttribute("cartMessage", "Invalid payment method selected.");
+                     session.setAttribute("cartMessageType", "ERROR");
+                     response.sendRedirect(request.getContextPath() + "/checkout");
+                     return;
                 }
 
             } else {
@@ -141,7 +149,7 @@ public class OrderController extends HttpServlet {
 
         } catch (Exception e) {
              System.out.println("!!!!!!!!!!!!!! EXCEPTION caught in OrderController !!!!!!!!!!!!!!");
-             e.printStackTrace(); // In lỗi đỏ ra console
+             e.printStackTrace(); 
             LOGGER.log(Level.SEVERE, "Error during order creation process for user " + (user != null ? user.getUserId() : "unknown"), e);
             session.setAttribute("cartMessage", "An unexpected error occurred: " + e.getMessage());
             session.setAttribute("cartMessageType", "ERROR");
@@ -150,4 +158,3 @@ public class OrderController extends HttpServlet {
         }
     }
 }
-

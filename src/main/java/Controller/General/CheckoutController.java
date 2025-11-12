@@ -1,5 +1,8 @@
 package Controller.General;
 
+import Dao.ServicesDao;
+import Models.Services;
+
 import Models.BookingDetail;
 import Models.Users;
 import jakarta.servlet.ServletException;
@@ -12,30 +15,26 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-// === THÊM IMPORT MỚI ===
 import java.time.format.DateTimeFormatter;
-// === KẾT THÚC IMPORT ===
+import java.util.ArrayList; 
 import java.util.List;
+import java.util.Map; 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Servlet này xử lý Giai đoạn 3: Trang Checkout.
- * URL: /checkout
- * Nhiệm vụ:
- * 1. Kiểm tra xem người dùng đã đăng nhập chưa (qua HttpSession).
- * 2. Nếu chưa, lưu URL hiện tại (/checkout) vào session và redirect sang trang login.
- * 3. Nếu đã đăng nhập, lấy thông tin giỏ hàng (cart), ngày check-in/out từ session.
- * 4. Tính toán tổng tiền dựa trên giá phòng và số đêm.
- * 5. Forward sang trang checkout.jsp để hiển thị thông tin và cho phép chọn phương thức thanh toán.
- */
 @WebServlet(name = "CheckoutController", urlPatterns = {"/checkout"})
 public class CheckoutController extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(CheckoutController.class.getName());
-    // === THÊM FORMATTER MỚI ĐỂ HIỂN THỊ ===
     private static final DateTimeFormatter DISPLAY_FORMATTER = DateTimeFormatter.ofPattern("HH:mm, dd/MM/yyyy");
-    // === KẾT THÚC THÊM ===
+    
+   
+    private ServicesDao servicesDao;
+
+    @Override
+    public void init() throws ServletException {
+        this.servicesDao = new ServicesDao();
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -43,7 +42,6 @@ public class CheckoutController extends HttpServlet {
 
         HttpSession session = request.getSession(false); 
 
-        // 1. Kiểm tra đăng nhập
         Users loggedInUser = null;
         if (session != null) {
             loggedInUser = (Users) session.getAttribute("user");
@@ -58,11 +56,10 @@ public class CheckoutController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-
-        // 2. Lấy thông tin giỏ hàng từ session
         List<BookingDetail> cart = (session != null) ? (List<BookingDetail>) session.getAttribute("cart") : null;
         LocalDateTime cartCheckIn = (session != null) ? (LocalDateTime) session.getAttribute("cartCheckIn") : null;
         LocalDateTime cartCheckOut = (session != null) ? (LocalDateTime) session.getAttribute("cartCheckOut") : null;
+        List<String> cartServiceIds = (session != null) ? (List<String>) session.getAttribute("cartServiceIds") : null;
 
         if (cart == null || cart.isEmpty() || cartCheckIn == null || cartCheckOut == null) {
             LOGGER.log(Level.WARNING, "Cart is empty or date information is missing for user {0}. Redirecting to rooms page.", loggedInUser.getUserId());
@@ -71,23 +68,48 @@ public class CheckoutController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/rooms");
             return;
         }
-
-        // 3. Tính toán tổng tiền và số đêm
-        double totalPrice = 0;
+        double totalRoomPrice = 0;
+        double totalServicesPrice = 0;
         long numberOfNights = 0;
+        
         try {
             numberOfNights = Duration.between(cartCheckIn.toLocalDate().atStartOfDay(), cartCheckOut.toLocalDate().atStartOfDay()).toDays();
             if (numberOfNights <= 0) {
                  numberOfNights = 1;
                  LOGGER.log(Level.INFO, "Calculated duration is less than or equal to 0 days, defaulting to 1 night.");
             }
-
             for (BookingDetail item : cart) {
-                totalPrice += item.getPriceAtBooking() * numberOfNights;
+                totalRoomPrice += item.getPriceAtBooking() * numberOfNights;
             }
-
-             LOGGER.log(Level.INFO, "Calculated total price: {0} for {1} night(s). CheckIn: {2}, CheckOut: {3}",
-                        new Object[]{totalPrice, numberOfNights, cartCheckIn, cartCheckOut});
+            Map<Integer, Services> servicesMap = servicesDao.getAllServicesAsMap();
+            List<Services> selectedServicesList = new ArrayList<>(); // Dùng để hiển thị
+            
+            if (cartServiceIds != null && !cartServiceIds.isEmpty() && servicesMap != null) {
+                LOGGER.log(Level.INFO, "[Checkout] Calculating total price for {0} services.", cartServiceIds.size());
+                for (String serviceIdStr : cartServiceIds) {
+                    try {
+                        int serviceId = Integer.parseInt(serviceIdStr);
+                        if (servicesMap.containsKey(serviceId)) {
+                            Services service = servicesMap.get(serviceId);
+                            totalServicesPrice += service.getPrice();
+                            selectedServicesList.add(service); // Thêm vào list để hiển thị
+                        }
+                    } catch (NumberFormatException e) {
+                        LOGGER.log(Level.WARNING, "Invalid service ID format in session: {0}", serviceIdStr);
+                    }
+                }
+            }
+            double finalTotalPrice = totalRoomPrice + totalServicesPrice;
+            
+            LOGGER.log(Level.INFO, "[Checkout] Calculated total: Room ({0}) + Services ({1}) = {2} for {3} night(s).",
+                         new Object[]{totalRoomPrice, totalServicesPrice, finalTotalPrice, numberOfNights});
+            request.setAttribute("cart", cart);
+            request.setAttribute("cartCheckInFormatted", cartCheckIn.format(DISPLAY_FORMATTER));
+            request.setAttribute("cartCheckOutFormatted", cartCheckOut.format(DISPLAY_FORMATTER));
+            request.setAttribute("numberOfNights", numberOfNights);
+            request.setAttribute("totalPrice", finalTotalPrice); 
+            request.setAttribute("user", loggedInUser); 
+            request.setAttribute("selectedServices", selectedServicesList); 
 
         } catch (Exception e) {
              LOGGER.log(Level.SEVERE, "Error calculating total price or duration for checkout.", e);
@@ -97,20 +119,6 @@ public class CheckoutController extends HttpServlet {
              return;
         }
 
-
-        // 4. Đặt các thuộc tính vào request để JSP hiển thị
-        request.setAttribute("cart", cart);
-        
-        // === SỬA LỖI: Chuyển LocalDateTime thành String đã định dạng ===
-        request.setAttribute("cartCheckInFormatted", cartCheckIn.format(DISPLAY_FORMATTER));
-        request.setAttribute("cartCheckOutFormatted", cartCheckOut.format(DISPLAY_FORMATTER));
-        // === KẾT THÚC SỬA LỖI ===
-        
-        request.setAttribute("numberOfNights", numberOfNights);
-        request.setAttribute("totalPrice", totalPrice);
-        request.setAttribute("user", loggedInUser); 
-
-        // 5. Forward sang trang checkout.jsp
         LOGGER.log(Level.INFO, "Forwarding user {0} to checkout page.", loggedInUser.getUserId());
         request.getRequestDispatcher("/pages/user/checkout.jsp").forward(request, response); // Đảm bảo đường dẫn JSP đúng
     }
@@ -122,4 +130,3 @@ public class CheckoutController extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/checkout");
     }
 }
-
