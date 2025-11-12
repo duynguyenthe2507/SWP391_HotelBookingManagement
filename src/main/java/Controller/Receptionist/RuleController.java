@@ -1,8 +1,8 @@
 package Controller.Receptionist;
 
-import Models.Users;
 import Dao.RuleDao;
 import Models.Rule;
+import Models.Users;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException; // Thêm import
+import java.util.List;
 
 @WebServlet(name = "RuleController", urlPatterns = {"/rules", "/rules/save", "/rules/edit", "/rules/delete"})
 public class RuleController extends HttpServlet {
@@ -28,8 +29,28 @@ public class RuleController extends HttpServlet {
             case "/rules":
                 Users user = (Users) request.getSession().getAttribute("loggedInUser");
                 request.setAttribute("rules", ruleDao.getAllRules());
+                String search = request.getParameter("search");
+                String statusParam = request.getParameter("status"); // Sẽ là "Active", "Inactive", hoặc "" (rỗng)
 
+                // 2. Chuyển đổi status string ("Active") thành boolean (true) cho DAO
+                // Sử dụng Boolean (object) để có thể chứa giá trị null (nghĩa là "All Statuses")
+                Boolean statusValue = null;
+                if ("Active".equalsIgnoreCase(statusParam)) {
+                    statusValue = true;
+                } else if ("Inactive".equalsIgnoreCase(statusParam)) {
+                    statusValue = false;
+                }
+
+                // 3. Gọi DAO với các tham số lọc
+                // *** QUAN TRỌNG: Bạn cần tạo phương thức 'findRules' trong RuleDao.java (xem bước 2) ***
+                List<Rule> rules = ruleDao.findRules(search, statusValue);
+
+                // 4. Gửi danh sách rules và các giá trị filter về lại JSP
+                request.setAttribute("rules", rules);
+                request.setAttribute("search", search);       // Để giữ giá trị trong ô search
+                request.setAttribute("status", statusParam);  // Để giữ giá trị trong dropdown (dùng "Active" thay vì true)
                 if (user != null && "receptionist".equalsIgnoreCase(user.getRole())) {
+                    // Đã sửa ở file JSP, nên chuyển đến file JSP đã sửa
                     request.getRequestDispatcher("/pages/receptionist/rules-list.jsp").forward(request, response);
                 } else {
                     // User chỉ xem
@@ -38,10 +59,12 @@ public class RuleController extends HttpServlet {
                 break;
 
             case "/rules/edit":
+                // Logic này không được dùng bởi rules-list.jsp mới, nhưng vẫn sửa cho đúng
                 try {
                     int id = Integer.parseInt(request.getParameter("id"));
                     Rule rule = ruleDao.getRuleById(id);
                     request.setAttribute("rule", rule);
+                    // Giả sử bạn có trang rules-edit.jsp
                     request.getRequestDispatcher("/pages/receptionist/rules-edit.jsp").forward(request, response);
                 } catch (Exception e) {
                     e.printStackTrace();
