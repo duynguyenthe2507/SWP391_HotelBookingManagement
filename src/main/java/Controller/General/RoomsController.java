@@ -37,7 +37,15 @@ public class RoomsController extends HttpServlet {
             String minCapacityParam = request.getParameter("minCapacity");
             String checkInDate = request.getParameter("checkInDate");
             String checkOutDate = request.getParameter("checkOutDate");
-            String statusFilter = request.getParameter("statusFilter");
+            
+            // === THAY ĐỔI QUAN TRỌNG (SỬA LỖI) ===
+            // String statusFilter = request.getParameter("statusFilter"); // <-- XÓA DÒNG CŨ
+            
+            // Luôn luôn đặt bộ lọc là "available" cho trang này
+            String statusFilter = "available"; 
+            LOGGER.log(Level.INFO, "Forcing status filter to 'available' for public rooms page.");
+            // === KẾT THÚC THAY ĐỔI ===
+            
             String pageParam = request.getParameter("page");
             String pageSizeParam = request.getParameter("pageSize");
 
@@ -68,12 +76,14 @@ public class RoomsController extends HttpServlet {
             }
             
             
+            // Hàm này bây giờ sẽ luôn nhận 'available'
             List<Room> rooms = roomService.findAllRooms(
                 searchKeyword, categoryId, minPrice, maxPrice, minCapacity,
                 checkInDate, checkOutDate, statusFilter,
                 pageNumber, pageSize
             );
 
+            // Hàm này cũng sẽ luôn nhận 'available'
             int totalRooms = roomService.getTotalRoomsCount(
                 searchKeyword, categoryId, minPrice, maxPrice, minCapacity,
                 checkInDate, checkOutDate, statusFilter
@@ -104,10 +114,10 @@ public class RoomsController extends HttpServlet {
             request.setAttribute("minCapacity", minCapacity);
             request.setAttribute("checkInDate", checkInDate); 
             request.setAttribute("checkOutDate", checkOutDate); 
-            request.setAttribute("statusFilter", statusFilter);
+            request.setAttribute("statusFilter", statusFilter); // Gửi 'available' tới JSP
 
             System.out.println("📄 RoomsController -> totalRooms: " + totalRooms +
-                               ", pageSize: " + pageSize + ", noOfPages: " + noOfPages);
+                                 ", pageSize: " + pageSize + ", noOfPages: " + noOfPages);
             request.setAttribute("pageTitle", "Our Rooms");
 
             request.getRequestDispatcher("/pages/general/rooms.jsp").forward(request, response);
@@ -150,4 +160,3 @@ public class RoomsController extends HttpServlet {
         }
     }
 }
-

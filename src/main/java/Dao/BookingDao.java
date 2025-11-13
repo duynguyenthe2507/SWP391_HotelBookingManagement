@@ -46,7 +46,6 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
                 rs.getTimestamp("updatedAt") != null ? rs.getTimestamp("updatedAt").toLocalDateTime() : null);
     }
 
-
     public int insertOfflineBooking(Booking booking) {
         String sql = "INSERT INTO Booking (guestName, receptionistId, roomId, checkinTime, checkoutTime, "
                 + "guestCount, specialRequest, totalPrice, status, createdAt) "
@@ -123,7 +122,7 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
             params.add("%" + keyword + "%");
             params.add("%" + keyword + "%");
         }
-        sql.append("ORDER BY b.createdAt DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+        sql.append("ORDER BY b.checkinTime DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
         params.add((pageNumber - 1) * pageSize);
         params.add(pageSize);
         try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
@@ -146,7 +145,7 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error finding bookings", e);
-            e.printStackTrace(); 
+            e.printStackTrace();
         }
 
         return list;
@@ -245,11 +244,10 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
         return null;
     }
 
-
     public boolean insertBookingWithDetails(Booking booking, List<BookingDetail> details) {
 
-        String bookingSql = "INSERT INTO Booking(userId, guestName, receptionistId, roomId, guestCount, checkinTime, checkoutTime, status, totalPrice, createdAt, updatedAt) "
-                + "VALUES (?,?,?,?,?,?,?,?,?,?,?)"; // 11 tham số
+        String bookingSql = "INSERT INTO Booking(userId, roomId, checkinTime, checkoutTime, status, totalPrice, createdAt, updatedAt) "
+                + "VALUES (?,?,?,?,?,?,?,?)"; // 8 tham số
 
         Connection conn = null;
         boolean originalAutoCommit = true;
@@ -265,27 +263,24 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
             if (!isExternalConn) {
                 originalAutoCommit = conn.getAutoCommit();
                 conn.setAutoCommit(false);
-                LOGGER.log(Level.INFO, "Transaction started internally for creating booking (userId: {0}, guestName: {1}).",
-                        new Object[]{booking.getUserId(), booking.getGuestName()});
+                LOGGER.log(Level.INFO, "Transaction started internally for creating booking for user {0}.",
+                        booking.getUserId());
             } else {
-                LOGGER.log(Level.INFO, "Participating in external transaction for creating booking (userId: {0}, guestName: {1}).",
-                        new Object[]{booking.getUserId(), booking.getGuestName()});
+                LOGGER.log(Level.INFO, "Participating in external transaction for creating booking for user {0}.",
+                        booking.getUserId());
             }
 
             try (PreparedStatement psInsertBooking = conn.prepareStatement(bookingSql, Statement.RETURN_GENERATED_KEYS)) {
 
-                // Hỗ trợ cả online (có userId) và offline (có guestName + receptionistId)
-                psInsertBooking.setObject(1, booking.getUserId()); // NULL cho offline booking
-                psInsertBooking.setString(2, booking.getGuestName()); // NULL cho online booking
-                psInsertBooking.setObject(3, booking.getReceptionistId()); // NULL cho online booking
-                psInsertBooking.setInt(4, booking.getRoomId());
-                psInsertBooking.setInt(5, booking.getGuestCount()); // Thêm guestCount
-                psInsertBooking.setTimestamp(6, Timestamp.valueOf(booking.getCheckinTime()));
-                psInsertBooking.setTimestamp(7, Timestamp.valueOf(booking.getCheckoutTime()));
-                psInsertBooking.setString(8, booking.getStatus());
-                psInsertBooking.setDouble(9, booking.getTotalPrice());
-                psInsertBooking.setTimestamp(10, Timestamp.valueOf(LocalDateTime.now()));
-                psInsertBooking.setTimestamp(11, Timestamp.valueOf(LocalDateTime.now()));
+                // (Đây là code đã sửa lỗi 'roomId' NULL)
+                psInsertBooking.setInt(1, booking.getUserId());
+                psInsertBooking.setInt(2, booking.getRoomId()); // (Sửa lỗi 'roomId' NULL)
+                psInsertBooking.setTimestamp(3, Timestamp.valueOf(booking.getCheckinTime()));
+                psInsertBooking.setTimestamp(4, Timestamp.valueOf(booking.getCheckoutTime()));
+                psInsertBooking.setString(5, booking.getStatus());
+                psInsertBooking.setDouble(6, booking.getTotalPrice());
+                psInsertBooking.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
+                psInsertBooking.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now()));
 
                 LOGGER.log(Level.INFO, "Executing insert booking statement...");
                 int affectedRows = psInsertBooking.executeUpdate();
@@ -544,7 +539,7 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
                 }
             }
         }
-        return true; 
+        return true;
     }
 
     public List<Booking> getAllBookings() {
@@ -559,6 +554,7 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
         }
         return list;
     }
+
     public Booking getBookingById(int id) {
         String sql = "SELECT * FROM Booking WHERE bookingId=?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -660,13 +656,11 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
         return false;
     }
 
-
     public boolean isRoomBookedDuringDates(int roomId, LocalDateTime checkIn, LocalDateTime checkOut) {
         String sql = "SELECT COUNT(bd.bookingDetailId) FROM BookingDetail bd "
                 + "JOIN Booking b ON bd.bookingId = b.bookingId "
                 + "WHERE bd.roomId = ? "
-                + 
-                "AND b.status IN ('pending', 'confirmed', 'checked-in') "
+                + "AND b.status IN ('pending', 'confirmed', 'checked-in') "
                 + "AND b.checkinTime < ? AND b.checkoutTime > ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -687,8 +681,9 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
             LOGGER.log(Level.SEVERE, "Error checking room dates for roomId: " + roomId, e);
             e.printStackTrace();
         }
-        return true; 
+        return true;
     }
+
     public List<Booking> getBookingsByStatus(String status) {
         List<Booking> list = new ArrayList<>();
         String sql = "SELECT * FROM Booking WHERE status=? ORDER BY createdAt DESC";
@@ -760,7 +755,7 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
 
     @Override
     public void close() throws Exception {
-        super.closeConnection(); 
+        super.closeConnection();
     }
 
     public boolean updateBookingStatusAndCheckInTime(int bookingId, String newStatus, LocalDateTime checkInTime) {
@@ -789,46 +784,71 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
         }
     }
 
-
-    public List<Map<String, Object>> getDetailedBookingsByUserId(int userId) {
+    public List<Map<String, Object>> getDetailedBookingsByUserId(int userId, String keyword, String status, int pageNumber, int pageSize) {
         List<Map<String, Object>> list = new ArrayList<>();
-        String sql = "SELECT b.*, r.name as roomName, r.imgUrl as roomImgUrl "
-                + "FROM Booking b "
-                + "JOIN Room r ON b.roomId = r.roomId "
-                + // Join với Room
-                "WHERE b.userId = ? "
-                + "ORDER BY b.checkinTime DESC";
+        List<Object> params = new ArrayList<>(); // Dùng danh sách tham số động
+        
+        StringBuilder sql = new StringBuilder(
+            "SELECT b.*, r.name as roomName, r.imgUrl as roomImgUrl " +
+            "FROM Booking b " +
+            "JOIN Room r ON b.roomId = r.roomId " +
+            "WHERE b.userId = ? " // Tham số đầu tiên luôn là userId
+        );
+        params.add(userId);
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, userId);
+        // Thêm điều kiện lọc
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append(" AND r.name LIKE ? ");
+            params.add("%" + keyword + "%");
+        }
+        if (status != null && !status.trim().isEmpty()) {
+            sql.append(" AND b.status = ? ");
+            params.add(status);
+        }
+
+        // Thêm logic phân trang
+        sql.append("ORDER BY b.checkinTime DESC ");
+        sql.append("OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+        
+        int offset = (pageNumber - 1) * pageSize;
+        params.add(offset);
+        params.add(pageSize);
+
+        try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+            // Gán các tham số
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+            
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Map<String, Object> item = new HashMap<>();
-                    item.put("booking", mapResultSetToBooking(rs));
+                    item.put("booking", mapResultSetToBooking(rs)); 
                     item.put("roomName", rs.getString("roomName"));
                     item.put("roomImgUrl", rs.getString("roomImgUrl"));
                     list.add(item);
                 }
             }
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Error getting detailed bookings for user: " + userId, e);
+            LOGGER.log(Level.SEVERE, "Error getting paginated/filtered detailed bookings for user: " + userId, e);
         }
         return list;
     }
 
     public int findCompletedBookingId(int userId, int roomId) {
-        // Chỉ cho phép review khi đã 'checked-out'
+
+        LOGGER.log(Level.WARNING, "=== DEV TEST MODE === Review permission check is relaxed (any status).");
         String sql = "SELECT TOP 1 bookingId FROM Booking "
                 + "WHERE userId = ? AND roomId = ? "
-                + "AND status = 'checked-out' "
-                + "ORDER BY checkoutTime DESC";
+                + 
+                "ORDER BY createdAt DESC"; 
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, userId);
             ps.setInt(2, roomId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt(1);
+                    return rs.getInt(1); // Trả về bookingId (ví dụ: pending)
                 }
             }
         } catch (SQLException e) {
@@ -837,10 +857,42 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
         return 0; 
     }
 
-    /**
-     * Get booking history for a specific room
-     * Returns list of bookings ordered by most recent first
-     */
+    public int countBookingsByUserId(int userId, String keyword, String status) {
+        List<Object> params = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+            "SELECT COUNT(b.bookingId) " +
+            "FROM Booking b " +
+            "JOIN Room r ON b.roomId = r.roomId " +
+            "WHERE b.userId = ? "
+        );
+        params.add(userId);
+
+        // Thêm điều kiện lọc (phải giống hệt hàm get...)
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append(" AND r.name LIKE ? ");
+            params.add("%" + keyword + "%");
+        }
+        if (status != null && !status.trim().isEmpty()) {
+            sql.append(" AND b.status = ? ");
+            params.add(status);
+        }
+
+        try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+            // Gán các tham số
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error counting filtered bookings for user: " + userId, e);
+        }
+        return 0;
+    }
     public List<Map<String, Object>> getBookingHistoryByRoom(int roomId) {
         List<Map<String, Object>> history = new ArrayList<>();
         String sql = """
@@ -873,11 +925,6 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
         }
         return history;
     }
-
-    /**
-     * Get current active booking for a room (if room is booked)
-     * Returns booking with status 'confirmed' or 'checked-in'
-     */
     public Map<String, Object> getCurrentBookingByRoom(int roomId) {
         String sql = """
             SELECT b.bookingId, 

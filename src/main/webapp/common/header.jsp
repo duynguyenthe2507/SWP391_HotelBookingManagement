@@ -110,14 +110,12 @@
                                             <a href="${pageContext.request.contextPath}/user/requests">My Requests</a>
                                         </li>
                                         
-                                        <!-- === THÊM MỚI (2/2): Link "My Bookings" cho mobile menu === -->
                                         <c:if test="${not empty sessionScope.user}">
                                              <li <c:if test="${pageContext.request.servletPath eq '/my-bookings'}">class="active"</c:if>
                                                  style="display: none;" class="mobile-only-link">
                                                  <a href="${pageContext.request.contextPath}/my-bookings">My Bookings</a>
                                              </li>
                                         </c:if>
-                                        <!-- === KẾT THÚC THÊM MỚI (2/2) === -->
                                         
                                     </ul>
                                 </c:otherwise>

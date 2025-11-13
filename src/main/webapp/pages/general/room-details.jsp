@@ -28,6 +28,9 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css" type="text/css">
 
     <style>
+        /* (Your original CSS)... */
+        
+        /* === NEW CSS === */
         body.hidden-overflow {
             overflow: hidden;
         }
@@ -751,15 +754,18 @@
             // 1. TOTAL PRICE CALCULATION (BOOKING)
             // ===================================
             
-            const baseRoomPrice = parseFloat($('#base-room-price').val());
+            // Ensure room price exists before parsing
+            const baseRoomPriceEl = $('#base-room-price');
+            const baseRoomPrice = baseRoomPriceEl.length ? parseFloat(baseRoomPriceEl.val()) : 0;
+            
             const checkInInput = $('#date-in');
             const checkOutInput = $('#date-out');
-            // const serviceCheckboxes = $('.service-checkbox'); // <<< This was the bug
             const totalDisplay = $('#booking-total-price');
 
             function parseDate(dateStr) {
                 if (!dateStr) return null;
                 var parts = dateStr.split('/');
+                // (Month in JS is 0-indexed)
                 return new Date(parts[2], parts[1] - 1, parts[0]);
             }
             
@@ -768,6 +774,8 @@
             }
 
             function calculateTotal() {
+                if (!baseRoomPriceEl.length) return; // Don't run if there's no room
+
                 let checkInDate = parseDate(checkInInput.val());
                 let checkOutDate = parseDate(checkOutInput.val());
                 let numNights = 0;
@@ -786,12 +794,16 @@
                 let totalRoomPrice = baseRoomPrice * numNights;
                 let totalServicesPrice = 0;
                 
-                // Use the new selector
+                // Use the selector for checked checkboxes
                 $('.service-checkbox:checked').each(function() {
                     totalServicesPrice += parseFloat($(this).data('price'));
                 });
 
-                let grandTotal = totalRoomPrice + totalServicesPrice;
+                // === SỬA LỖI (13/11/2025): Nhân tiền dịch vụ với số đêm ===
+                let finalServicesPrice = totalServicesPrice * numNights;
+
+                // Tính tổng
+                let grandTotal = totalRoomPrice + finalServicesPrice;
                 totalDisplay.text(formatCurrency(grandTotal));
             }
 
@@ -824,18 +836,22 @@
             });
             
             // === FIX: Use Event Delegation ===
-            // This listens for changes on 'document', but only acts if the change
-            // happened on an element matching '.service-checkbox'
             $(document).on('change', '.service-checkbox', calculateTotal);
             // === END FIX ===
 
-            $('select').niceSelect();
+            // Initialize nice select AFTER datepicker
+            if ($('select').length) {
+                $('select').niceSelect();
+            }
+            
             $(window).on('load', function() {
                 $("#preloder").fadeOut("slow");
                 $("body").removeClass("hidden-overflow");
             });
             $("body").addClass("hidden-overflow");
-             calculateTotal();
+            
+            // Initial calculation on page load
+            calculateTotal();
 
             // ===================================
             // 2. SUBMIT REVIEW LOGIC (AJAX)
@@ -899,7 +915,7 @@
                     // 3. Prepend new review to the list
                     prependNewReview(newReview);
                     // 4. Remove "No reviews" message (if present)
-                    if(noReviewsMessage) noReviewsMessage.hide();
+                    if(noReviewsMessage.length) noReviewsMessage.hide();
                 })
                 .catch(error => {
                     // FAILURE!
@@ -919,9 +935,10 @@
                     starsHtml += '<i class="fa fa-star-o"></i>';
                 }
                 
-                // Format date (simple)
-                // Note: fb.createdAt is an ISO string (e.g., "2025-11-11T14:30:00")
-                const date = new Date(fb.createdAt); 
+                // === FIX: Handle ISO Date String ===
+                // fb.createdAt is an ISO string (e.g., "2025-11-11T14:30:00")
+                // Replace "T" with a space to make it compatible across browsers
+                const date = new Date(fb.createdAt.replace("T", " ")); 
                 const formattedDate = date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
                 // Get avatar (fallback)
@@ -946,10 +963,8 @@
                 reviewListContainer.prepend(reviewHtml);
                 
                 // Trigger animation (fade in)
-                // Use setTimeout to ensure DOM has rendered before changing class
                 setTimeout(() => {
-                    // Find the exact new review that was added
-                    reviewListContainer.find('.review-item.new-review').css({
+                    reviewListContainer.find('.review-item.new-review').first().css({
                         'opacity': '1',
                         'transform': 'scale(1)'
                     });
@@ -957,6 +972,7 @@
             }
         });
     </script>
+    <!-- === END NEW SCRIPT === -->
 
 </body>
 </html>

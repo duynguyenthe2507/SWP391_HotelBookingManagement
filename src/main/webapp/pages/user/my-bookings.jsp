@@ -140,6 +140,78 @@
         }
         .no-bookings .btn-primary:hover { background-color: #c7956d; }
         
+        /* === CSS MỚI: PHÂN TRANG === */
+        .pagination-controls {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+        .pagination-controls .page-link {
+            display: inline-block;
+            padding: 8px 14px;
+            margin: 0 3px;
+            color: #dfa974;
+            border: 1px solid #dfa974;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .pagination-controls .page-link:hover {
+            background-color: #dfa974;
+            color: #fff;
+        }
+        .pagination-controls .page-item.active .page-link {
+            background-color: #dfa974;
+            color: #fff;
+            border-color: #dfa974;
+        }
+        .pagination-controls .page-item.disabled .page-link {
+            color: #aaa;
+            border-color: #ddd;
+            background-color: #f8f8f8;
+            pointer-events: none;
+        }
+        /* === KẾT THÚC CSS MỚI === */
+        
+        /* === CSS MỚI: FORM LỌC === */
+        .filter-form {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .filter-form h5 {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .filter-form .form-control {
+            border-radius: 5px;
+            height: 46px;
+        }
+        .filter-form .btn-filter {
+            background-color: #dfa974;
+            border-color: #dfa974;
+            color: white;
+            font-weight: 600;
+            height: 46px;
+            transition: all 0.3s;
+        }
+        .filter-form .btn-filter:hover {
+            background-color: #c7956d;
+            border-color: #c7956d;
+        }
+        .filter-form .btn-clear {
+            height: 46px;
+            color: #555;
+            font-weight: 600;
+        }
+        /* === KẾT THÚC CSS MỚI === */
+
         @media (max-width: 767px) {
             .booking-card { flex-direction: column; }
             .booking-img { width: 100%; height: 200px; flex: auto; }
@@ -173,6 +245,37 @@
     </div>
 
     <div class="container bookings-container">
+
+        <!-- === FILTER/SEARCH FORM === -->
+        <div class="filter-form">
+            <h5><i class="fa fa-filter"></i> Filter Your Bookings</h5>
+            <form action="${pageContext.request.contextPath}/my-bookings" method="GET">
+                <div class="row g-3">
+                    <div class="col-md-5">
+                        <label for="search" class="form-label" style="display:none;">Search</label>
+                        <input type="text" class="form-control" id="search" name="search" value="${searchKeyword}" placeholder="Search by Room Name...">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="status" class="form-label" style="display:none;">Status</label>
+                        <select id="status" name="status" class="form-control">
+                            <option value="">All Statuses</option>
+                            <option value="pending" ${statusFilter == 'pending' ? 'selected' : ''}>Pending</option>
+                            <option value="confirmed" ${statusFilter == 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                            <option value="checked-in" ${statusFilter == 'checked-in' ? 'selected' : ''}>Checked-In</option>
+                            <option value="checked-out" ${statusFilter == 'checked-out' ? 'selected' : ''}>Checked-Out</option>
+                            <option value="cancelled" ${statusFilter == 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-filter w-100">Search</button>
+                    </div>
+                    <div class="col-md-2">
+                        <a href="${pageContext.request.contextPath}/my-bookings" class="btn btn-outline-secondary btn-clear w-100">Clear</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <!-- === END FILTER FORM === -->
 
         <c:choose>
             <%-- Case 1: User has bookings --%>
@@ -230,9 +333,17 @@
             <%-- Case 2: No bookings --%>
             <c:otherwise>
                 <div class="no-bookings">
-                    <h3>You have no bookings yet.</h3>
-                    <p style="margin-bottom: 30px; color: #666;">Feel free to explore our amazing rooms!</p>
-                    <a href="${pageContext.request.contextPath}/rooms" class="btn-primary">Find a Room</a>
+                    <%-- Message reflects filter results --%>
+                    <c:if test="${not empty searchKeyword || not empty statusFilter}">
+                        <h3>No bookings found</h3>
+                        <p style="margin-bottom: 30px; color: #666;">No bookings matched your filter criteria.</p>
+                        <a href="${pageContext.request.contextPath}/my-bookings" class="btn-primary">Clear Filters</a>
+                    </c:if>
+                    <c:if test="${empty searchKeyword && empty statusFilter}">
+                        <h3>You have no bookings yet.</h3>
+                        <p style="margin-bottom: 30px; color: #666;">Feel free to explore our amazing rooms!</p>
+                        <a href="${pageContext.request.contextPath}/rooms" class="btn-primary">Find a Room</a>
+                    </c:if>
                 </div>
             </c:otherwise>
         </c:choose>
@@ -243,6 +354,42 @@
                 <strong>Error:</strong> ${requestScope.errorMessage}
             </div>
         </c:if>
+        
+        <!-- === PAGINATION CONTROLS (Updated) === -->
+        <c:if test="${totalPages > 1}">
+            <nav class="pagination-controls" aria-label="Page navigation">
+                <ul class="pagination" style="justify-content: center;">
+                    
+                    <%-- Create base URL with filter parameters --%>
+                    <c:url var="pageUrl" value="/my-bookings">
+                        <c:param name="search" value="${searchKeyword}" />
+                        <c:param name="status" value="${statusFilter}" />
+                    </c:url>
+                    
+                    <%-- Previous Button --%>
+                    <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
+                        <a class="page-link" href="${pageUrl}&page=${currentPage - 1}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+
+                    <%-- Page Number Buttons --%>
+                    <c:forEach var="i" begin="1" end="${totalPages}">
+                        <li class="page-item ${i == currentPage ? 'active' : ''}">
+                            <a class="page-link" href="${pageUrl}&page=${i}">${i}</a>
+                        </li>
+                    </c:forEach>
+
+                    <%-- Next Button --%>
+                    <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
+                        <a class="page-link" href="${pageUrl}&page=${currentPage + 1}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </c:if>
+        <!-- === END PAGINATION === -->
 
     </div>
 

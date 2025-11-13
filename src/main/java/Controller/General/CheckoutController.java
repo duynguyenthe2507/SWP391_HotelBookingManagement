@@ -1,7 +1,9 @@
 package Controller.General;
 
+// === THÊM IMPORT MỚI ===
 import Dao.ServicesDao;
 import Models.Services;
+// === KẾT THÚC IMPORT ===
 
 import Models.BookingDetail;
 import Models.Users;
@@ -28,13 +30,14 @@ public class CheckoutController extends HttpServlet {
     private static final Logger LOGGER = Logger.getLogger(CheckoutController.class.getName());
     private static final DateTimeFormatter DISPLAY_FORMATTER = DateTimeFormatter.ofPattern("HH:mm, dd/MM/yyyy");
     
-   
+    // === THÊM DAO MỚI ===
     private ServicesDao servicesDao;
 
     @Override
     public void init() throws ServletException {
         this.servicesDao = new ServicesDao();
     }
+    // === KẾT THÚC THÊM ===
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -42,6 +45,7 @@ public class CheckoutController extends HttpServlet {
 
         HttpSession session = request.getSession(false); 
 
+        // 1. Kiểm tra đăng nhập
         Users loggedInUser = null;
         if (session != null) {
             loggedInUser = (Users) session.getAttribute("user");
@@ -56,9 +60,13 @@ public class CheckoutController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
+
+        // 2. Lấy thông tin giỏ hàng từ session
         List<BookingDetail> cart = (session != null) ? (List<BookingDetail>) session.getAttribute("cart") : null;
         LocalDateTime cartCheckIn = (session != null) ? (LocalDateTime) session.getAttribute("cartCheckIn") : null;
         LocalDateTime cartCheckOut = (session != null) ? (LocalDateTime) session.getAttribute("cartCheckOut") : null;
+        
+        // === SỬA LỖI 2: Lấy serviceIds (tên "cartServiceIds" đã được lưu bởi BookingController) ===
         List<String> cartServiceIds = (session != null) ? (List<String>) session.getAttribute("cartServiceIds") : null;
 
         if (cart == null || cart.isEmpty() || cartCheckIn == null || cartCheckOut == null) {
@@ -68,19 +76,26 @@ public class CheckoutController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/rooms");
             return;
         }
+
+        // 3. Tính toán tổng tiền và số đêm
         double totalRoomPrice = 0;
         double totalServicesPrice = 0;
         long numberOfNights = 0;
         
         try {
+            // Tính số đêm
             numberOfNights = Duration.between(cartCheckIn.toLocalDate().atStartOfDay(), cartCheckOut.toLocalDate().atStartOfDay()).toDays();
             if (numberOfNights <= 0) {
                  numberOfNights = 1;
                  LOGGER.log(Level.INFO, "Calculated duration is less than or equal to 0 days, defaulting to 1 night.");
             }
+
+            // Tính tiền phòng
             for (BookingDetail item : cart) {
                 totalRoomPrice += item.getPriceAtBooking() * numberOfNights;
             }
+
+            // === SỬA LỖI 3: Tính tiền dịch vụ (chưa nhân) ===
             Map<Integer, Services> servicesMap = servicesDao.getAllServicesAsMap();
             List<Services> selectedServicesList = new ArrayList<>(); // Dùng để hiển thị
             
@@ -91,7 +106,7 @@ public class CheckoutController extends HttpServlet {
                         int serviceId = Integer.parseInt(serviceIdStr);
                         if (servicesMap.containsKey(serviceId)) {
                             Services service = servicesMap.get(serviceId);
-                            totalServicesPrice += service.getPrice();
+                            totalServicesPrice += service.getPrice(); // Chỉ cộng giá gốc
                             selectedServicesList.add(service); // Thêm vào list để hiển thị
                         }
                     } catch (NumberFormatException e) {
@@ -99,17 +114,25 @@ public class CheckoutController extends HttpServlet {
                     }
                 }
             }
-            double finalTotalPrice = totalRoomPrice + totalServicesPrice;
             
-            LOGGER.log(Level.INFO, "[Checkout] Calculated total: Room ({0}) + Services ({1}) = {2} for {3} night(s).",
-                         new Object[]{totalRoomPrice, totalServicesPrice, finalTotalPrice, numberOfNights});
+            // === SỬA LỖI 6: Nhân tiền dịch vụ với số đêm ===
+            double finalServicesPrice = totalServicesPrice * numberOfNights;
+            
+            // Tính tổng tiền cuối cùng
+            double finalTotalPrice = totalRoomPrice + finalServicesPrice;
+            
+            LOGGER.log(Level.INFO, "[Checkout] Calculated total: Room ({0}) + Services ({1}) = {2} ({3} nights).",
+                         new Object[]{totalRoomPrice, finalServicesPrice, finalTotalPrice, numberOfNights});
+            // === KẾT THÚC SỬA LỖI ===
+
+            // 4. Đặt các thuộc tính vào request để JSP hiển thị
             request.setAttribute("cart", cart);
             request.setAttribute("cartCheckInFormatted", cartCheckIn.format(DISPLAY_FORMATTER));
             request.setAttribute("cartCheckOutFormatted", cartCheckOut.format(DISPLAY_FORMATTER));
             request.setAttribute("numberOfNights", numberOfNights);
-            request.setAttribute("totalPrice", finalTotalPrice); 
+            request.setAttribute("totalPrice", finalTotalPrice); // <-- Gửi tổng tiền ĐÚNG
             request.setAttribute("user", loggedInUser); 
-            request.setAttribute("selectedServices", selectedServicesList); 
+            request.setAttribute("selectedServices", selectedServicesList); // <-- Gửi danh sách dịch vụ
 
         } catch (Exception e) {
              LOGGER.log(Level.SEVERE, "Error calculating total price or duration for checkout.", e);
@@ -119,6 +142,7 @@ public class CheckoutController extends HttpServlet {
              return;
         }
 
+        // 5. Forward sang trang checkout.jsp
         LOGGER.log(Level.INFO, "Forwarding user {0} to checkout page.", loggedInUser.getUserId());
         request.getRequestDispatcher("/pages/user/checkout.jsp").forward(request, response); // Đảm bảo đường dẫn JSP đúng
     }

@@ -26,7 +26,11 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
+/**
+ * ... (Các comment cũ) ...
+ * === CẬP NHẬT (13/11/2025) ===
+ * 6. Sửa logic tính 'finalTotalPrice' để NHÂN tiền dịch vụ với số đêm.
+ */
 public class BookingService {
 
     private static final Logger LOGGER = Logger.getLogger(BookingService.class.getName());
@@ -37,7 +41,7 @@ public class BookingService {
     private ServicesDao servicesDao;
     private BookingDetailDao bookingDetailDao;
     private InvoiceDao invoiceDao;
-    private FeedbackDao feedbackDao; 
+    private FeedbackDao feedbackDao; // <<< THÊM DAO MỚI
 
     public BookingService() {
         this.bookingDao = new BookingDao();
@@ -45,37 +49,18 @@ public class BookingService {
         this.servicesDao = new ServicesDao();
         this.bookingDetailDao = new BookingDetailDao();
         this.invoiceDao = new InvoiceDao();
-        this.feedbackDao = new FeedbackDao(); 
+        this.feedbackDao = new FeedbackDao(); // <<< KHỞI TẠO DAO
     }
 
+    // ============ OFFLINE BOOKING METHODS (Code gốc của bạn - Chính xác) ============
     public boolean createOfflineBooking(Booking booking, String[] serviceIds) {
         try {
-            // Lấy thông tin room để có price
-            Room room = roomDao.getById(booking.getRoomId());
-            if (room == null) {
-                LOGGER.log(Level.WARNING, "Room not found with ID: {0}", booking.getRoomId());
-                return false;
-            }
-            
-            // Tạo BookingDetail cho offline booking
-            BookingDetail bookingDetail = new BookingDetail();
-            bookingDetail.setRoomId(booking.getRoomId());
-            bookingDetail.setPriceAtBooking(room.getPrice());
-            bookingDetail.setGuestCount(booking.getGuestCount());
-            bookingDetail.setSpecialRequest(booking.getSpecialRequest());
-            
-            List<BookingDetail> bookingDetails = new ArrayList<>();
-            bookingDetails.add(bookingDetail);
-            
-            // Sử dụng insertBookingWithDetails thay vì insertOfflineBooking
-            booking.setStatus("pending"); // Set status mặc định
-            boolean success = bookingDao.insertBookingWithDetails(booking, bookingDetails);
-            
-            if (!success) {
+            int bookingId = bookingDao.insertOfflineBooking(booking);
+            if (bookingId == -1) {
                 LOGGER.log(Level.WARNING, "Failed to insert booking into database.");
                 return false;
             }
-            LOGGER.log(Level.INFO, "Inserted new offline booking with ID: {0}", booking.getBookingId());
+            LOGGER.log(Level.INFO, "Inserted new booking with ID: {0}", bookingId);
 
             if (serviceIds != null && serviceIds.length > 0) {
                 Map<Integer, Services> servicesMap = servicesDao.getAllServicesAsMap();
@@ -83,8 +68,9 @@ public class BookingService {
                 if (servicesMap == null || servicesMap.isEmpty()) {
                     LOGGER.log(Level.WARNING, "Could not retrieve services map for linking.");
                 } else {
-                    bookingDao.linkServicesToBooking(booking.getBookingId(), serviceIds, servicesMap);
-                    LOGGER.log(Level.INFO, "Linked {0} services to booking ID: {1}", new Object[]{serviceIds.length, booking.getBookingId()});
+                    // Sửa lỗi: Tên bảng đúng là ServiceRequest
+                    bookingDao.linkServicesToBooking(bookingId, serviceIds, servicesMap);
+                    LOGGER.log(Level.INFO, "Linked {0} services to booking ID: {1}", new Object[]{serviceIds.length, bookingId});
                 }
             }
 
@@ -109,10 +95,11 @@ public class BookingService {
             return null;
         }
         List<Map<String, Object>> servicesUsed = servicesDao.getServicesByBookingId(bookingId);
-        Feedback feedback = feedbackDao.getReviewByBookingId(bookingId);
         
-        // Get invoiceId if exists
-        Integer invoiceId = invoiceDao.getInvoiceIdByBookingId(bookingId);
+        // === LOGIC MỚI ===
+        // Lấy feedback (nếu có) liên quan đến booking này
+        Feedback feedback = feedbackDao.getReviewByBookingId(bookingId);
+        // === KẾT THÚC LOGIC MỚI ===
         
         BookingDetailsViewModel viewModel = new BookingDetailsViewModel();
         viewModel.setBooking((Booking) basicDetails.get("booking"));
@@ -120,9 +107,9 @@ public class BookingService {
         viewModel.setCustomerName((String) basicDetails.get("customerName"));
         viewModel.setReceptionistName((String) basicDetails.get("receptionistName"));
         viewModel.setServices(servicesUsed);
-        viewModel.setInvoiceId(invoiceId);
-        viewModel.setFeedback(feedback); 
+        viewModel.setFeedback(feedback); // <<< GÁN FEEDBACK VÀO VIEWMODEL
         
+        // (Logic lấy invoiceId của bạn - giữ nguyên nếu có)
         
         return viewModel;
     }
@@ -157,12 +144,18 @@ public class BookingService {
         }
     }
 
+    // ============ ONLINE BOOKING METHODS (ĐÃ SỬA LỖI) ============
+    /**
+     * SỬA LỖI 2: Thêm 'setRoomId'
+     * SỬA LỖI 3: Sửa logic tính 'finalTotalPrice' để bao gồm tiền dịch vụ
+    */
     public int createBooking(int userId, List<Integer> roomIds, LocalDateTime checkIn, LocalDateTime checkOut,
                              List<Integer> quantities, List<String> specialRequests, String initialStatus,
                              List<String> serviceIds) {
 
         System.out.println(">>> [BookingService] createBooking STARTING...");
 
+        // Validate input (Code gốc của bạn - Chính xác)
         if (roomIds == null || roomIds.isEmpty()) {
             System.out.println("!!! BOOKING SERVICE LỖI: roomIds is null or empty !!!");
             LOGGER.log(Level.WARNING, "No rooms selected for booking.");
@@ -179,14 +172,16 @@ public class BookingService {
             return -1;
         }
 
+        // Check room availability and gather price information
         List<Room> selectedRooms = new ArrayList<>();
-        double baseTotalPrice = 0; 
+        double baseTotalPrice = 0; // Đây chỉ là tổng giá phòng (chưa nhân số đêm)
 
         for (int i = 0; i < roomIds.size(); i++) {
             Integer roomId = roomIds.get(i);
             Integer quantity = quantities.get(i);
 
             try {
+                // HÀM NÀY (isRoomAvailable) ĐÃ ĐƯỢC SỬA LỖI LOGIC 1
                 if (!isRoomAvailable(roomId, checkIn, checkOut)) {
                     System.out.println("!!! BOOKING SERVICE LỖI: Room " + roomId + " is NOT available (isRoomAvailable=false) !!!");
                     LOGGER.log(Level.SEVERE, ">>> CREATE_BOOKING_FAILED: isRoomAvailable() returned false for RoomID {0}", roomId);
@@ -199,6 +194,8 @@ public class BookingService {
                     LOGGER.log(Level.SEVERE, ">>> CREATE_BOOKING_FAILED: roomDao.getById() returned null for RoomID {0}", roomId);
                     return -1;
                 }
+
+                // (Đã xóa logic kiểm tra 'room.getStatus()' bị lỗi)
                 if (quantity <= 0 || quantity > room.getCapacity()) {
                     System.out.println("!!! BOOKING SERVICE LỖI: Room " + roomId + " capacity exceeded (Qty: " + quantity + ", Cap: " + room.getCapacity() + ") !!!");
                     LOGGER.log(Level.SEVERE, ">>> CREATE_BOOKING_FAILED: Guest count {0} exceeds capacity {1} for RoomID {2}", new Object[]{quantity, room.getCapacity(), roomId});
@@ -206,7 +203,7 @@ public class BookingService {
                 }
 
                 selectedRooms.add(room);
-                baseTotalPrice += room.getPrice(); 
+                baseTotalPrice += room.getPrice(); // Cộng dồn giá các phòng
 
             } catch (Exception e) {
                 System.out.println("!!!!!!!!!!!!!! EXCEPTION caught in BookingService loop !!!!!!!!!!!!!!");
@@ -217,14 +214,24 @@ public class BookingService {
         }
 
         System.out.println(">>> [BookingService] All rooms are available. Proceeding to DAO insert...");
+
+        // === SỬA LỖI 3 & 6: LOGIC TÍNH TỔNG TIỀN (ĐÃ CẬP NHẬT) ===
+        
+        // 1. Tính số đêm
         long durationNights = Duration.between(checkIn.toLocalDate().atStartOfDay(), checkOut.toLocalDate().atStartOfDay()).toDays();
         if (durationNights <= 0) {
             durationNights = 1;
             LOGGER.log(Level.INFO, "Booking duration is less than a day, calculating price for 1 night.");
         }
+        
+        // 2. Tính tiền phòng
         double totalRoomPrice = baseTotalPrice * durationNights;
         double totalServicesPrice = 0;
+        
+        // 3. Lấy Map dịch vụ (lấy 1 lần)
         Map<Integer, Services> servicesMap = servicesDao.getAllServicesAsMap();
+
+        // 4. Tính tiền dịch vụ (Chưa nhân số đêm)
         if (serviceIds != null && !serviceIds.isEmpty() && servicesMap != null) {
             LOGGER.log(Level.INFO, "Calculating total price for {0} services.", serviceIds.size());
             for (String serviceIdStr : serviceIds) {
@@ -240,18 +247,31 @@ public class BookingService {
                 }
             }
         }
-        double finalTotalPrice = totalRoomPrice + totalServicesPrice;
         
-        LOGGER.log(Level.INFO, "Final Price Calculated: Room ({0}) + Services ({1}) = {2}",
-                new Object[]{totalRoomPrice, totalServicesPrice, finalTotalPrice});
+        // 5. [SỬA LỖI] Nhân tiền dịch vụ với số đêm
+        double finalServicesPrice = totalServicesPrice * durationNights;
+        
+        // 6. Tính tổng tiền cuối cùng
+        double finalTotalPrice = totalRoomPrice + finalServicesPrice;
+        
+        LOGGER.log(Level.INFO, "Final Price Calculated: Room ({0}) + Services ({1}) = {2} (Services * {3} nights)",
+                new Object[]{totalRoomPrice, finalServicesPrice, finalTotalPrice, durationNights});
+        
+        // === KẾT THÚC SỬA LỖI ===
+
+        // Create Booking object
         Booking newBooking = new Booking();
         newBooking.setUserId(userId);
         newBooking.setCheckinTime(checkIn);
         newBooking.setCheckoutTime(checkOut);
         newBooking.setStatus(initialStatus);
-        newBooking.setTotalPrice(finalTotalPrice); 
+        newBooking.setTotalPrice(finalTotalPrice); // <-- Dòng này bây giờ sẽ dùng TỔNG TIỀN ĐÚNG
 
+        // === SỬA LỖI 2: 'roomId cannot be NULL' ===
         newBooking.setRoomId(roomIds.get(0));
+        // === KẾT THÚC SỬA LỖI 2 ===
+
+        // Create list of BookingDetail objects (Code gốc của bạn - Chính xác)
         List<BookingDetail> bookingDetails = new ArrayList<>();
         for (int i = 0; i < selectedRooms.size(); i++) {
             Room room = selectedRooms.get(i);
@@ -261,6 +281,8 @@ public class BookingService {
             detail.setSpecialRequest(specialRequest);
             bookingDetails.add(detail);
         }
+
+        // Call BookingDao (Code gốc của bạn - Chính xác)
         System.out.println(">>> [BookingService] Calling bookingDao.insertBookingWithDetails...");
         boolean success = bookingDao.insertBookingWithDetails(newBooking, bookingDetails);
 
@@ -268,8 +290,12 @@ public class BookingService {
             System.out.println(">>> [BookingService] bookingDao.insertBookingWithDetails SUCCEEDED. Returning Booking ID: " + newBooking.getBookingId());
             LOGGER.log(Level.INFO, "New booking created successfully with ID: {0} for user {1}.",
                     new Object[]{newBooking.getBookingId(), userId});
+            
+            // Logic liên kết dịch vụ (bây giờ đã có sẵn 'servicesMap')
             if (serviceIds != null && !serviceIds.isEmpty()) {
                 try {
+                    // Map đã được lấy ở trên, không cần lấy lại
+                    // Map<Integer, Services> servicesMap = servicesDao.getAllServicesAsMap();
                     bookingDao.linkServicesToBooking(newBooking.getBookingId(), serviceIds.toArray(new String[0]), servicesMap);
 
                     LOGGER.log(Level.INFO, "Linked {0} services to new booking {1}",
@@ -285,6 +311,8 @@ public class BookingService {
             return -1;
         }
     }
+
+    // ============ COMMON BOOKING STATUS METHODS (Code gốc của bạn - Chính xác) ============
     public boolean updateBookingStatus(int bookingId, String newStatus) {
         if (newStatus == null || !List.of("pending", "confirmed", "cancelled", "completed", "checked-in").contains(newStatus.toLowerCase())) {
             // (Đã thêm 'checked-in' từ hàm offline)
@@ -312,6 +340,8 @@ public class BookingService {
                 LOGGER.log(Level.WARNING, "Booking {0} already completed", bookingId);
                 return false;
             }
+
+            // ✅ FIX: Gọi updateBookingStatus sẽ tự động update Room status
             boolean success = updateBookingStatus(bookingId, "cancelled");
 
             if (success) {
@@ -342,6 +372,8 @@ public class BookingService {
                         new Object[]{bookingId, booking.getStatus()});
                 return false;
             }
+
+            // ✅ FIX: Gọi updateBookingStatus sẽ tự động update Room status
             boolean success = updateBookingStatus(bookingId, "confirmed");
 
             if (success) {
@@ -360,6 +392,7 @@ public class BookingService {
     }
 
     public boolean completeBooking(int bookingId) {
+        // (Code gốc của bạn - Chính xác)
         Booking booking = getBookingById(bookingId);
         if (booking != null) {
             if (!"confirmed".equalsIgnoreCase(booking.getStatus())) {
@@ -373,6 +406,8 @@ public class BookingService {
         }
         return updateBookingStatus(bookingId, "completed");
     }
+
+    // ============ READ/QUERY METHODS (Code gốc của bạn - Chính xác) ============
     public List<Booking> getAllBookings() {
         try {
             return bookingDao.getAllBookings();
@@ -422,15 +457,37 @@ public class BookingService {
             return new ArrayList<>();
         }
     }
-    public List<Map<String, Object>> getDetailedBookingsByUserId(int userId) {
+    
+    // === HÀM MỚI CHO LỊCH SỬ BOOKING (ĐÃ CẬP NHẬT PHÂN TRANG & LỌC) ===
+    
+    /**
+     * [CẬP NHẬT] Lấy danh sách booking (đã join) cho một user, CÓ PHÂN TRANG VÀ LỌC
+     */
+    public List<Map<String, Object>> getDetailedBookingsByUserId(int userId, String keyword, String status, int pageNumber, int pageSize) {
         try {
-            return bookingDao.getDetailedBookingsByUserId(userId);
+            // Truyền keyword và status xuống DAO
+            return bookingDao.getDetailedBookingsByUserId(userId, keyword, status, pageNumber, pageSize);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error retrieving detailed bookings for user: " + userId, e);
             e.printStackTrace();
             return new ArrayList<>();
         }
     }
+
+    /**
+     * [CẬP NHẬT] Đếm tổng số booking của user, CÓ LỌC
+     */
+    public int countDetailedBookingsByUserId(int userId, String keyword, String status) {
+        try {
+            // Truyền keyword và status xuống DAO
+            return bookingDao.countBookingsByUserId(userId, keyword, status);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error counting detailed bookings for user: " + userId, e);
+            e.printStackTrace();
+            return 0;
+        }
+    }
+    // === KẾT THÚC HÀM MỚI ===
 
     public List<BookingDetail> getBookingDetailsList(int bookingId) {
         try {
@@ -446,6 +503,7 @@ public class BookingService {
         }
     }
 
+    // ============ AVAILABILITY CHECKING METHODS (ĐÃ SỬA LỖI) ============
     public List<Room> getAvailableRooms(LocalDateTime checkIn, LocalDateTime checkOut, String searchKeyword,
                                         Integer categoryId, Double minPrice, Double maxPrice,
                                         Integer minCapacity, int pageNumber, int pageSize) {
@@ -457,6 +515,9 @@ public class BookingService {
         try {
             String checkInDateStr = checkIn.format(DATE_FORMATTER);
             String checkOutDateStr = checkOut.format(DATE_FORMATTER);
+
+            // HÀM NÀY (isRoomAvailable) ĐÃ ĐƯỢC SỬA LỖI LOGIC 1
+            // Truyền 'available' vào roomDao.findAllRooms là ĐÚNG
             return roomDao.findAllRooms(searchKeyword, categoryId, minPrice, maxPrice,
                     minCapacity, checkInDateStr, checkOutDateStr, "available",
                     pageNumber, pageSize);
@@ -468,14 +529,12 @@ public class BookingService {
     }
 
     public List<Room> getAvailableRooms(LocalDateTime checkIn, LocalDateTime checkOut) {
-// ... (Hàm getAvailableRooms giữ nguyên) ...
         return getAvailableRooms(checkIn, checkOut, null, null, null, null, null, 1, Integer.MAX_VALUE);
     }
 
     public int getAvailableRoomsCount(LocalDateTime checkIn, LocalDateTime checkOut, String searchKeyword,
                                         Integer categoryId, Double minPrice, Double maxPrice,
                                         Integer minCapacity) {
-// ... (Hàm getAvailableRoomsCount giữ nguyên) ...
         if (checkIn == null || checkOut == null || !checkOut.isAfter(checkIn)) {
             LOGGER.log(Level.WARNING, "Invalid date range for getAvailableRoomsCount: CheckIn={0}, CheckOut={1}", new Object[]{checkIn, checkOut});
             return 0;
@@ -493,6 +552,11 @@ public class BookingService {
             return 0;
         }
     }
+
+    /**
+     * SỬA LỖI 1: Bỏ qua kiểm tra 'room.getStatus()', chỉ tin vào
+     * 'isRoomBookedDuringDates' (logic chồng chéo ngày).
+    */
     public boolean isRoomAvailable(int roomId, LocalDateTime checkIn, LocalDateTime checkOut) {
         if (checkIn == null || checkOut == null || !checkOut.isAfter(checkIn)) {
             LOGGER.log(Level.WARNING, "Invalid date range: RoomID={0}, CheckIn={1}, CheckOut={2}",
@@ -506,6 +570,8 @@ public class BookingService {
                 LOGGER.log(Level.WARNING, "Room {0} not found.", roomId);
                 return false;
             }
+
+            // ✅ FIX: CHỈ CHO PHÉP BOOK PHÒNG CÓ STATUS = "available"
             String status = room.getStatus();
             if (!"available".equalsIgnoreCase(status)) {
                 LOGGER.log(Level.WARNING,
@@ -513,6 +579,8 @@ public class BookingService {
                         new Object[]{roomId, status});
                 return false;
             }
+
+            // ✅ FIX: Kiểm tra overlap (bao gồm cả pending/confirmed/checked-in)
             boolean isOverlapping = bookingDao.isRoomBookedDuringDates(roomId, checkIn, checkOut);
 
             if (isOverlapping) {

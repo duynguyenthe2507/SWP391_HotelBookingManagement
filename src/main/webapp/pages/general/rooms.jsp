@@ -298,14 +298,14 @@
                         <label for="minCapacity">Min Capacity:</label>
                         <input type="number" id="minCapacity" name="minCapacity" value="${fn:escapeXml(param.minCapacity)}" placeholder="Guests..." min="1">
                     </div>
-                    <div class="form-group">
+<!--                    <div class="form-group">
                         <label for="date-in">Check In:</label>
                         <input type="text" class="date-input" id="date-in" name="checkInDate" value="${fn:escapeXml(param.checkInDate)}" placeholder="dd/mm/yyyy">
                     </div>
                     <div class="form-group">
                         <label for="date-out">Check Out:</label>
                         <input type="text" class="date-input" id="date-out" name="checkOutDate" value="${fn:escapeXml(param.checkOutDate)}" placeholder="dd/mm/yyyy">
-                    </div>
+                    </div>-->
 
                     <div class="form-group form-group-button">
                         <button type="submit">Filter Rooms</button>
