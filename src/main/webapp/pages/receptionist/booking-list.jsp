@@ -71,6 +71,17 @@
     <jsp:include page="/common/sidebar.jsp"/>
 
     <div class="dashboard-content">
+        <!-- Alert Messages -->
+        <c:if test="${not empty sessionScope.bookingMessage}">
+            <div class="alert alert-info alert-dismissible fade show" role="alert" style="margin-bottom: 20px;">
+                ${sessionScope.bookingMessage}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <c:remove var="bookingMessage" scope="session" />
+            </div>
+        </c:if>
+        
         <div class="search-filter-section">
             <h5><i class="fa fa-search"></i> Search & Filter Bookings</h5>
             <form action="${pageContext.request.contextPath}/receptionist/booking-list" method="get">
@@ -136,9 +147,15 @@
                                     </td>
                                     <td>
                                         <a href="${pageContext.request.contextPath}/receptionist/booking-details?bookingId=${booking.bookingId}"
-                                           class="btn btn-sm btn-info" style="background-color: #dfa974; border-color: #dfa974; color: white;">
+                                           class="btn btn-sm btn-info" style="background-color: #dfa974; border-color: #dfa974; color: white; margin-right: 5px;">
                                             <i class="fa fa-eye"></i> Details
                                         </a>
+                                        <c:if test="${!bookingsWithInvoice.contains(booking.bookingId) && ((booking.status == 'confirmed' && booking.userId != null) || (booking.status == 'checked-out' && booking.userId == null))}">
+                                            <a href="${pageContext.request.contextPath}/receptionist/bills?action=createBill&bookingId=${booking.bookingId}"
+                                               class="btn btn-sm btn-success" style="background-color: #28a745; border-color: #28a745; color: white;">
+                                                <i class="fa fa-file-text"></i> Create Bill
+                                            </a>
+                                        </c:if>
                                     </td>
                                 </tr>
                             </c:forEach>

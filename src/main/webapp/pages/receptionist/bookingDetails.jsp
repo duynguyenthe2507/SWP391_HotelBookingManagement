@@ -260,8 +260,9 @@
                                 </form>
                             </c:if>
 
-                                <%-- Nút 3: View Bill (Hiện khi ĐÃ checkout) --%>
-                            <c:if test="${fn:toLowerCase(details.booking.status) == 'checked-out'}">
+                                <%-- Nút 3: View Bill / Create Bill --%>
+                            <%-- Hiển thị cho booking online (confirmed) hoặc booking offline (checked-out) --%>
+                            <c:if test="${(fn:toLowerCase(details.booking.status) == 'confirmed' && details.booking.userId != null) || (fn:toLowerCase(details.booking.status) == 'checked-out')}">
                                 <c:choose>
                                     <c:when test="${not empty details.invoiceId}">
                                        <a href="${pageContext.request.contextPath}/receptionist/bills?action=detailBill&id=${details.invoiceId}" class="btn btn-info">

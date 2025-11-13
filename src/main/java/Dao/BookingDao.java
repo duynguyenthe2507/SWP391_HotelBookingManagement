@@ -248,8 +248,8 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
 
     public boolean insertBookingWithDetails(Booking booking, List<BookingDetail> details) {
 
-        String bookingSql = "INSERT INTO Booking(userId, roomId, checkinTime, checkoutTime, status, totalPrice, createdAt, updatedAt) "
-                + "VALUES (?,?,?,?,?,?,?,?)"; // 8 tham số
+        String bookingSql = "INSERT INTO Booking(userId, guestName, receptionistId, roomId, guestCount, checkinTime, checkoutTime, status, totalPrice, createdAt, updatedAt) "
+                + "VALUES (?,?,?,?,?,?,?,?,?,?,?)"; // 11 tham số
 
         Connection conn = null;
         boolean originalAutoCommit = true;
@@ -265,24 +265,27 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
             if (!isExternalConn) {
                 originalAutoCommit = conn.getAutoCommit();
                 conn.setAutoCommit(false);
-                LOGGER.log(Level.INFO, "Transaction started internally for creating booking for user {0}.",
-                        booking.getUserId());
+                LOGGER.log(Level.INFO, "Transaction started internally for creating booking (userId: {0}, guestName: {1}).",
+                        new Object[]{booking.getUserId(), booking.getGuestName()});
             } else {
-                LOGGER.log(Level.INFO, "Participating in external transaction for creating booking for user {0}.",
-                        booking.getUserId());
+                LOGGER.log(Level.INFO, "Participating in external transaction for creating booking (userId: {0}, guestName: {1}).",
+                        new Object[]{booking.getUserId(), booking.getGuestName()});
             }
 
             try (PreparedStatement psInsertBooking = conn.prepareStatement(bookingSql, Statement.RETURN_GENERATED_KEYS)) {
 
-                // (Đây là code đã sửa lỗi 'roomId' NULL)
-                psInsertBooking.setInt(1, booking.getUserId());
-                psInsertBooking.setInt(2, booking.getRoomId()); // (Sửa lỗi 'roomId' NULL)
-                psInsertBooking.setTimestamp(3, Timestamp.valueOf(booking.getCheckinTime()));
-                psInsertBooking.setTimestamp(4, Timestamp.valueOf(booking.getCheckoutTime()));
-                psInsertBooking.setString(5, booking.getStatus());
-                psInsertBooking.setDouble(6, booking.getTotalPrice());
-                psInsertBooking.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
-                psInsertBooking.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now()));
+                // Hỗ trợ cả online (có userId) và offline (có guestName + receptionistId)
+                psInsertBooking.setObject(1, booking.getUserId()); // NULL cho offline booking
+                psInsertBooking.setString(2, booking.getGuestName()); // NULL cho online booking
+                psInsertBooking.setObject(3, booking.getReceptionistId()); // NULL cho online booking
+                psInsertBooking.setInt(4, booking.getRoomId());
+                psInsertBooking.setInt(5, booking.getGuestCount()); // Thêm guestCount
+                psInsertBooking.setTimestamp(6, Timestamp.valueOf(booking.getCheckinTime()));
+                psInsertBooking.setTimestamp(7, Timestamp.valueOf(booking.getCheckoutTime()));
+                psInsertBooking.setString(8, booking.getStatus());
+                psInsertBooking.setDouble(9, booking.getTotalPrice());
+                psInsertBooking.setTimestamp(10, Timestamp.valueOf(LocalDateTime.now()));
+                psInsertBooking.setTimestamp(11, Timestamp.valueOf(LocalDateTime.now()));
 
                 LOGGER.log(Level.INFO, "Executing insert booking statement...");
                 int affectedRows = psInsertBooking.executeUpdate();
@@ -832,5 +835,78 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
             LOGGER.log(Level.SEVERE, "Error checking completed booking for user " + userId + " and room " + roomId, e);
         }
         return 0; 
+    }
+
+    /**
+     * Get booking history for a specific room
+     * Returns list of bookings ordered by most recent first
+     */
+    public List<Map<String, Object>> getBookingHistoryByRoom(int roomId) {
+        List<Map<String, Object>> history = new ArrayList<>();
+        String sql = """
+            SELECT b.bookingId, 
+                   COALESCE(u.firstName + ' ' + u.lastName, b.guestName) AS guestName,
+                   b.checkinTime, b.checkoutTime, b.status, b.totalPrice, b.createdAt
+            FROM Booking b
+            LEFT JOIN Users u ON b.userId = u.userId
+            WHERE b.roomId = ?
+            ORDER BY b.createdAt DESC
+        """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, roomId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> booking = new HashMap<>();
+                    booking.put("bookingId", rs.getInt("bookingId"));
+                    booking.put("guestName", rs.getString("guestName"));
+                    booking.put("checkinTime", rs.getTimestamp("checkinTime"));
+                    booking.put("checkoutTime", rs.getTimestamp("checkoutTime"));
+                    booking.put("status", rs.getString("status"));
+                    booking.put("totalPrice", rs.getDouble("totalPrice"));
+                    booking.put("createdAt", rs.getTimestamp("createdAt"));
+                    history.add(booking);
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error getting booking history for room " + roomId, e);
+        }
+        return history;
+    }
+
+    /**
+     * Get current active booking for a room (if room is booked)
+     * Returns booking with status 'confirmed' or 'checked-in'
+     */
+    public Map<String, Object> getCurrentBookingByRoom(int roomId) {
+        String sql = """
+            SELECT b.bookingId, 
+                   COALESCE(u.firstName + ' ' + u.lastName, b.guestName) AS guestName,
+                   b.checkinTime, b.checkoutTime, b.status, b.totalPrice
+            FROM Booking b
+            LEFT JOIN Users u ON b.userId = u.userId
+            WHERE b.roomId = ? 
+              AND b.status IN ('confirmed', 'checked-in')
+            ORDER BY b.checkinTime ASC
+        """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, roomId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Map<String, Object> booking = new HashMap<>();
+                    booking.put("bookingId", rs.getInt("bookingId"));
+                    booking.put("guestName", rs.getString("guestName"));
+                    booking.put("checkinTime", rs.getTimestamp("checkinTime"));
+                    booking.put("checkoutTime", rs.getTimestamp("checkoutTime"));
+                    booking.put("status", rs.getString("status"));
+                    booking.put("totalPrice", rs.getDouble("totalPrice"));
+                    return booking;
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error getting current booking for room " + roomId, e);
+        }
+        return null;
     }
 }

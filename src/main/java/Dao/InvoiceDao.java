@@ -91,12 +91,12 @@ public class InvoiceDao extends DBContext {
         List<Map<String, Object>> bills = new ArrayList<>();
         String sql = """
             SELECT i.invoiceId, i.bookingId, i.totalAmount, i.issuedDate,
-                   u.firstName, u.lastName, u.mobilePhone,
+                   u.firstName, u.lastName, u.mobilePhone, b.guestName,
                    b.checkinTime, b.checkoutTime, b.status AS bookingStatus
             FROM Invoice i
             INNER JOIN Booking b ON i.bookingId = b.bookingId
-            INNER JOIN Users u ON b.userId = u.userId
-            ORDER BY i.invoiceId ASC
+            LEFT JOIN Users u ON b.userId = u.userId
+            ORDER BY i.issuedDate DESC, i.invoiceId DESC
         """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql);
@@ -107,8 +107,17 @@ public class InvoiceDao extends DBContext {
                 bill.put("bookingId", rs.getInt("bookingId"));
                 bill.put("totalAmount", rs.getDouble("totalAmount"));
                 bill.put("issuedDate", rs.getTimestamp("issuedDate"));
-                bill.put("customerName", rs.getString("firstName") + " " + rs.getString("lastName"));
-                bill.put("customerPhone", rs.getString("mobilePhone"));
+                
+                // Xử lý customer name: online (có userId) hoặc offline (guestName)
+                String firstName = rs.getString("firstName");
+                if (firstName != null) {
+                    bill.put("customerName", firstName + " " + rs.getString("lastName"));
+                    bill.put("customerPhone", rs.getString("mobilePhone"));
+                } else {
+                    bill.put("customerName", rs.getString("guestName"));
+                    bill.put("customerPhone", "N/A");
+                }
+                
                 bill.put("checkinTime", rs.getTimestamp("checkinTime"));
                 bill.put("checkoutTime", rs.getTimestamp("checkoutTime"));
                 bill.put("bookingStatus", rs.getString("bookingStatus"));
@@ -123,12 +132,12 @@ public class InvoiceDao extends DBContext {
         List<Map<String, Object>> bills = new ArrayList<>();
         String sql = """
             SELECT i.invoiceId, i.bookingId, i.totalAmount, i.issuedDate,
-                   u.firstName, u.lastName, u.mobilePhone,
+                   u.firstName, u.lastName, u.mobilePhone, b.guestName,
                    b.checkinTime, b.checkoutTime, b.status AS bookingStatus
             FROM Invoice i
             INNER JOIN Booking b ON i.bookingId = b.bookingId
-            INNER JOIN Users u ON b.userId = u.userId
-            ORDER BY i.invoiceId ASC
+            LEFT JOIN Users u ON b.userId = u.userId
+            ORDER BY i.issuedDate DESC, i.invoiceId DESC
             OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
         """;
 
@@ -142,8 +151,17 @@ public class InvoiceDao extends DBContext {
                     bill.put("bookingId", rs.getInt("bookingId"));
                     bill.put("totalAmount", rs.getDouble("totalAmount"));
                     bill.put("issuedDate", rs.getTimestamp("issuedDate"));
-                    bill.put("customerName", rs.getString("firstName") + " " + rs.getString("lastName"));
-                    bill.put("customerPhone", rs.getString("mobilePhone"));
+                    
+                    // Xử lý customer name: online (có userId) hoặc offline (guestName)
+                    String firstName = rs.getString("firstName");
+                    if (firstName != null) {
+                        bill.put("customerName", firstName + " " + rs.getString("lastName"));
+                        bill.put("customerPhone", rs.getString("mobilePhone"));
+                    } else {
+                        bill.put("customerName", rs.getString("guestName"));
+                        bill.put("customerPhone", "N/A");
+                    }
+                    
                     bill.put("checkinTime", rs.getTimestamp("checkinTime"));
                     bill.put("checkoutTime", rs.getTimestamp("checkoutTime"));
                     bill.put("bookingStatus", rs.getString("bookingStatus"));
@@ -218,20 +236,21 @@ public class InvoiceDao extends DBContext {
         List<Map<String, Object>> bills = new ArrayList<>();
         String sql = """
             SELECT i.invoiceId, i.bookingId, i.totalAmount, i.issuedDate,
-                   u.firstName, u.lastName, u.mobilePhone,
+                   u.firstName, u.lastName, u.mobilePhone, b.guestName,
                    b.checkinTime, b.checkoutTime, b.status AS bookingStatus
             FROM Invoice i
             INNER JOIN Booking b ON i.bookingId = b.bookingId
-            INNER JOIN Users u ON b.userId = u.userId
+            LEFT JOIN Users u ON b.userId = u.userId
             WHERE u.firstName LIKE ?
                OR u.lastName LIKE ?
                OR u.mobilePhone LIKE ?
                OR (u.firstName + ' ' + u.lastName) LIKE ?
                OR (u.firstName + ' ' + COALESCE(u.middleName, '') + ' ' + u.lastName) LIKE ?
                OR (u.lastName + ' ' + u.firstName) LIKE ?
+               OR b.guestName LIKE ?
                OR CAST(i.invoiceId AS VARCHAR(20)) LIKE ?
                OR CAST(b.bookingId AS VARCHAR(20)) LIKE ?
-            ORDER BY i.invoiceId ASC
+            ORDER BY i.issuedDate DESC, i.invoiceId DESC
             OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
         """;
 
@@ -243,10 +262,11 @@ public class InvoiceDao extends DBContext {
             ps.setString(4, searchPattern);
             ps.setString(5, searchPattern);
             ps.setString(6, searchPattern);
-            ps.setString(7, searchPattern);
-            ps.setString(8, searchPattern);
-            ps.setInt(9, Math.max(0, offset));
-            ps.setInt(10, Math.max(1, limit));
+            ps.setString(7, searchPattern); // guestName for offline bookings
+            ps.setString(8, searchPattern); // invoiceId
+            ps.setString(9, searchPattern); // bookingId
+            ps.setInt(10, Math.max(0, offset));
+            ps.setInt(11, Math.max(1, limit));
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Map<String, Object> bill = new HashMap<>();
@@ -254,8 +274,17 @@ public class InvoiceDao extends DBContext {
                     bill.put("bookingId", rs.getInt("bookingId"));
                     bill.put("totalAmount", rs.getDouble("totalAmount"));
                     bill.put("issuedDate", rs.getTimestamp("issuedDate"));
-                    bill.put("customerName", rs.getString("firstName") + " " + rs.getString("lastName"));
-                    bill.put("customerPhone", rs.getString("mobilePhone"));
+                    
+                    // Xử lý customer name: online (có userId) hoặc offline (guestName)
+                    String firstName = rs.getString("firstName");
+                    if (firstName != null) {
+                        bill.put("customerName", firstName + " " + rs.getString("lastName"));
+                        bill.put("customerPhone", rs.getString("mobilePhone"));
+                    } else {
+                        bill.put("customerName", rs.getString("guestName"));
+                        bill.put("customerPhone", "N/A");
+                    }
+                    
                     bill.put("checkinTime", rs.getTimestamp("checkinTime"));
                     bill.put("checkoutTime", rs.getTimestamp("checkoutTime"));
                     bill.put("bookingStatus", rs.getString("bookingStatus"));
@@ -271,13 +300,14 @@ public class InvoiceDao extends DBContext {
             SELECT COUNT(*) AS total
             FROM Invoice i
             INNER JOIN Booking b ON i.bookingId = b.bookingId
-            INNER JOIN Users u ON b.userId = u.userId
+            LEFT JOIN Users u ON b.userId = u.userId
             WHERE u.firstName LIKE ?
                OR u.lastName LIKE ?
                OR u.mobilePhone LIKE ?
                OR (u.firstName + ' ' + u.lastName) LIKE ?
                OR (u.firstName + ' ' + COALESCE(u.middleName, '') + ' ' + u.lastName) LIKE ?
                OR (u.lastName + ' ' + u.firstName) LIKE ?
+               OR b.guestName LIKE ?
                OR CAST(i.invoiceId AS VARCHAR(20)) LIKE ?
                OR CAST(b.bookingId AS VARCHAR(20)) LIKE ?
         """;
@@ -289,8 +319,9 @@ public class InvoiceDao extends DBContext {
             ps.setString(4, searchPattern);
             ps.setString(5, searchPattern);
             ps.setString(6, searchPattern);
-            ps.setString(7, searchPattern);
-            ps.setString(8, searchPattern);
+            ps.setString(7, searchPattern); // guestName for offline bookings
+            ps.setString(8, searchPattern); // invoiceId
+            ps.setString(9, searchPattern); // bookingId
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) return rs.getInt("total");
             }
@@ -414,12 +445,14 @@ public class InvoiceDao extends DBContext {
     public List<Map<String, Object>> getBookingsWithoutInvoices() {
         List<Map<String, Object>> bookings = new ArrayList<>();
         String sql = """
-            SELECT b.bookingId, b.checkinTime, b.checkoutTime, b.totalPrice, b.status,
+            SELECT b.bookingId, b.checkinTime, b.checkoutTime, b.totalPrice, b.status, b.userId, b.guestName,
                    u.firstName, u.lastName, u.mobilePhone
             FROM Booking b
-            INNER JOIN Users u ON b.userId = u.userId
+            LEFT JOIN Users u ON b.userId = u.userId
             LEFT JOIN Invoice i ON b.bookingId = i.bookingId
-            WHERE i.invoiceId IS NULL AND b.status = 'confirmed'
+            WHERE i.invoiceId IS NULL 
+              AND ((b.userId IS NOT NULL AND b.status = 'confirmed') 
+                   OR (b.userId IS NULL AND b.status = 'checked-out'))
             ORDER BY b.checkinTime DESC
         """;
 
@@ -432,8 +465,16 @@ public class InvoiceDao extends DBContext {
                 booking.put("checkoutTime", rs.getTimestamp("checkoutTime"));
                 booking.put("totalPrice", rs.getDouble("totalPrice"));
                 booking.put("status", rs.getString("status"));
-                booking.put("customerName", rs.getString("firstName") + " " + rs.getString("lastName"));
-                booking.put("customerPhone", rs.getString("mobilePhone"));
+                
+                // Xử lý customer name: nếu có userId thì lấy từ Users, nếu không thì lấy guestName
+                Object userIdObj = rs.getObject("userId");
+                if (userIdObj != null) {
+                    booking.put("customerName", rs.getString("firstName") + " " + rs.getString("lastName"));
+                    booking.put("customerPhone", rs.getString("mobilePhone"));
+                } else {
+                    booking.put("customerName", rs.getString("guestName"));
+                    booking.put("customerPhone", "N/A");
+                }
                 bookings.add(booking);
             }
         } catch (SQLException e) { e.printStackTrace(); }
@@ -475,7 +516,7 @@ public class InvoiceDao extends DBContext {
             SELECT sr.*, s.name AS serviceName, s.description
             FROM ServiceRequest sr
             INNER JOIN Services s ON sr.serviceTypeId = s.serviceId
-            WHERE sr.bookingId = ? AND sr.status = 'completed'
+            WHERE sr.bookingId = ? AND sr.status IN ('requested', 'completed')
         """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -512,5 +553,192 @@ public class InvoiceDao extends DBContext {
             e.printStackTrace();
         }
         return null; // Không tìm thấy hóa đơn
+    }
+
+    // Revenue Report Methods
+    /**
+     * Get revenue by date range
+     */
+    public List<Map<String, Object>> getRevenueByDateRange(java.sql.Date startDate, java.sql.Date endDate) {
+        List<Map<String, Object>> revenueData = new ArrayList<>();
+        String sql = """
+            SELECT CAST(i.issuedDate AS DATE) AS date,
+                   COUNT(i.invoiceId) AS invoiceCount,
+                   SUM(i.totalAmount) AS totalRevenue,
+                   SUM(i.totalRoomCost) AS roomRevenue,
+                   SUM(i.totalServiceCost) AS serviceRevenue,
+                   SUM(i.taxAmount) AS taxRevenue
+            FROM Invoice i
+            WHERE CAST(i.issuedDate AS DATE) BETWEEN ? AND ?
+            GROUP BY CAST(i.issuedDate AS DATE)
+            ORDER BY CAST(i.issuedDate AS DATE) ASC
+        """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setDate(1, startDate);
+            ps.setDate(2, endDate);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("date", rs.getDate("date"));
+                    data.put("invoiceCount", rs.getInt("invoiceCount"));
+                    data.put("totalRevenue", rs.getDouble("totalRevenue"));
+                    data.put("roomRevenue", rs.getDouble("roomRevenue"));
+                    data.put("serviceRevenue", rs.getDouble("serviceRevenue"));
+                    data.put("taxRevenue", rs.getDouble("taxRevenue"));
+                    revenueData.add(data);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return revenueData;
+    }
+
+    /**
+     * Get revenue by month
+     */
+    public List<Map<String, Object>> getRevenueByMonth(int year) {
+        List<Map<String, Object>> revenueData = new ArrayList<>();
+        String sql = """
+            SELECT MONTH(i.issuedDate) AS month,
+                   COUNT(i.invoiceId) AS invoiceCount,
+                   SUM(i.totalAmount) AS totalRevenue,
+                   SUM(i.totalRoomCost) AS roomRevenue,
+                   SUM(i.totalServiceCost) AS serviceRevenue,
+                   SUM(i.taxAmount) AS taxRevenue
+            FROM Invoice i
+            WHERE YEAR(i.issuedDate) = ?
+            GROUP BY MONTH(i.issuedDate)
+            ORDER BY MONTH(i.issuedDate) ASC
+        """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, year);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("month", rs.getInt("month"));
+                    data.put("invoiceCount", rs.getInt("invoiceCount"));
+                    data.put("totalRevenue", rs.getDouble("totalRevenue"));
+                    data.put("roomRevenue", rs.getDouble("roomRevenue"));
+                    data.put("serviceRevenue", rs.getDouble("serviceRevenue"));
+                    data.put("taxRevenue", rs.getDouble("taxRevenue"));
+                    revenueData.add(data);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return revenueData;
+    }
+
+    /**
+     * Get revenue by year
+     */
+    public List<Map<String, Object>> getRevenueByYear() {
+        List<Map<String, Object>> revenueData = new ArrayList<>();
+        String sql = """
+            SELECT YEAR(i.issuedDate) AS year,
+                   COUNT(i.invoiceId) AS invoiceCount,
+                   SUM(i.totalAmount) AS totalRevenue,
+                   SUM(i.totalRoomCost) AS roomRevenue,
+                   SUM(i.totalServiceCost) AS serviceRevenue,
+                   SUM(i.taxAmount) AS taxRevenue
+            FROM Invoice i
+            GROUP BY YEAR(i.issuedDate)
+            ORDER BY YEAR(i.issuedDate) ASC
+        """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Map<String, Object> data = new HashMap<>();
+                data.put("year", rs.getInt("year"));
+                data.put("invoiceCount", rs.getInt("invoiceCount"));
+                data.put("totalRevenue", rs.getDouble("totalRevenue"));
+                data.put("roomRevenue", rs.getDouble("roomRevenue"));
+                data.put("serviceRevenue", rs.getDouble("serviceRevenue"));
+                data.put("taxRevenue", rs.getDouble("taxRevenue"));
+                revenueData.add(data);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return revenueData;
+    }
+
+    /**
+     * Get total revenue summary
+     */
+    public Map<String, Object> getTotalRevenueSummary() {
+        Map<String, Object> summary = new HashMap<>();
+        String sql = """
+            SELECT COUNT(i.invoiceId) AS totalInvoices,
+                   SUM(i.totalAmount) AS totalRevenue,
+                   SUM(i.totalRoomCost) AS totalRoomRevenue,
+                   SUM(i.totalServiceCost) AS totalServiceRevenue,
+                   SUM(i.taxAmount) AS totalTaxRevenue,
+                   AVG(i.totalAmount) AS averageInvoiceAmount
+            FROM Invoice i
+        """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                summary.put("totalInvoices", rs.getInt("totalInvoices"));
+                summary.put("totalRevenue", rs.getDouble("totalRevenue"));
+                summary.put("totalRoomRevenue", rs.getDouble("totalRoomRevenue"));
+                summary.put("totalServiceRevenue", rs.getDouble("totalServiceRevenue"));
+                summary.put("totalTaxRevenue", rs.getDouble("totalTaxRevenue"));
+                summary.put("averageInvoiceAmount", rs.getDouble("averageInvoiceAmount"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return summary;
+    }
+
+    /**
+     * Get revenue by date range with detailed invoice list
+     */
+    public List<Map<String, Object>> getRevenueDetailsByDateRange(java.sql.Date startDate, java.sql.Date endDate) {
+        List<Map<String, Object>> details = new ArrayList<>();
+        String sql = """
+            SELECT i.invoiceId, i.bookingId, i.totalAmount, i.totalRoomCost, 
+                   i.totalServiceCost, i.taxAmount, i.issuedDate,
+                   u.firstName, u.lastName, u.mobilePhone,
+                   b.checkinTime, b.checkoutTime
+            FROM Invoice i
+            INNER JOIN Booking b ON i.bookingId = b.bookingId
+            INNER JOIN Users u ON b.userId = u.userId
+            WHERE CAST(i.issuedDate AS DATE) BETWEEN ? AND ?
+            ORDER BY i.issuedDate DESC
+        """;
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setDate(1, startDate);
+            ps.setDate(2, endDate);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> detail = new HashMap<>();
+                    detail.put("invoiceId", rs.getInt("invoiceId"));
+                    detail.put("bookingId", rs.getInt("bookingId"));
+                    detail.put("totalAmount", rs.getDouble("totalAmount"));
+                    detail.put("totalRoomCost", rs.getDouble("totalRoomCost"));
+                    detail.put("totalServiceCost", rs.getDouble("totalServiceCost"));
+                    detail.put("taxAmount", rs.getDouble("taxAmount"));
+                    detail.put("issuedDate", rs.getTimestamp("issuedDate"));
+                    detail.put("customerName", rs.getString("firstName") + " " + rs.getString("lastName"));
+                    detail.put("customerPhone", rs.getString("mobilePhone"));
+                    detail.put("checkinTime", rs.getTimestamp("checkinTime"));
+                    detail.put("checkoutTime", rs.getTimestamp("checkoutTime"));
+                    details.add(detail);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return details;
     }
 }

@@ -14,6 +14,8 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @WebServlet("/receptionist/bills")
 public class BillController extends HttpServlet {
@@ -120,12 +122,28 @@ public class BillController extends HttpServlet {
         if (page > totalPages) page = totalPages;
         int offset = (page - 1) * size;
 
+        System.out.println("=== BILLS PAGINATION DEBUG ===");
+        System.out.println("Page: " + page + ", Size: " + size);
+        System.out.println("Total Items: " + totalItems + ", Total Pages: " + totalPages);
+        System.out.println("Offset: " + offset);
+
         List<Map<String, Object>> bills = invoiceDao.getBillsWithDetailsPaged(offset, size);
+        System.out.println("Bills retrieved: " + (bills != null ? bills.size() : 0));
+        
         request.setAttribute("bills", bills);
         request.setAttribute("page", page);
         request.setAttribute("size", size);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("totalItems", totalItems);
+        
+        // Get success message from session if exists
+        HttpSession session = request.getSession();
+        String successMessage = (String) session.getAttribute("success");
+        if (successMessage != null) {
+            request.setAttribute("success", successMessage);
+            session.removeAttribute("success"); // Remove after displaying
+        }
+        
         request.getRequestDispatcher("/pages/receptionist/bills.jsp").forward(request, response);
     }
 
@@ -168,6 +186,15 @@ public class BillController extends HttpServlet {
         request.setAttribute("page", page);
         request.setAttribute("size", size);
         request.setAttribute("totalItems", totalItems);
+        
+        // Get success message from session if exists
+        HttpSession session = request.getSession();
+        String successMessage = (String) session.getAttribute("success");
+        if (successMessage != null) {
+            request.setAttribute("success", successMessage);
+            session.removeAttribute("success"); // Remove after displaying
+        }
+        
         request.getRequestDispatcher("/pages/receptionist/bills.jsp").forward(request, response);
     }
 
@@ -212,8 +239,47 @@ public class BillController extends HttpServlet {
     private void handleCreateBillForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // Get bookingId from parameter if provided
+        String bookingIdParam = request.getParameter("bookingId");
+        Integer selectedBookingId = null;
+        if (bookingIdParam != null && !bookingIdParam.trim().isEmpty()) {
+            try {
+                selectedBookingId = Integer.parseInt(bookingIdParam.trim());
+                // Verify that this booking doesn't already have an invoice
+                if (invoiceDao.getByBookingId(selectedBookingId) != null) {
+                    request.setAttribute("error", "This booking already has an invoice.");
+                    selectedBookingId = null;
+                }
+            } catch (NumberFormatException e) {
+                request.setAttribute("error", "Invalid booking ID format.");
+            }
+        }
+
         // Get bookings without invoices
         List<Map<String, Object>> availableBookings = invoiceDao.getBookingsWithoutInvoices();
+
+        // If a specific bookingId is provided, filter to only show that booking
+        if (selectedBookingId != null) {
+            final Integer finalSelectedBookingId = selectedBookingId; // Make effectively final for lambda
+            List<Map<String, Object>> filteredBookings = availableBookings.stream()
+                .filter(booking -> {
+                    Object bookingIdObj = booking.get("bookingId");
+                    if (bookingIdObj instanceof Integer) {
+                        return Objects.equals(finalSelectedBookingId, (Integer) bookingIdObj);
+                    }
+                    return false;
+                })
+                .collect(Collectors.toList());
+            
+            // If the selected booking is not found in available bookings, show error
+            if (filteredBookings.isEmpty()) {
+                request.setAttribute("error", "Selected booking is not available for bill creation. It may already have an invoice or is not confirmed.");
+                // Still show all available bookings
+                selectedBookingId = null;
+            } else {
+                availableBookings = filteredBookings;
+            }
+        }
 
         // For each booking, get detailed room and service information
         for (Map<String, Object> booking : availableBookings) {
@@ -238,7 +304,9 @@ public class BillController extends HttpServlet {
             booking.put("roomCost", roomCost);
             booking.put("serviceCost", serviceCost);
         }
+        
         request.setAttribute("availableBookings", availableBookings);
+        request.setAttribute("selectedBookingId", selectedBookingId);
         request.getRequestDispatcher("/pages/receptionist/create-bill.jsp").forward(request, response);
     }
 
@@ -316,7 +384,8 @@ public class BillController extends HttpServlet {
             boolean success = invoiceDao.insert(invoice);
 
             if (success) {
-                request.setAttribute("success", "Bill created successfully.");
+                HttpSession session = request.getSession();
+                session.setAttribute("success", "Bill created successfully.");
                 response.sendRedirect(request.getContextPath() + "/receptionist/bills");
             } else {
                 request.setAttribute("error", "Failed to create bill.");

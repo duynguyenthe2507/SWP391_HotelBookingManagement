@@ -50,12 +50,32 @@ public class BookingService {
 
     public boolean createOfflineBooking(Booking booking, String[] serviceIds) {
         try {
-            int bookingId = bookingDao.insertOfflineBooking(booking);
-            if (bookingId == -1) {
+            // Lấy thông tin room để có price
+            Room room = roomDao.getById(booking.getRoomId());
+            if (room == null) {
+                LOGGER.log(Level.WARNING, "Room not found with ID: {0}", booking.getRoomId());
+                return false;
+            }
+            
+            // Tạo BookingDetail cho offline booking
+            BookingDetail bookingDetail = new BookingDetail();
+            bookingDetail.setRoomId(booking.getRoomId());
+            bookingDetail.setPriceAtBooking(room.getPrice());
+            bookingDetail.setGuestCount(booking.getGuestCount());
+            bookingDetail.setSpecialRequest(booking.getSpecialRequest());
+            
+            List<BookingDetail> bookingDetails = new ArrayList<>();
+            bookingDetails.add(bookingDetail);
+            
+            // Sử dụng insertBookingWithDetails thay vì insertOfflineBooking
+            booking.setStatus("pending"); // Set status mặc định
+            boolean success = bookingDao.insertBookingWithDetails(booking, bookingDetails);
+            
+            if (!success) {
                 LOGGER.log(Level.WARNING, "Failed to insert booking into database.");
                 return false;
             }
-            LOGGER.log(Level.INFO, "Inserted new booking with ID: {0}", bookingId);
+            LOGGER.log(Level.INFO, "Inserted new offline booking with ID: {0}", booking.getBookingId());
 
             if (serviceIds != null && serviceIds.length > 0) {
                 Map<Integer, Services> servicesMap = servicesDao.getAllServicesAsMap();
@@ -63,8 +83,8 @@ public class BookingService {
                 if (servicesMap == null || servicesMap.isEmpty()) {
                     LOGGER.log(Level.WARNING, "Could not retrieve services map for linking.");
                 } else {
-                    bookingDao.linkServicesToBooking(bookingId, serviceIds, servicesMap);
-                    LOGGER.log(Level.INFO, "Linked {0} services to booking ID: {1}", new Object[]{serviceIds.length, bookingId});
+                    bookingDao.linkServicesToBooking(booking.getBookingId(), serviceIds, servicesMap);
+                    LOGGER.log(Level.INFO, "Linked {0} services to booking ID: {1}", new Object[]{serviceIds.length, booking.getBookingId()});
                 }
             }
 
@@ -91,12 +111,16 @@ public class BookingService {
         List<Map<String, Object>> servicesUsed = servicesDao.getServicesByBookingId(bookingId);
         Feedback feedback = feedbackDao.getReviewByBookingId(bookingId);
         
+        // Get invoiceId if exists
+        Integer invoiceId = invoiceDao.getInvoiceIdByBookingId(bookingId);
+        
         BookingDetailsViewModel viewModel = new BookingDetailsViewModel();
         viewModel.setBooking((Booking) basicDetails.get("booking"));
         viewModel.setRoom((Room) basicDetails.get("room"));
         viewModel.setCustomerName((String) basicDetails.get("customerName"));
         viewModel.setReceptionistName((String) basicDetails.get("receptionistName"));
         viewModel.setServices(servicesUsed);
+        viewModel.setInvoiceId(invoiceId);
         viewModel.setFeedback(feedback); 
         
         

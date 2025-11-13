@@ -86,8 +86,8 @@ public class BookingDetailsController extends HttpServlet {
                 success = bookingService.checkOutBooking(bookingId, roomId);
                 message = success ? "Booking checkout successful" : "Booking checkout failed";
                 if (success) {
-                    session.setAttribute("bookingMessage", message + "Redirecting to create bill...");
-                    response.sendRedirect(request.getContextPath() + "/receptionist/bills");
+                    session.setAttribute("success", "Checkout successful! Please create a bill for this booking.");
+                    response.sendRedirect(request.getContextPath() + "/receptionist/bills?action=createBill&bookingId=" + bookingId);
                     return;
                 }
             } else if ("createBill".equals(action)) {

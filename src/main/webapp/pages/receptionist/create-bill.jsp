@@ -57,20 +57,22 @@
                 </div>
             </c:if>
 
-            <!-- Booking Selection Card -->
-            <div class="form-card">
-                <div class="card-header">
-                    <h4><i class="fa fa-calendar"></i>Select Booking</h4>
-                </div>
-                <div class="card-body">
-                    <c:choose>
-                        <c:when test="${not empty availableBookings}">
-                            <p style="color: #6b6b6b; margin-bottom: 20px;">
-                                Select a confirmed booking to create a bill. Only bookings without existing invoices are shown.
-                            </p>
-
-                            <form id="createBillForm" action="${pageContext.request.contextPath}/receptionist/bills" method="post">
-                                <input type="hidden" name="action" value="create">
+            <!-- Form for bill creation -->
+            <form id="createBillForm" action="${pageContext.request.contextPath}/receptionist/bills" method="post">
+                <input type="hidden" name="action" value="create">
+                
+                <!-- Booking Selection Card - Only show if no selectedBookingId -->
+            <c:if test="${selectedBookingId == null}">
+                <div class="form-card">
+                    <div class="card-header">
+                        <h4><i class="fa fa-calendar"></i>Select Booking</h4>
+                    </div>
+                    <div class="card-body">
+                        <c:choose>
+                            <c:when test="${not empty availableBookings}">
+                                <p style="color: #6b6b6b; margin-bottom: 20px;">
+                                    Select a confirmed booking to create a bill. Only bookings without existing invoices are shown.
+                                </p>
 
                                 <table class="booking-table">
                                     <thead>
@@ -94,7 +96,9 @@
                                                 data-service-cost="${booking.serviceCost}">
                                                 <td>
                                                     <input type="radio" name="bookingId" value="${booking.bookingId}"
-                                                           class="booking-radio" required>
+                                                           class="booking-radio" 
+                                                           ${selectedBookingId != null && selectedBookingId == booking.bookingId ? 'checked' : ''}
+                                                           required>
                                                 </td>
                                                 <td>
                                                     <strong>#${booking.bookingId}</strong>
@@ -172,12 +176,18 @@
                             </div>
                         </c:otherwise>
                     </c:choose>
+                    </div>
                 </div>
-            </div>
+            </c:if>
+
+            <!-- Hidden input for bookingId when selectedBookingId is provided -->
+            <c:if test="${selectedBookingId != null}">
+                <input type="hidden" name="bookingId" value="${selectedBookingId}">
+            </c:if>
 
             <!-- Bill Calculation Card -->
             <c:if test="${not empty availableBookings}">
-                <div class="form-card" id="calculationCard" style="display: none;">
+                <div class="form-card" id="calculationCard" style="${selectedBookingId != null ? 'display: block;' : 'display: none;'}">
                     <div class="card-header">
                         <h4><i class="fa fa-calculator"></i>Bill Calculation</h4>
                     </div>
@@ -319,6 +329,56 @@
             const displayTaxAmount = document.getElementById('displayTaxAmount');
             const displayTotalAmount = document.getElementById('displayTotalAmount');
 
+            // Auto-populate form if selectedBookingId is provided
+            const selectedBookingId = ${selectedBookingId != null ? selectedBookingId : 'null'};
+            if (selectedBookingId !== null) {
+                // Try to find booking row first (in case it's still in DOM)
+                let bookingRow = document.querySelector(`tr[data-booking-id="${selectedBookingId}"]`);
+                let roomCost = 0;
+                let serviceCost = 0;
+                
+                if (bookingRow) {
+                    // Get booking data from the row
+                    const roomCostRaw = bookingRow.dataset.roomCost;
+                    const serviceCostRaw = bookingRow.dataset.serviceCost;
+                    roomCost = parseFloat(roomCostRaw) || 0;
+                    serviceCost = parseFloat(serviceCostRaw) || 0;
+                } else {
+                    // If row not found (hidden), get data from availableBookings
+                    <c:if test="${not empty availableBookings && selectedBookingId != null}">
+                        <c:forEach var="booking" items="${availableBookings}">
+                            <c:if test="${booking.bookingId == selectedBookingId}">
+                                roomCost = ${booking.roomCost};
+                                serviceCost = ${booking.serviceCost};
+                            </c:if>
+                        </c:forEach>
+                    </c:if>
+                }
+                
+                // Auto-fill the calculation fields
+                if (roomCostInput) {
+                    roomCostInput.value = roomCost.toFixed(2);
+                }
+                if (serviceCostInput) {
+                    serviceCostInput.value = serviceCost.toFixed(2);
+                }
+                
+                // Calculate tax as 10% of subtotal (room + service cost)
+                const subtotal = roomCost + serviceCost;
+                const taxValue = (subtotal * 0.1).toFixed(2);
+                if (taxAmountInput) {
+                    taxAmountInput.value = taxValue;
+                }
+                
+                // Calculate total
+                calculateTotal();
+                
+                // Enable create button
+                if (createBillBtn) {
+                    createBillBtn.disabled = false;
+                }
+            }
+
             // Show calculation card when booking is selected
             bookingRadios.forEach((radio, index) => {
                 console.log(`Setting up listener for radio ${index + 1}`);
@@ -440,7 +500,9 @@
 
                 // Enable/disable create button
                 if (createBillBtn) {
-                    const hasBookingSelected = document.querySelector('.booking-radio:checked');
+                    // Check if booking is selected via radio button OR hidden input (when selectedBookingId is provided)
+                    const hasBookingSelected = document.querySelector('.booking-radio:checked') || 
+                                             document.querySelector('input[name="bookingId"][type="hidden"]');
                     const hasValidAmounts = roomCost >= 0 && serviceCost >= 0 && taxAmount >= 0 && total > 0;
                     createBillBtn.disabled = !(hasBookingSelected && hasValidAmounts);
                 }
@@ -474,7 +536,9 @@
             // Form validation
             if (form) {
                 form.addEventListener('submit', function(e) {
-                    const selectedBooking = document.querySelector('.booking-radio:checked');
+                    // Check if booking is selected via radio button OR hidden input (when selectedBookingId is provided)
+                    const selectedBooking = document.querySelector('.booking-radio:checked') || 
+                                           document.querySelector('input[name="bookingId"][type="hidden"]');
                     if (!selectedBooking) {
                         e.preventDefault();
                         alert('Please select a booking to create a bill.');

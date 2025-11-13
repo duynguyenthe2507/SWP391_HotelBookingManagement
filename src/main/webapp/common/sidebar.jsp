@@ -123,14 +123,14 @@
             <i class="fa fa-calendar-plus-o"></i> Create Booking
         </a>
 
-        <a href="${contextPath}/receptionist/room-fees"
-           class="${currentPath == '/receptionist/room-fees' ? 'active' : ''}">
-            <i class="fa fa-bed"></i> Room Fees
-        </a>
-
         <a href="${contextPath}/receptionist/bills"
            class="${currentPath == '/receptionist/bills' ? 'active' : ''}">
             <i class="fa fa-file-text-o"></i> Bills
+        </a>
+
+        <a href="${contextPath}/receptionist/revenue-report"
+           class="${currentPath == '/receptionist/revenue-report' ? 'active' : ''}">
+            <i class="fa fa-line-chart"></i> Revenue Report
         </a>
 
         <a href="${contextPath}/receptionist/rooms"

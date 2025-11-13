@@ -65,6 +65,12 @@ public class CreateBookingController extends HttpServlet {
             LocalDateTime checkInDate = LocalDateTime.parse(request.getParameter("checkInDate"));
             LocalDateTime checkOutDate = LocalDateTime.parse(request.getParameter("checkOutDate"));
 
+            System.out.println("=== CREATE OFFLINE BOOKING DEBUG ===");
+            System.out.println("Guest Name: " + guestName);
+            System.out.println("Room ID: " + roomId);
+            System.out.println("Check-in: " + checkInDate);
+            System.out.println("Check-out: " + checkOutDate);
+
             if (checkOutDate.isBefore(checkInDate)) {
                 session.setAttribute("bookingMessage", "Error: Check-out date must be after check-in date.");
                 response.sendRedirect(request.getContextPath() + "/receptionist/create-booking");
@@ -75,8 +81,14 @@ public class CreateBookingController extends HttpServlet {
             String specialRequest = request.getParameter("specialRequest");
             double priceAtBooking = Double.parseDouble(request.getParameter("priceAtBooking"));
 
+            System.out.println("Guest Count: " + guestCount);
+            System.out.println("Special Request: " + specialRequest);
+            System.out.println("Price: " + priceAtBooking);
+            System.out.println("Receptionist ID: " + receptionist.getUserId());
+
             // Lấy danh sách các checkbox dịch vụ đã được chọn
             String[] serviceIds = request.getParameterValues("serviceIds");
+            System.out.println("Service IDs: " + (serviceIds != null ? String.join(", ", serviceIds) : "None"));
 
             // 2. Tạo đối tượng Booking
             Booking booking = new Booking();
@@ -90,13 +102,15 @@ public class CreateBookingController extends HttpServlet {
             booking.setReceptionistId(receptionist.getUserId()); // Gán ID lễ tân
 
             // 3. Gọi Service để xử lý nghiệp vụ
+            System.out.println("Calling createOfflineBooking...");
             boolean success = bookingService.createOfflineBooking(booking, serviceIds);
+            System.out.println("Result: " + (success ? "SUCCESS" : "FAILED"));
 
             // 4. Gửi thông báo về view
             if (success) {
-                session.setAttribute("bookingMessage", "Booking created successfully!");
+                session.setAttribute("bookingMessage", "Booking created successfully! Booking ID: " + booking.getBookingId());
             } else {
-                session.setAttribute("bookingMessage", "Failed to create booking.");
+                session.setAttribute("bookingMessage", "Failed to create booking. Please check server logs.");
             }
 
             // Chuyển hướng về trang danh sách booking

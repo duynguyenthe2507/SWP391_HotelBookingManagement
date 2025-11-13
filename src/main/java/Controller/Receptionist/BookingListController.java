@@ -1,6 +1,8 @@
 package Controller.Receptionist;
 
 import Dao.BookingDao;
+import Dao.InvoiceDao;
+import Models.Booking;
 import Models.Users;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -11,8 +13,10 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -118,8 +122,39 @@ public class BookingListController extends HttpServlet {
             LOGGER.log(Level.INFO, "Final stats - Bookings: {0}, Total: {1}, Pages: {2}",
                     new Object[]{bookings != null ? bookings.size() : 0, totalItems, totalPages});
 
+            // Kiểm tra booking nào đã có invoice
+            InvoiceDao invoiceDao = null;
+            Set<Integer> bookingsWithInvoice = new HashSet<>();
+            if (bookings != null && !bookings.isEmpty()) {
+                try {
+                    invoiceDao = new InvoiceDao();
+                    for (Map<String, Object> entry : bookings) {
+                        Object bookingObj = entry.get("booking");
+                        if (bookingObj instanceof Booking) {
+                            Booking booking = (Booking) bookingObj;
+                            int bookingId = booking.getBookingId();
+                            // Kiểm tra xem booking đã có invoice chưa
+                            if (invoiceDao.getByBookingId(bookingId) != null) {
+                                bookingsWithInvoice.add(bookingId);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    LOGGER.log(Level.WARNING, "Error checking invoices for bookings", e);
+                } finally {
+                    if (invoiceDao != null) {
+                        try {
+                            invoiceDao.closeConnection();
+                        } catch (Exception e) {
+                            LOGGER.log(Level.WARNING, "Error closing InvoiceDao connection", e);
+                        }
+                    }
+                }
+            }
+
             // Set attributes for JSP
             request.setAttribute("bookings", bookings != null ? bookings : new ArrayList<>());
+            request.setAttribute("bookingsWithInvoice", bookingsWithInvoice);
             request.setAttribute("page", page);
             request.setAttribute("size", size);
             request.setAttribute("totalPages", totalPages);

@@ -43,23 +43,10 @@
     <!-- Main Content Section -->
     <section class="main-content">
         <div class="container-fluid">
-            <!-- Alert Messages -->
-            <c:if test="${not empty success}">
-                <div class="alert alert-success">
-                    <i class="fa fa-check-circle"></i> ${success}
-                </div>
-            </c:if>
-
-            <c:if test="${not empty error}">
-                <div class="alert alert-error">
-                    <i class="fa fa-exclamation-circle"></i> ${error}
-                </div>
-            </c:if>
-
             <!-- Search and Filter Section -->
             <div class="search-section">
                 <form action="${pageContext.request.contextPath}/receptionist/bills" method="get" class="search-form">
-                    <input type="hidden" name="action" value="search">
+                    <input type="hidden" name="action" value="searchBill">
                     <input type="text" name="search" class="search-input"
                            placeholder="Search by invoice ID, booking ID, customer name or phone..."
                            value="${searchTerm}">
@@ -74,15 +61,22 @@
                 </form>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="action-buttons">
-                <a href="${pageContext.request.contextPath}/receptionist/bills?action=create" class="action-btn">
-                    <i class="fa fa-plus"></i> Create New Bill
-                </a>
-                <a href="${pageContext.request.contextPath}/receptionist/room-fees" class="action-btn secondary">
-                    <i class="fa fa-bed"></i> Room Fees
-                </a>
-            </div>
+            <!-- Alert Messages - Display above table -->
+            <c:if test="${not empty success}">
+                <div class="alert alert-success-pastel" style="background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <i class="fa fa-check-circle" style="margin-right: 10px; font-size: 18px; color: #28a745;"></i>
+                    <span style="flex: 1;">${success}</span>
+                    <button type="button" class="close-alert" onclick="this.parentElement.style.display='none'" style="background: none; border: none; font-size: 20px; color: #155724; cursor: pointer; margin-left: 10px; opacity: 0.5;">&times;</button>
+                </div>
+            </c:if>
+
+            <c:if test="${not empty error}">
+                <div class="alert alert-error" style="background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <i class="fa fa-exclamation-circle" style="margin-right: 10px; font-size: 18px; color: #dc3545;"></i>
+                    <span style="flex: 1;">${error}</span>
+                    <button type="button" class="close-alert" onclick="this.parentElement.style.display='none'" style="background: none; border: none; font-size: 20px; color: #721c24; cursor: pointer; margin-left: 10px; opacity: 0.5;">&times;</button>
+                </div>
+            </c:if>
 
             <!-- Bills Table -->
             <div class="bills-table">
@@ -148,13 +142,9 @@
                                         </td>
                                         <td>
                                             <div class="action-links">
-                                                <a href="${pageContext.request.contextPath}/receptionist/bills?action=detail&id=${bill.invoiceId}"
+                                                <a href="${pageContext.request.contextPath}/receptionist/bills?action=detailBill&id=${bill.invoiceId}"
                                                    class="action-link view">
                                                     <i class="fa fa-eye"></i> View
-                                                </a>
-                                                <a href="${pageContext.request.contextPath}/receptionist/bills?action=edit&id=${bill.invoiceId}"
-                                                   class="action-link edit">
-                                                    <i class="fa fa-edit"></i> Edit
                                                 </a>
                                                 <a href="${pageContext.request.contextPath}/receptionist/bills/export-pdf?id=${bill.invoiceId}"
                                                    class="action-link print" target="_blank">
@@ -191,24 +181,27 @@
 
                 <!-- Pagination Controls -->
                 <c:if test="${totalPages > 1}">
+                    <c:set var="paginationAction" value="${not empty searchTerm ? 'searchBill' : 'listBill'}" />
+                    <c:set var="searchParam" value="${not empty searchTerm ? '&search='.concat(searchTerm) : ''}" />
+                    
                     <nav aria-label="Bills pagination" style="padding: 10px 20px 20px 20px;">
                         <ul class="pagination" style="margin:0; display:flex; justify-content:center; flex-wrap: wrap;">
                             <li class="page-item ${page == 1 ? 'disabled' : ''}" style="margin: 2px;">
-                                <a class="page-link" href="${pageContext.request.contextPath}/receptionist/bills?page=${page - 1}&size=${size}" aria-label="Previous"
+                                <a class="page-link" href="${pageContext.request.contextPath}/receptionist/bills?action=${paginationAction}&page=${page - 1}&size=${size}${searchParam}" aria-label="Previous"
                                    style="border-radius: 8px; padding: 8px 12px; border: 1px solid #e5e5e5; color: #19191a; text-decoration: none; display: inline-block;">
                                     <span aria-hidden="true">&laquo;</span>
                                 </a>
                             </li>
                             <c:forEach var="i" begin="1" end="${totalPages}">
                                 <li class="page-item ${i == page ? 'active' : ''}" style="margin: 2px;">
-                                    <a class="page-link" href="${pageContext.request.contextPath}/receptionist/bills?page=${i}&size=${size}"
+                                    <a class="page-link" href="${pageContext.request.contextPath}/receptionist/bills?action=${paginationAction}&page=${i}&size=${size}${searchParam}"
                                        style="border-radius: 8px; padding: 8px 12px; text-decoration: none; display: inline-block;">
                                         ${i}
                                     </a>
                                 </li>
                             </c:forEach>
                             <li class="page-item ${page == totalPages ? 'disabled' : ''}" style="margin: 2px;">
-                                <a class="page-link" href="${pageContext.request.contextPath}/receptionist/bills?page=${page + 1}&size=${size}" aria-label="Next"
+                                <a class="page-link" href="${pageContext.request.contextPath}/receptionist/bills?action=${paginationAction}&page=${page + 1}&size=${size}${searchParam}" aria-label="Next"
                                    style="border-radius: 8px; padding: 8px 12px; border: 1px solid #e5e5e5; color: #19191a; text-decoration: none; display: inline-block;">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
@@ -218,10 +211,10 @@
                             Page ${page} of ${totalPages} • Total ${totalItems} bills
                             <span style="margin-left:10px;">|</span>
                             <span style="margin-left:10px;">Per page:</span>
-                            <a href="${pageContext.request.contextPath}/receptionist/bills?page=1&size=5" style="margin-left:6px;">5</a>
-                            <a href="${pageContext.request.contextPath}/receptionist/bills?page=1&size=10" style="margin-left:6px;">10</a>
-                            <a href="${pageContext.request.contextPath}/receptionist/bills?page=1&size=20" style="margin-left:6px;">20</a>
-                            <a href="${pageContext.request.contextPath}/receptionist/bills?page=1&size=50" style="margin-left:6px;">50</a>
+                            <a href="${pageContext.request.contextPath}/receptionist/bills?action=${paginationAction}&page=1&size=5${searchParam}" style="margin-left:6px;">5</a>
+                            <a href="${pageContext.request.contextPath}/receptionist/bills?action=${paginationAction}&page=1&size=10${searchParam}" style="margin-left:6px;">10</a>
+                            <a href="${pageContext.request.contextPath}/receptionist/bills?action=${paginationAction}&page=1&size=20${searchParam}" style="margin-left:6px;">20</a>
+                            <a href="${pageContext.request.contextPath}/receptionist/bills?action=${paginationAction}&page=1&size=50${searchParam}" style="margin-left:6px;">50</a>
                         </div>
                     </nav>
                 </c:if>

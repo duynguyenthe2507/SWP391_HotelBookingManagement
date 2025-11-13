@@ -246,6 +246,9 @@
                                         </td>
                                         <td>
                                             <div class="action-links">
+                                                <a href="${pageContext.request.contextPath}/receptionist/room-detail?id=${r.roomId}" class="action-link view">
+                                                    <i class="fa fa-eye"></i> Detail
+                                                </a>
                                                 <span class="action-link edit" onclick="openPanel('edit', this)">
                                                     <i class="fa fa-edit"></i> Edit
                                                 </span>
