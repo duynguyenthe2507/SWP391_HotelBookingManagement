@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeParseException; // Thêm import
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @WebServlet(name = "RuleController", urlPatterns = {"/rules", "/rules/save", "/rules/edit", "/rules/delete"})
@@ -30,10 +30,9 @@ public class RuleController extends HttpServlet {
                 Users user = (Users) request.getSession().getAttribute("loggedInUser");
                 request.setAttribute("rules", ruleDao.getAllRules());
                 String search = request.getParameter("search");
-                String statusParam = request.getParameter("status"); // Sẽ là "Active", "Inactive", hoặc "" (rỗng)
+                String statusParam = request.getParameter("status");
 
-                // 2. Chuyển đổi status string ("Active") thành boolean (true) cho DAO
-                // Sử dụng Boolean (object) để có thể chứa giá trị null (nghĩa là "All Statuses")
+                // Chuyển đổi trạng thái lọc
                 Boolean statusValue = null;
                 if ("Active".equalsIgnoreCase(statusParam)) {
                     statusValue = true;
@@ -41,30 +40,28 @@ public class RuleController extends HttpServlet {
                     statusValue = false;
                 }
 
-                // 3. Gọi DAO với các tham số lọc
-                // *** QUAN TRỌNG: Bạn cần tạo phương thức 'findRules' trong RuleDao.java (xem bước 2) ***
+                // Gọi DAO tìm kiếm
                 List<Rule> rules = ruleDao.findRules(search, statusValue);
 
-                // 4. Gửi danh sách rules và các giá trị filter về lại JSP
+                // Gửi dữ liệu về JSP
                 request.setAttribute("rules", rules);
-                request.setAttribute("search", search);       // Để giữ giá trị trong ô search
-                request.setAttribute("status", statusParam);  // Để giữ giá trị trong dropdown (dùng "Active" thay vì true)
+                request.setAttribute("search", search);
+                request.setAttribute("status", statusParam);
                 if (user != null && "receptionist".equalsIgnoreCase(user.getRole())) {
-                    // Đã sửa ở file JSP, nên chuyển đến file JSP đã sửa
+                    // View cho lễ tân
                     request.getRequestDispatcher("/pages/receptionist/rules-list.jsp").forward(request, response);
                 } else {
-                    // User chỉ xem
+                    // View cho khách hàng
                     request.getRequestDispatcher("/pages/user/rules.jsp").forward(request, response);
                 }
                 break;
 
             case "/rules/edit":
-                // Logic này không được dùng bởi rules-list.jsp mới, nhưng vẫn sửa cho đúng
+                // Xử lý chỉnh sửa (dự phòng)
                 try {
                     int id = Integer.parseInt(request.getParameter("id"));
                     Rule rule = ruleDao.getRuleById(id);
                     request.setAttribute("rule", rule);
-                    // Giả sử bạn có trang rules-edit.jsp
                     request.getRequestDispatcher("/pages/receptionist/rules-edit.jsp").forward(request, response);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -95,11 +92,11 @@ public class RuleController extends HttpServlet {
         String idStr = request.getParameter("ruleId");
         String title = request.getParameter("title");
         String description = request.getParameter("description");
-        String statusStr = request.getParameter("status"); // [cite: 93]
+        String statusStr = request.getParameter("status");
         String createdAtStr = request.getParameter("createdAt");
         String updatedAtStr = request.getParameter("updatedAt");
 
-        boolean status = "Active".equalsIgnoreCase(statusStr); //
+        boolean status = "Active".equalsIgnoreCase(statusStr);
 
         try {
             LocalDateTime vnTime = LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
@@ -110,20 +107,20 @@ public class RuleController extends HttpServlet {
                     createdAt = Timestamp.valueOf(createdAtStr.replace("T", " ") + ":00");
                 }
             } catch (DateTimeParseException | IllegalArgumentException ex) {
-                System.out.println("⚠️ Lỗi parse CreatedAt.");
+                System.out.println("⚠️ Error parsing CreatedAt."); //
             }
             Timestamp updatedAt = null;
             try {
                 if (updatedAtStr != null && !updatedAtStr.trim().isEmpty()) {
-                    updatedAt = Timestamp.valueOf(updatedAtStr.replace("T", " ") + ":00"); //
+                    updatedAt = Timestamp.valueOf(updatedAtStr.replace("T", " ") + ":00");
                 }
             } catch (DateTimeParseException | IllegalArgumentException ex) {
-                System.out.println("⚠️ Lỗi parse UpdatedAt.");
+                System.out.println("⚠️ Error parsing UpdatedAt."); //
             }
 
 
             if (idStr == null || idStr.trim().isEmpty()) {
-                // === TẠO MỚI ===
+                // Tạo mới Rule
                 rule = new Rule();
                 rule.setTitle(title);
                 rule.setDescription(description);
@@ -138,10 +135,11 @@ public class RuleController extends HttpServlet {
                 ruleDao.insertRule(rule);
 
             } else {
+                // Cập nhật Rule
                 int id = Integer.parseInt(idStr);
                 rule = ruleDao.getRuleById(id);
                 if (rule == null) {
-                    throw new Exception("Không tìm thấy Rule với ID: " + id);
+                    throw new Exception("Rule not found with ID: " + id); //
                 }
                 rule.setTitle(title);
                 rule.setDescription(description);
@@ -159,7 +157,7 @@ public class RuleController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/rules?success=true");
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("error", "Lưu thất bại: " + e.getMessage());
+            request.setAttribute("error", "Save failed: " + e.getMessage()); //
             request.setAttribute("rules", ruleDao.getAllRules());
             request.getRequestDispatcher("/pages/receptionist/rules-list.jsp").forward(request, response);
         }

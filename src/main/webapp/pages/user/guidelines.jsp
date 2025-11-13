@@ -13,25 +13,26 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 
     <style>
-        /* (Style cơ bản giống rules.jsp) */
+        /* Style cơ bản */
         body { background-color: #f9f9f9; font-family: 'Lora', serif; }
         .page-header {
-            background: url('${pageContext.request.contextPath}/img/hero/hero-2.jpg') center/cover no-repeat; /* Ảnh nền khác */
-            padding: 120px 0; color: white; text-align: center; position: relative;
+            background: url('${pageContext.request.contextPath}/img/hero/hero-2.jpg') center/cover no-repeat;
+            padding: 120px 0;
+            color: white; text-align: center; position: relative;
         }
         .page-header::after { content: ""; position: absolute; inset: 0; background-color: rgba(0,0,0,0.55); }
         .page-header h1 { position: relative; z-index: 2; font-size: 48px; font-weight: 700; }
         .guideline-section { padding: 60px 0; }
 
-        /* --- STYLE MỚI CHO CARD CÓ ẢNH BÊN CẠNH --- */
+        /* STYLE CHO CARD */
         .guideline-card {
-            display: flex; /* Chia 2 cột: ảnh và nội dung */
+            display: flex;
             gap: 20px;
             background: white;
             border-radius: 12px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             margin-bottom: 25px;
-            overflow: hidden; /* Giữ bo góc cho ảnh */
+            overflow: hidden;
             transition: all 0.3s ease;
         }
         .guideline-card:hover {
@@ -39,15 +40,15 @@
             box-shadow: 0 4px 14px rgba(0,0,0,0.12);
         }
         .guideline-img {
-            width: 220px;   /* Kích thước cố định cho ảnh */
-            height: 180px;  /* Kích thước cố định cho ảnh */
+            width: 220px;
+            height: 180px;
             object-fit: cover;
         }
         .guideline-content {
             padding: 20px;
-            flex: 1; /* Nội dung chiếm phần còn lại */
+            flex: 1;
         }
-        /* Xử lý khi guideline KHÔNG có ảnh */
+        /* Khi không có ảnh */
         .guideline-card.no-image .guideline-content {
             padding-left: 20px;
         }
@@ -86,7 +87,7 @@
 
                 <c:if test="${empty guidelines}">
                     <div class="text-center">
-                        <p class="text-muted">Không có hướng dẫn nào (guidelines) ở thời điểm hiện tại.</p>
+                        <p class="text-muted">No guidelines available at the moment.</p>
                     </div>
                 </c:if>
 
@@ -101,7 +102,7 @@
                             <h3 class="guideline-title">${fn:escapeXml(g.title)}</h3>
                             <p class="guideline-desc">${fn:escapeXml(g.content)}</p>
                             <div class="guideline-meta">
-                                <span>Cập nhật: <fmt:formatDate value="${g.updatedAt}" pattern="dd/MM/yyyy"/></span>
+                                <span>Updated: <fmt:formatDate value="${g.updatedAt}" pattern="dd/MM/yyyy"/></span>
                             </div>
                         </div>
 

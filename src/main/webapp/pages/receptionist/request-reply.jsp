@@ -1,9 +1,6 @@
 <%--
     request-reply.jsp
-    Đã được cập nhật để tích hợp layout dashboard, sidebar,
-    và sử dụng CSS/JS từ các trang khác của bạn.
-    Sử dụng style 'room-detail-card', 'back-button', 'action-btn'
-    từ file room-fee-detail.jsp để đồng bộ.
+    Layout dashboard
 --%>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page import="Models.GuestRequest" %>
@@ -11,20 +8,19 @@
 <%
     GuestRequest gr = (GuestRequest) request.getAttribute("item");
     if (gr == null) {
-        // Xử lý trường hợp không tìm thấy request
+        // Redirect nếu không tìm thấy
         response.sendRedirect(request.getContextPath() + "/receptionist/requests?error=Request+not+found");
         return;
     }
     boolean closed = "resolved".equalsIgnoreCase(gr.getStatus()) || "cancelled".equalsIgnoreCase(gr.getStatus());
-
-    // Logic xác định class cho badge
-    String badgeClass = "status-cancelled"; // Default
+    // Class badge
+    String badgeClass = "status-cancelled";
     if ("pending".equalsIgnoreCase(gr.getStatus())) badgeClass = "status-pending";
     else if ("replied".equalsIgnoreCase(gr.getStatus())) badgeClass = "status-replied";
     else if ("resolved".equalsIgnoreCase(gr.getStatus())) badgeClass = "status-resolved";
 %>
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="description" content="Reply Request - 36 Hotel">
@@ -46,189 +42,67 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css" type="text/css">
 
     <style>
-        /* Layout Styles (Copied from room-fee-detail.jsp) */
-        body {
-            background: #f8f9fa;
-            font-family: "Cabin", sans-serif;
-        }
-        .dashboard-wrapper {
-            display: flex;
-            min-height: 100vh;
-        }
-        .dashboard-content {
-            flex: 1;
-            margin-left: 250px; /* Width of sidebar */
-            width: calc(100% - 250px);
-            padding: 40px;
-            min-height: 100vh;
-        }
-
-        /* Card Styles (Copied from room-fee-detail.jsp) */
+        /* Giữ nguyên CSS cũ */
+        body { background: #f8f9fa; font-family: "Cabin", sans-serif; }
+        .dashboard-wrapper { display: flex; min-height: 100vh; }
+        .dashboard-content { flex: 1; margin-left: 250px; width: calc(100% - 250px); padding: 40px; min-height: 100vh; }
         .room-detail-card {
-            background: white;
-            border-radius: 15px;
-            padding: 40px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            position: relative;
-            overflow: hidden;
+            background: white; border-radius: 15px; padding: 40px; margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); position: relative; overflow: hidden;
         }
         .room-detail-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
             background: linear-gradient(90deg, #dfa974, #c8965a);
         }
-        .card-title-h1 {
-            color: #19191a;
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin-bottom: 30px;
-            font-family: "Lora", serif;
-        }
-        .form-label {
-            font-weight: 600;
-            color: #19191a;
-            margin-bottom: 8px;
-            font-size: 1rem;
-        }
-        .form-label i {
-            margin-right: 8px;
-            color: #dfa974;
-            width: 20px;
-            text-align: center;
-        }
+        .card-title-h1 { color: #19191a; font-size: 2.2rem; font-weight: 700; margin-bottom: 30px; font-family: "Lora", serif; }
+        .form-label { font-weight: 600; color: #19191a; margin-bottom: 8px; font-size: 1rem; }
+        .form-label i { margin-right: 8px; color: #dfa974; width: 20px; text-align: center; }
         .form-control-plaintext {
-            padding-left: 0;
-            padding-right: 0;
-            font-size: 1rem;
-            color: #333;
-            background: #f8f9fa;
-            padding: 10px 15px;
-            border-radius: 8px;
-            min-height: 40px;
-            border: 1px solid #e5e5e5;
+            padding-left: 0; padding-right: 0; font-size: 1rem; color: #333; background: #f8f9fa;
+            padding: 10px 15px; border-radius: 8px; min-height: 40px; border: 1px solid #e5e5e5;
         }
-
-        /* Back Button Style (Copied from room-fee-detail.jsp) */
         .back-button {
-            display: inline-block;
-            padding: 12px 25px;
-            background: linear-gradient(135deg, #dfa974, #c8965a);
-            color: white;
-            text-decoration: none;
-            border-radius: 25px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            margin-bottom: 30px;
+            display: inline-block; padding: 12px 25px; background: linear-gradient(135deg, #dfa974, #c8965a);
+            color: white; text-decoration: none; border-radius: 25px; font-weight: 600;
+            transition: all 0.3s ease; margin-bottom: 30px;
         }
         .back-button:hover {
-            background: linear-gradient(135deg, #c8965a, #b8855a);
-            color: white;
-            text-decoration: none;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(223, 169, 116, 0.3);
+            background: linear-gradient(135deg, #c8965a, #b8855a); color: white;
+            text-decoration: none; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(223, 169, 116, 0.3);
         }
-
-        /* Action Button Styles (Copied from room-fee-detail.jsp) */
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
+        .action-buttons { display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
         .action-btn {
-            padding: 12px 25px;
-            background: linear-gradient(135deg, #dfa974, #c8965a);
-            color: white;
-            border: none;
-            border-radius: 25px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 14px;
+            padding: 12px 25px; background: linear-gradient(135deg, #dfa974, #c8965a); color: white;
+            border: none; border-radius: 25px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;
+            text-decoration: none; display: inline-block; font-size: 14px;
         }
         .action-btn:hover {
-            background: linear-gradient(135deg, #c8965a, #b8855a);
-            color: white;
-            text-decoration: none;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(223, 169, 116, 0.3);
+            background: linear-gradient(135deg, #c8965a, #b8855a); color: white; text-decoration: none;
+            transform: translateY(-2px); box-shadow: 0 4px 15px rgba(223, 169, 116, 0.3);
         }
-        .action-btn.success { /* For 'Mark as Resolved' */
-            background: linear-gradient(135deg, #28a745, #218838);
-        }
-        .action-btn.success:hover {
-            background: linear-gradient(135deg, #218838, #1e7e34);
-            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-        }
-        .action-btn:disabled {
-            background: #6c757d;
-            opacity: 0.65;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        /* Status Badge Styles (Copied from requests-list.jsp) */
+        .action-btn.success { background: linear-gradient(135deg, #28a745, #218838); }
+        .action-btn.success:hover { background: linear-gradient(135deg, #218838, #1e7e34); box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3); }
+        .action-btn:disabled { background: #6c757d; opacity: 0.65; cursor: not-allowed; transform: none; box-shadow: none; }
         .status-badge {
-            padding: 6px 12px;
-            border-radius: 15px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            border: 1px solid;
-            display: inline-block;
-            text-align: center;
-            min-width: 90px;
+            padding: 6px 12px; border-radius: 15px; font-size: 11px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.3px; border: 1px solid; display: inline-block; text-align: center; min-width: 90px;
         }
-        .status-pending { /* Yellow */
-            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
-            color: #856404;
-            border-color: #ffeaa7;
-        }
-        .status-replied { /* Blue */
-            background: linear-gradient(135deg, #d1ecf1, #bee5eb);
-            color: #0c5460;
-            border-color: #bee5eb;
-        }
-        .status-resolved { /* Green */
-            background: linear-gradient(135deg, #d4edda, #c3e6cb);
-            color: #155724;
-            border-color: #c3e6cb;
-        }
-        .status-cancelled { /* Gray */
-            background: linear-gradient(135deg, #e2e3e5, #d6d8db);
-            color: #383d41;
-            border-color: #d6d8db;
-        }
-
+        .status-pending { background: linear-gradient(135deg, #fff3cd, #ffeaa7); color: #856404; border-color: #ffeaa7; }
+        .status-replied { background: linear-gradient(135deg, #d1ecf1, #bee5eb); color: #0c5460; border-color: #bee5eb; }
+        .status-resolved { background: linear-gradient(135deg, #d4edda, #c3e6cb); color: #155724; border-color: #c3e6cb; }
+        .status-cancelled { background: linear-gradient(135deg, #e2e3e5, #d6d8db); color: #383d41; border-color: #d6d8db; }
         @media (max-width: 768px) {
-            .dashboard-content {
-                margin-left: 0;
-                padding: 20px;
-            }
-            .room-detail-card {
-                padding: 20px;
-            }
-            .card-title-h1 {
-                font-size: 1.8rem;
-            }
+            .dashboard-content { margin-left: 0; padding: 20px; }
+            .room-detail-card { padding: 20px; }
+            .card-title-h1 { font-size: 1.8rem; }
         }
     </style>
 </head>
 <body>
-<%-- Đặt biến này để sidebar có thể highlight đúng mục --%>
+<%-- Set active cho Sidebar --%>
 <c:set var="pageActive" value="requests"/>
 
 <div class="dashboard-wrapper">
-    <%-- Include Sidebar --%>
     <jsp:include page="/common/sidebar.jsp"/>
 
     <div class="dashboard-content">
@@ -284,10 +158,10 @@
             <form method="post" action="<%= request.getContextPath() %>/receptionist/requests/send-reply">
                 <input type="hidden" name="id" value="<%= gr.getRequestId() %>"/>
                 <div class="mb-3">
-                        <textarea name="replyText" class="form-control" rows="5"
-                                  style="border-radius: 8px; font-size: 1rem;"
-                                  placeholder="Enter your reply here..."
-                                <%= closed ? "disabled" : "" %>><%= gr.getReplyText() == null ? "" : gr.getReplyText() %></textarea>
+                    <textarea name="replyText" class="form-control" rows="5"
+                              style="border-radius: 8px; font-size: 1rem;"
+                              placeholder="Enter your reply here..."
+                            <%= closed ? "disabled" : "" %>><%= gr.getReplyText() == null ? "" : gr.getReplyText() %></textarea>
                 </div>
 
                 <div class="action-buttons">

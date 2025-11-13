@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/receptionist-bills.css" type="text/css">
 
     <style>
+        /* CSS giữ nguyên */
         .action-link.delete-btn { background: none; border: none; padding: 0; color: #dc3545; cursor: pointer; font-weight: 500; font-family: "Cabin", sans-serif; font-size: 14px; }
         .action-link.delete-btn:hover { color: #a71d2a; }
         .side-panel { position: fixed; top: 0; right: -600px; width: 500px; height: 100%; background-color: #fff; box-shadow: -4px 0 10px rgba(0,0,0,0.15); z-index: 9999; transition: right 0.4s ease; overflow-y: auto; display: flex; flex-direction: column; }
@@ -39,60 +40,16 @@
         .status-badge.status-active { color: #ffffff; background: #28a745; }
         .status-badge.status-inactive { color: #ffffff; background: #6c757d; }
         .col-description { white-space: pre-line; text-align: left; font-size: 13px; max-width: 350px; overflow-wrap: break-word; line-height: 1.4; }
-
-        /* Thêm style cho ảnh trong bảng và preview */
         .table-img { height: 48px; width: 72px; object-fit: cover; border-radius: 6px; }
         .thumb-preview { max-height: 160px; width: auto; border: 1px solid #eee; border-radius: 8px; margin-top: 8px; display: none; }
-        .filter-section {
-            background: #ffffff;
-            border-radius: 12px;
-            padding: 20px 25px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            margin-bottom: 30px;
-        }
-        .filter-form {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            align-items: center;
-        }
-        .filter-form .form-group {
-            flex: 1;
-            min-width: 150px;
-        }
-        .filter-form .search-group {
-            flex-grow: 3;
-            min-width: 250px;
-        }
-        .filter-form .form-control {
-            width: 100%;
-            height: 46px;
-            padding: 10px 15px;
-            border: 1px solid #e5e5e5;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-        .filter-form .form-control:focus {
-            border-color: #dfa974;
-            box-shadow: 0 0 0 2px rgba(223, 169, 116, 0.2);
-            outline: none;
-        }
-        .filter-form .btn-filter {
-            height: 46px;
-            border: none;
-            background: #dfa974;
-            color: white;
-            padding: 0 25px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .filter-form .btn-filter:hover {
-            background: #c8965a;
-        }
+        .filter-section { background: #ffffff; border-radius: 12px; padding: 20px 25px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); margin-bottom: 30px; }
+        .filter-form { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; }
+        .filter-form .form-group { flex: 1; min-width: 150px; }
+        .filter-form .search-group { flex-grow: 3; min-width: 250px; }
+        .filter-form .form-control { width: 100%; height: 46px; padding: 10px 15px; border: 1px solid #e5e5e5; border-radius: 8px; font-size: 14px; transition: all 0.3s ease; }
+        .filter-form .form-control:focus { border-color: #dfa974; box-shadow: 0 0 0 2px rgba(223, 169, 116, 0.2); outline: none; }
+        .filter-form .btn-filter { height: 46px; border: none; background: #dfa974; color: white; padding: 0 25px; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.3s ease; }
+        .filter-form .btn-filter:hover { background: #c8965a; }
     </style>
 </head>
 
@@ -108,20 +65,19 @@
             <div class="container-fluid">
 
                 <c:if test="${not empty param.success}">
-                    <div class="alert alert-success"><i class="fa fa-check-circle"></i> Lưu thành công!</div>
+                    <div class="alert alert-success"><i class="fa fa-check-circle"></i> Saved successfully!</div>
                 </c:if>
                 <c:if test="${not empty sessionScope.error}">
                     <div class="alert alert-danger"><i class="fa fa-times-circle"></i> ${sessionScope.error}</div>
                     <c:remove var="error" scope="session"/>
                 </c:if>
+
                 <div class="filter-section">
                     <form action="${pageContext.request.contextPath}/guidelines" method="get" class="filter-form">
-
                         <div class="form-group search-group">
                             <input type="text" name="search" class="form-control"
                                    placeholder="Search by title or content..." value="${search}">
                         </div>
-
                         <div class="form-group">
                             <select name="status" class="form-control">
                                 <option value="">All Statuses</option>
@@ -129,11 +85,9 @@
                                 <option value="Inactive" ${status == 'Inactive' ? 'selected' : ''}>Inactive</option>
                             </select>
                         </div>
-
                         <button type="submit" class="btn-filter">
                             <i class="fa fa-search"></i> Filter
                         </button>
-
                         <c:if test="${not empty search || not empty status}">
                             <a href="${pageContext.request.contextPath}/guidelines"
                                class="btn-filter"
@@ -160,18 +114,18 @@
                                 <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th>Ảnh</th>
-                                    <th>Tiêu đề</th>
-                                    <th class="col-description">Nội dung (tóm tắt)</th>
+                                    <th>Image</th>
+                                    <th>Title</th>
+                                    <th class="col-description">Content (Summary)</th>
                                     <th>Service ID</th>
-                                    <th>Trạng thái</th>
-                                    <th>Cập nhật</th>
+                                    <th>Status</th>
+                                    <th>Updated At</th>
                                     <th>Actions</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 <c:forEach var="g" items="${guidelines}" varStatus="loop">
-                                    <%-- Thêm data-* để JS có thể đọc --%>
+                                    <%-- Dữ liệu cho JS --%>
                                     <tr data-guideline-id="${g.guidelineId}"
                                         data-title="${fn:escapeXml(g.title)}"
                                         data-content="${fn:escapeXml(g.content)}"
@@ -186,20 +140,18 @@
                                             </c:if>
                                         </td>
                                         <td><div class="customer-name">${g.title}</div></td>
-                                        <td class="col-description">${fn:escapeXml(g.content)}
-                                        </td>
-                                        <td>${g.serviceId != null ? g.serviceId : 'Chung'}</td>
+                                        <td class="col-description">${fn:escapeXml(g.content)}</td>
+                                        <td>${g.serviceId != null ? g.serviceId : 'General'}</td>
                                         <td><span class="status-badge ${g.status ? 'status-active' : 'status-inactive'}">${g.status ? 'Active' : 'Inactive'}</span></td>
                                         <td><div class="bill-date"><fmt:formatDate value="${g.updatedAt}" pattern="dd/MM/yyyy HH:mm"/></div></td>
                                         <td>
                                             <div class="action-links">
-                                                    <%-- Nút Edit gọi JS --%>
+                                                    <%-- Nút Sửa --%>
                                                 <span class="action-link edit" onclick="openPanel('edit', this)">
                                                     <i class="fa fa-edit"></i> Edit
                                                 </span>
-
-                                                    <%-- Form Delete (Giống hệt guidelines-edit.jsp) --%>
-                                                <form action="${pageContext.request.contextPath}/guidelines/delete" method="get" style="display:inline;" onsubmit="return confirm('Xóa guideline này?');">
+                                                    <%-- Form Xóa --%>
+                                                <form action="${pageContext.request.contextPath}/guidelines/delete" method="get" style="display:inline;" onsubmit="return confirm('Delete this guideline?');">
                                                     <input type="hidden" name="id" value="${g.guidelineId}">
                                                     <button type="submit" class="action-link delete-btn">
                                                         <i class="fa fa-trash"></i> Delete
@@ -228,7 +180,7 @@
         </section>
 
         <div class="side-panel" id="sidePanel">
-            <%-- QUAN TRỌNG: Thêm enctype để upload file --%>
+            <%-- Thêm enctype để upload --%>
             <form method="post" id="guidelineForm" action="${pageContext.request.contextPath}/guidelines/save" enctype="multipart/form-data">
                 <div class="panel-header">
                     <span id="panelTitle">Add New Guideline</span>
@@ -238,23 +190,22 @@
                     <input type="hidden" id="guidelineId" name="guidelineId">
 
                     <div class="mb-3">
-                        <label for="serviceId">Dịch vụ (tùy chọn)</label>
-                        <input type="number" id="serviceId" name="serviceId" class="form-control" placeholder="Để trống nếu là guideline chung">
+                        <label for="serviceId">Service (Optional)</label>
+                        <input type="number" id="serviceId" name="serviceId" class="form-control" placeholder="Leave empty for general guideline">
                     </div>
 
                     <div class="mb-3">
-                        <label for="title">Tiêu đề</label>
+                        <label for="title">Title</label>
                         <input type="text" id="title" name="title" class="form-control" required maxlength="255">
                     </div>
 
                     <div class="mb-3">
-                        <label for="content">Nội dung</label>
+                        <label for="content">Content</label>
                         <textarea id="content" name="content" rows="8" class="form-control" required></textarea>
                     </div>
 
                     <div class="mb-3">
-                        <label for="status">Trạng thái</label>
-                        <%-- Dùng Select giống rules-list.jsp cho dễ dùng với JS --%>
+                        <label for="status">Status</label>
                         <select id="status" name="status" class="form-control" required>
                             <option value="Active">Active</option>
                             <option value="Inactive">Inactive</option>
@@ -262,13 +213,13 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="image">Ảnh minh họa (tùy chọn)</label>
+                        <label for="image">Image (Optional)</label>
                         <input type="file" id="image" name="image" class="form-control" accept="image/*">
 
-                        <%-- Input ẩn để giữ link ảnh cũ khi không upload ảnh mới --%>
+                        <%-- Giữ link ảnh cũ nếu không upload mới --%>
                         <input type="hidden" id="existingImageUrl" name="existingImageUrl">
 
-                        <%-- Hiển thị ảnh đang có (nếu sửa) --%>
+                        <%-- Preview ảnh --%>
                         <img id="imagePreview" src="" class="thumb-preview" alt="Preview"/>
                     </div>
                 </div>
@@ -295,52 +246,53 @@
     const form = document.getElementById("guidelineForm");
     const panelTitle = document.getElementById("panelTitle");
 
-    // Lấy các trường của form
+    // Lấy các trường
     const f_guidelineId = document.getElementById('guidelineId');
     const f_title = document.getElementById('title');
     const f_content = document.getElementById('content');
     const f_status = document.getElementById('status');
     const f_serviceId = document.getElementById('serviceId');
-
-    // Các trường cho ảnh
+    // Trường ảnh
     const f_image = document.getElementById('image');
     const f_existingImageUrl = document.getElementById('existingImageUrl');
     const f_imagePreview = document.getElementById('imagePreview');
 
     function openPanel(mode, button) {
-        form.reset(); // Xóa sạch form
+        form.reset();
+        // Xóa sạch form
 
         if (mode === 'add') {
             panelTitle.innerText = "Add New Guideline";
             f_guidelineId.value = "";
-            f_status.value = "Active"; // Mặc định là Active
+            f_status.value = "Active";
             f_existingImageUrl.value = "";
             f_imagePreview.style.display = 'none'; // Ẩn preview
 
         } else if (mode === 'edit') {
             panelTitle.innerText = "Edit Guideline";
-
             const row = button.closest('tr');
             const data = row.dataset;
 
-            // Điền dữ liệu text
+            // Fill dữ liệu
             f_guidelineId.value = data.guidelineId;
             f_title.value = data.title;
             f_content.value = data.content;
-            f_status.value = data.status; // 'Active' hoặc 'Inactive'
+            f_status.value = data.status;
             f_serviceId.value = data.serviceId;
 
-            // Xử lý hiển thị ảnh cũ
-            f_existingImageUrl.value = data.imageUrl; // Giữ link ảnh cũ
+            // Xử lý ảnh cũ
+            f_existingImageUrl.value = data.imageUrl;
+            // Giữ link ảnh cũ
             if (data.imageUrl) {
                 f_imagePreview.src = data.imageUrl;
-                f_imagePreview.style.display = 'block'; // Hiển thị ảnh
+                f_imagePreview.style.display = 'block'; // Hiện ảnh
             } else {
-                f_imagePreview.style.display = 'none'; // Ẩn nếu không có ảnh
+                f_imagePreview.style.display = 'none'; // Ẩn nếu không có
             }
         }
 
-        f_image.value = null; // Luôn reset ô input file
+        f_image.value = null;
+        // Reset input file
         panel.classList.add("active");
     }
 

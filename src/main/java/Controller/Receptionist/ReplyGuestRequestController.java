@@ -11,11 +11,11 @@ import java.sql.SQLException;
 import java.util.List;
 
 @WebServlet(name = "ReplyGuestRequestController", urlPatterns = {
-        "/receptionist/requests",            // list + filter theo status
-        "/receptionist/requests/detail",     // xem chi tiết -> markSeen
-        "/receptionist/requests/send-reply", // POST trả lời
-        "/receptionist/requests/resolve",    // POST đánh dấu đã xử lý
-        "/receptionist/requests/delete"      // POST xóa request
+        "/receptionist/requests",            // List & Filter
+        "/receptionist/requests/detail",     // Chi tiết & Đánh dấu đã xem
+        "/receptionist/requests/send-reply", // Trả lời (POST)
+        "/receptionist/requests/resolve",    // Hoàn tất (POST)
+        "/receptionist/requests/delete"      // Xóa (POST)
 })
 public class ReplyGuestRequestController extends HttpServlet {
 
@@ -26,9 +26,7 @@ public class ReplyGuestRequestController extends HttpServlet {
         dao = new GuestRequestDao();
     }
 
-    /**
-     * Lấy userId từ session (dựa theo UserRequestController)
-     */
+    // Lấy User ID từ session
     private Integer currentUserId(HttpServletRequest req) {
         Object userObj = req.getSession().getAttribute("user");
         if (userObj != null && userObj instanceof Users) {
@@ -37,9 +35,7 @@ public class ReplyGuestRequestController extends HttpServlet {
         return null;
     }
 
-    /**
-     * Kiểm tra role có phải receptionist không
-     */
+    // Kiểm tra quyền Receptionist
     private boolean isReceptionist(HttpServletRequest req) {
         Object userObj = req.getSession().getAttribute("user");
         if (userObj instanceof Users) {
@@ -49,34 +45,32 @@ public class ReplyGuestRequestController extends HttpServlet {
         return false;
     }
 
-    /**
-     * Kiểm tra role và chuyển hướng phù hợp
-     */
+    // Check role & redirect
     private boolean checkRoleAndRedirect(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Object userObj = req.getSession().getAttribute("user");
 
         if (userObj instanceof Users) {
             String role = ((Users) userObj).getRole();
 
-            // Nếu là customer -> chuyển sang UserRequestController
+            // Nếu Customer -> User Controller
             if ("customer".equalsIgnoreCase(role)) {
                 resp.sendRedirect(req.getContextPath() + "/user/requests");
                 return false;
             }
 
-            // Nếu là admin -> chuyển về trang admin
+            // Nếu Admin -> Admin page
             if ("admin".equalsIgnoreCase(role)) {
                 resp.sendRedirect(req.getContextPath() + "/viewuser");
                 return false;
             }
 
-            // Nếu là receptionist -> cho phép truy cập
+            // Nếu Receptionist -> OK
             if ("receptionist".equalsIgnoreCase(role)) {
                 return true;
             }
 
-            // Role không xác định
-            req.getSession().setAttribute("flash_error", "Bạn không có quyền truy cập chức năng này");
+            // Role lạ
+            req.getSession().setAttribute("flash_error", "Access denied.");
             resp.sendRedirect(req.getContextPath() + "/");
             return false;
         }
@@ -97,18 +91,18 @@ public class ReplyGuestRequestController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Integer userId = currentUserId(req);
 
-        // Kiểm tra đăng nhập
+        // Check login
         if (userId == null) {
             HttpSession session = req.getSession();
             String queryString = req.getQueryString();
             String fullUrl = req.getRequestURI() + (queryString != null ? "?" + queryString : "");
             session.setAttribute("redirectUrl", fullUrl);
-            session.setAttribute("loginMessage", "Vui lòng đăng nhập để sử dụng chức năng này");
+            session.setAttribute("loginMessage", "Please login to use this feature.");
             resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
 
-        // Kiểm tra role và chuyển hướng nếu cần
+        // Check role
         if (!checkRoleAndRedirect(req, resp)) {
             return;
         }
@@ -117,7 +111,7 @@ public class ReplyGuestRequestController extends HttpServlet {
         try {
             switch (path) {
                 case "/receptionist/requests": {
-                    String status = req.getParameter("status"); // all/pending/replied/resolved/cancelled
+                    String status = req.getParameter("status"); // Filter status
                     if (status == null || status.isEmpty()) status = "all";
 
                     List<GuestRequest> items = dao.findAll(status);
@@ -131,14 +125,14 @@ public class ReplyGuestRequestController extends HttpServlet {
                     int id = parseInt(req.getParameter("id"), 0);
 
                     if (id <= 0) {
-                        req.getSession().setAttribute("flash_error", "Request ID không hợp lệ");
+                        req.getSession().setAttribute("flash_error", "Invalid Request ID.");
                         resp.sendRedirect(req.getContextPath() + "/receptionist/requests");
                         return;
                     }
 
                     GuestRequest item = dao.findById(id);
                     if (item == null) {
-                        req.getSession().setAttribute("flash_error", "Không tìm thấy request #" + id);
+                        req.getSession().setAttribute("flash_error", "Request not found #" + id);
                         resp.sendRedirect(req.getContextPath() + "/receptionist/requests");
                         return;
                     }
@@ -147,7 +141,7 @@ public class ReplyGuestRequestController extends HttpServlet {
                     try {
                         dao.markSeen(id, userId);
                     } catch (Exception e) {
-                        // Ignore nếu column chưa có
+                        // Bỏ qua nếu chưa có cột này
                     }
 
                     req.setAttribute("item", item);
@@ -167,13 +161,13 @@ public class ReplyGuestRequestController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Integer userId = currentUserId(req);
 
-        // Kiểm tra đăng nhập
+        // Check login
         if (userId == null) {
-            resp.sendError(401, "Bạn cần đăng nhập để sử dụng chức năng này");
+            resp.sendError(401, "Login required.");
             return;
         }
 
-        // Kiểm tra role và chuyển hướng nếu cần
+        // Check role
         if (!checkRoleAndRedirect(req, resp)) {
             return;
         }
@@ -187,13 +181,13 @@ public class ReplyGuestRequestController extends HttpServlet {
 
                     // Validation
                     if (id <= 0) {
-                        req.getSession().setAttribute("flash_error", "Request ID không hợp lệ");
+                        req.getSession().setAttribute("flash_error", "Invalid Request ID.");
                         resp.sendRedirect(req.getContextPath() + "/receptionist/requests");
                         return;
                     }
 
                     if (replyText == null || replyText.trim().isEmpty()) {
-                        req.getSession().setAttribute("flash_error", "Vui lòng nhập nội dung phản hồi");
+                        req.getSession().setAttribute("flash_error", "Please enter reply content.");
                         resp.sendRedirect(req.getContextPath() + "/receptionist/requests/detail?id=" + id);
                         return;
                     }
@@ -201,9 +195,9 @@ public class ReplyGuestRequestController extends HttpServlet {
                     boolean ok = dao.reply(id, replyText.trim(), userId);
 
                     if (ok) {
-                        req.getSession().setAttribute("flash_success", "✅ Đã trả lời yêu cầu #" + id + " thành công!");
+                        req.getSession().setAttribute("flash_success", "✅ Replied to request #" + id + " successfully!");
                     } else {
-                        req.getSession().setAttribute("flash_error", "❌ Trả lời thất bại. Vui lòng thử lại.");
+                        req.getSession().setAttribute("flash_error", "❌ Reply failed. Please try again.");
                     }
 
                     resp.sendRedirect(req.getContextPath() + "/receptionist/requests/detail?id=" + id);
@@ -214,7 +208,7 @@ public class ReplyGuestRequestController extends HttpServlet {
                     int id = parseInt(req.getParameter("id"), 0);
 
                     if (id <= 0) {
-                        req.getSession().setAttribute("flash_error", "Request ID không hợp lệ");
+                        req.getSession().setAttribute("flash_error", "Invalid Request ID.");
                         resp.sendRedirect(req.getContextPath() + "/receptionist/requests");
                         return;
                     }
@@ -222,9 +216,9 @@ public class ReplyGuestRequestController extends HttpServlet {
                     boolean ok = dao.resolve(id, userId);
 
                     if (ok) {
-                        req.getSession().setAttribute("flash_success", "✅ Đã đánh dấu hoàn tất yêu cầu #" + id);
+                        req.getSession().setAttribute("flash_success", "✅ Marked request #" + id + " as resolved.");
                     } else {
-                        req.getSession().setAttribute("flash_error", "❌ Cập nhật thất bại. Vui lòng thử lại.");
+                        req.getSession().setAttribute("flash_error", "❌ Update failed. Please try again.");
                     }
 
                     resp.sendRedirect(req.getContextPath() + "/receptionist/requests/detail?id=" + id);
@@ -235,7 +229,7 @@ public class ReplyGuestRequestController extends HttpServlet {
                     int id = parseInt(req.getParameter("id"), 0);
 
                     if (id <= 0) {
-                        req.getSession().setAttribute("flash_error", "Request ID không hợp lệ");
+                        req.getSession().setAttribute("flash_error", "Invalid Request ID.");
                         resp.sendRedirect(req.getContextPath() + "/receptionist/requests");
                         return;
                     }
@@ -243,9 +237,9 @@ public class ReplyGuestRequestController extends HttpServlet {
                     boolean ok = dao.delete(id);
 
                     if (ok) {
-                        req.getSession().setAttribute("flash_success", "✅ Đã xóa yêu cầu #" + id + " thành công!");
+                        req.getSession().setAttribute("flash_success", "✅ Deleted request #" + id + " successfully!");
                     } else {
-                        req.getSession().setAttribute("flash_error", "❌ Không thể xóa yêu cầu #" + id);
+                        req.getSession().setAttribute("flash_error", "❌ Could not delete request #" + id);
                     }
 
                     resp.sendRedirect(req.getContextPath() + "/receptionist/requests");
@@ -257,7 +251,7 @@ public class ReplyGuestRequestController extends HttpServlet {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            req.getSession().setAttribute("flash_error", "Có lỗi xảy ra: " + e.getMessage());
+            req.getSession().setAttribute("flash_error", "Error occurred: " + e.getMessage());
             resp.sendRedirect(req.getContextPath() + "/receptionist/requests");
         }
     }
