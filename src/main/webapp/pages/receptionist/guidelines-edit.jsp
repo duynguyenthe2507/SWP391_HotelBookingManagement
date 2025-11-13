@@ -43,6 +43,56 @@
         /* Thêm style cho ảnh trong bảng và preview */
         .table-img { height: 48px; width: 72px; object-fit: cover; border-radius: 6px; }
         .thumb-preview { max-height: 160px; width: auto; border: 1px solid #eee; border-radius: 8px; margin-top: 8px; display: none; }
+        .filter-section {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 20px 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+        .filter-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+        .filter-form .form-group {
+            flex: 1;
+            min-width: 150px;
+        }
+        .filter-form .search-group {
+            flex-grow: 3;
+            min-width: 250px;
+        }
+        .filter-form .form-control {
+            width: 100%;
+            height: 46px;
+            padding: 10px 15px;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .filter-form .form-control:focus {
+            border-color: #dfa974;
+            box-shadow: 0 0 0 2px rgba(223, 169, 116, 0.2);
+            outline: none;
+        }
+        .filter-form .btn-filter {
+            height: 46px;
+            border: none;
+            background: #dfa974;
+            color: white;
+            padding: 0 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .filter-form .btn-filter:hover {
+            background: #c8965a;
+        }
     </style>
 </head>
 
@@ -64,6 +114,35 @@
                     <div class="alert alert-danger"><i class="fa fa-times-circle"></i> ${sessionScope.error}</div>
                     <c:remove var="error" scope="session"/>
                 </c:if>
+                <div class="filter-section">
+                    <form action="${pageContext.request.contextPath}/guidelines" method="get" class="filter-form">
+
+                        <div class="form-group search-group">
+                            <input type="text" name="search" class="form-control"
+                                   placeholder="Search by title or content..." value="${search}">
+                        </div>
+
+                        <div class="form-group">
+                            <select name="status" class="form-control">
+                                <option value="">All Statuses</option>
+                                <option value="Active" ${status == 'Active' ? 'selected' : ''}>Active</option>
+                                <option value="Inactive" ${status == 'Inactive' ? 'selected' : ''}>Inactive</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn-filter">
+                            <i class="fa fa-search"></i> Filter
+                        </button>
+
+                        <c:if test="${not empty search || not empty status}">
+                            <a href="${pageContext.request.contextPath}/guidelines"
+                               class="btn-filter"
+                               style="text-decoration: none; display:inline-flex; align-items: center; background: #6c757d;">
+                                <i class="fa fa-times"></i> Clear
+                            </a>
+                        </c:if>
+                    </form>
+                </div>
 
                 <div class="action-buttons">
                     <button class="action-btn" onclick="openPanel('add')">

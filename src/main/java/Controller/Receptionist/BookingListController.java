@@ -31,12 +31,39 @@ public class BookingListController extends HttpServlet {
 
         LOGGER.log(Level.INFO, "=== BookingListController.doGet STARTED ===");
 
-        HttpSession session = request.getSession();
-        Users loggedInUser = (Users) session.getAttribute("loggedInUser");
+        HttpSession session = request.getSession(false);
 
-        // Kiểm tra quyền truy cập
-        if (loggedInUser == null || !"receptionist".equalsIgnoreCase(loggedInUser.getRole())) {
-            LOGGER.log(Level.WARNING, "Access denied - redirecting to login");
+        // CRITICAL FIX: Check both "loggedInUser" AND "user"
+        Users loggedInUser = null;
+        if (session != null) {
+            loggedInUser = (Users) session.getAttribute("loggedInUser");
+
+            if (loggedInUser == null) {
+                loggedInUser = (Users) session.getAttribute("user");
+                LOGGER.log(Level.INFO, "loggedInUser was null, using 'user' attribute instead");
+            }
+        }
+
+        LOGGER.log(Level.INFO, "Session exists: {0}, User found: {1}",
+                new Object[]{session != null, loggedInUser != null});
+
+        if (loggedInUser != null) {
+            LOGGER.log(Level.INFO, "User details - ID: {0}, Role: {1}, Name: {2}",
+                    new Object[]{loggedInUser.getUserId(), loggedInUser.getRole(), loggedInUser.getFirstName()});
+        }
+
+        // FIX: Case-insensitive role check
+        if (loggedInUser == null ||
+                (loggedInUser.getRole() == null ||
+                        !loggedInUser.getRole().trim().equalsIgnoreCase("receptionist"))) {
+
+            LOGGER.log(Level.WARNING, "Access denied - User is null or not receptionist. Role: {0}",
+                    loggedInUser != null ? loggedInUser.getRole() : "NULL");
+
+            if (session == null) {
+                session = request.getSession();
+            }
+            session.setAttribute("redirectUrl", request.getContextPath() + "/receptionist/booking-list");
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
@@ -47,14 +74,15 @@ public class BookingListController extends HttpServlet {
 
         try {
             bookingDao = new BookingDao();
+            LOGGER.log(Level.INFO, "BookingDao initialized successfully");
 
-            // Lấy tham số filter, search, pagination
+            // Get filter parameters
             String statusFilter = request.getParameter("status");
             String checkInFilter = request.getParameter("checkInDate");
             String searchKeyword = request.getParameter("search");
 
             int page = 1;
-            int size = 5;
+            int size = 10; // Changed to 10 for better initial view
 
             try {
                 String pageParam = request.getParameter("page");
@@ -66,19 +94,33 @@ public class BookingListController extends HttpServlet {
                 page = 1;
             }
 
-            LOGGER.log(Level.INFO, "Fetching bookings - Status: {0}, CheckIn: {1}, Search: {2}, Page: {3}",
+            LOGGER.log(Level.INFO, "Query parameters - Status: {0}, CheckIn: {1}, Search: {2}, Page: {3}",
                     new Object[]{statusFilter, checkInFilter, searchKeyword, page});
 
-            // Lấy dữ liệu từ DAO
-            List<Map<String, Object>> bookings = bookingDao.findBookings(
-                    statusFilter, checkInFilter, searchKeyword, page, size
-            );
+            // Fetch bookings with error handling
+            List<Map<String, Object>> bookings = null;
+            int totalItems = 0;
 
-            int totalItems = bookingDao.countBookings(statusFilter, checkInFilter, searchKeyword);
-            int totalPages = (int) Math.ceil((double) totalItems / size);
+            try {
+                LOGGER.log(Level.INFO, "Calling bookingDao.findBookings...");
+                bookings = bookingDao.findBookings(statusFilter, checkInFilter, searchKeyword, page, size);
+                LOGGER.log(Level.INFO, "findBookings returned {0} results", bookings != null ? bookings.size() : "NULL");
 
-            LOGGER.log(Level.INFO, "Retrieved {0} bookings, total: {1}",
-                    new Object[]{bookings != null ? bookings.size() : 0, totalItems});
+                LOGGER.log(Level.INFO, "Calling bookingDao.countBookings...");
+                totalItems = bookingDao.countBookings(statusFilter, checkInFilter, searchKeyword);
+                LOGGER.log(Level.INFO, "countBookings returned {0}", totalItems);
+
+            } catch (Exception daoEx) {
+                LOGGER.log(Level.SEVERE, "DAO operation failed!", daoEx);
+                daoEx.printStackTrace();
+                bookings = new ArrayList<>();
+                totalItems = 0;
+            }
+
+            int totalPages = (totalItems > 0) ? (int) Math.ceil((double) totalItems / size) : 1;
+
+            LOGGER.log(Level.INFO, "Final stats - Bookings: {0}, Total: {1}, Pages: {2}",
+                    new Object[]{bookings != null ? bookings.size() : 0, totalItems, totalPages});
 
             // Kiểm tra booking nào đã có invoice
             InvoiceDao invoiceDao = null;
@@ -110,7 +152,7 @@ public class BookingListController extends HttpServlet {
                 }
             }
 
-            // Đặt thuộc tính cho JSP
+            // Set attributes for JSP
             request.setAttribute("bookings", bookings != null ? bookings : new ArrayList<>());
             request.setAttribute("bookingsWithInvoice", bookingsWithInvoice);
             request.setAttribute("page", page);
@@ -121,25 +163,37 @@ public class BookingListController extends HttpServlet {
             request.setAttribute("checkInFilter", checkInFilter);
             request.setAttribute("searchKeyword", searchKeyword);
 
+            LOGGER.log(Level.INFO, "Forwarding to JSP...");
             request.getRequestDispatcher("/pages/receptionist/booking-list.jsp").forward(request, response);
+            LOGGER.log(Level.INFO, "=== BookingListController.doGet COMPLETED SUCCESSFULLY ===");
 
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error loading booking list", e);
+            LOGGER.log(Level.SEVERE, "CRITICAL ERROR in BookingListController", e);
+            e.printStackTrace();
+
+            if (session == null) {
+                session = request.getSession();
+            }
             session.setAttribute("bookingMessage", "Error loading bookings: " + e.getMessage());
 
-            // Vẫn forward để hiển thị trang với thông báo lỗi
+            // Still forward to show the page with error message
             request.setAttribute("bookings", new ArrayList<>());
             request.setAttribute("page", 1);
             request.setAttribute("size", 10);
             request.setAttribute("totalPages", 0);
             request.setAttribute("totalItems", 0);
 
-            request.getRequestDispatcher("/pages/receptionist/booking-list.jsp").forward(request, response);
+            try {
+                request.getRequestDispatcher("/pages/receptionist/booking-list.jsp").forward(request, response);
+            } catch (Exception ex) {
+                LOGGER.log(Level.SEVERE, "Failed to forward to JSP", ex);
+                response.sendRedirect(request.getContextPath() + "/");
+            }
         } finally {
-            // Đóng connection
             if (bookingDao != null) {
                 try {
                     bookingDao.closeConnection();
+                    LOGGER.log(Level.INFO, "BookingDao connection closed");
                 } catch (Exception e) {
                     LOGGER.log(Level.WARNING, "Error closing BookingDao connection", e);
                 }

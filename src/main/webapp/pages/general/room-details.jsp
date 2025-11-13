@@ -2,7 +2,7 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"> <%-- Translated lang --%>
 <head>
     <meta charset="UTF-8">
     <meta name="description" content="Sona Template">
@@ -253,7 +253,17 @@
             padding: 25px;
             background-color: #f8f9fa;
             border-radius: 8px;
+            /* Add transition for new reviews */
+            opacity: 1;
+            transform: scale(1);
+            transition: all 0.5s ease-out;
         }
+        /* Style for new reviews (used by JS) */
+        .review-item.new-review {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        
         .review-item .ri-pic { margin-right: 20px; }
         .review-item .ri-pic img {
             width: 70px;
@@ -275,6 +285,7 @@
         .review-item .ri-text .rating {
             color: #dfa974;
             margin: 8px 0;
+            font-size: 16px; /* Added size */
         }
         .review-item .ri-text p {
             color: #666;
@@ -328,6 +339,44 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(223, 169, 116, 0.4);
         }
+        /* CSS for Star Rating */
+        .star-rating {
+            direction: rtl; /* Flip to color from right to left */
+            display: inline-block;
+            padding: 0;
+            margin-bottom: 15px;
+        }
+        .star-rating input[type=radio] {
+            display: none;
+        }
+        .star-rating label {
+            color: #ddd; /* Empty star color */
+            font-size: 30px;
+            padding: 0 3px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .star-rating input[type=radio]:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: #dfa974; /* Selected or hover star color */
+        }
+
+        /* Login/Permission Message */
+        .review-permission-box {
+            text-align: center;
+            padding: 20px;
+            background-color: #fffaf0;
+            border: 1px solid #ffeeba;
+            border-radius: 8px;
+            color: #856404;
+        }
+        .review-permission-box a {
+            color: #dfa974;
+            font-weight: 600;
+            text-decoration: underline;
+        }
+        
         .breadcrumb-section {
             background-color: #f8f9fa;
             padding: 50px 0;
@@ -347,6 +396,62 @@
             text-decoration: none;
         }
         .bt-option a:hover { color: #dfa974; }
+        
+        /* === NEW CSS FOR SERVICES & TOTAL PRICE === */
+        .services-list {
+            max-height: 200px;
+            overflow-y: auto;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+        }
+        .service-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+         .service-item:last-child {
+             margin-bottom: 0;
+         }
+        .service-item input[type="checkbox"] {
+            width: auto;
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+        .service-item label {
+            margin-bottom: 0;
+            font-weight: 500;
+            font-size: 15px;
+            color: #555;
+            flex: 1;
+            cursor: pointer;
+        }
+         .service-item .service-price {
+            font-weight: 600;
+             color: #333;
+             font-size: 14px;
+         }
+
+        .total-price-display {
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 2px dashed #dfa974;
+        }
+        .total-price-display h4 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .total-price-display h3 {
+            font-size: 30px;
+            font-weight: 700;
+            color: #dfa974;
+            margin: 0;
+        }
+        /* === END NEW CSS === */
+        
         @media (max-width: 991px) {
             .room-booking { margin-top: 40px; position: static; }
             .rd-title { flex-direction: column; align-items: flex-start; }
@@ -380,17 +485,17 @@
     <section class="room-details-section spad">
         <div class="container">
             
-            <%-- === PHẦN THÊM MỚI: Hiển thị thông báo (Thêm vào giỏ thành công/thất bại) === --%>
+            <%-- === NEW SECTION: Display alerts (Add to cart success/fail) === --%>
             <c:if test="${not empty sessionScope.cartMessage}">
                 <div class="alert ${sessionScope.cartMessageType == 'ERROR' ? 'alert-danger' : (sessionScope.cartMessageType == 'WARNING' ? 'alert-warning' : 'alert-success')}" role="alert">
                      <button type="button" class="close-alert" onclick="this.parentElement.style.display='none';">&times;</button>
                     <c:out value="${sessionScope.cartMessage}"/>
                 </div>
-                <%-- Xóa thông báo khỏi session sau khi hiển thị --%>
+                <%-- Clear message from session after displaying --%>
                 <% session.removeAttribute("cartMessage"); %>
                 <% session.removeAttribute("cartMessageType"); %>
             </c:if>
-            <%-- === KẾT THÚC PHẦN THÊM MỚI === --%>
+            <%-- === END NEW SECTION === --%>
 
             <c:choose>
                 <c:when test="${not empty room}">
@@ -405,7 +510,6 @@
                                 <div class="rd-text">
                                     <div class="rd-title">
                                         <h3><c:out value="${room.name}"/></h3>
-                                        <%-- Đã bỏ nút "Booking Now" ở đây vì form ở bên phải --%>
                                     </div>
                                     
                                     <h2>
@@ -435,34 +539,98 @@
                                     </table>
                                     
                                     <p class="f-para"><c:out value="${room.description}"/></p>
-                                    <p>Mauris molestie lectus in CLUDES quamlaoreet, a tincidunt lacus aliquet. Quisque non interdum
-                                        massa. Phasellus et lacus id nunc venenatis fringilla. Aliquam Cursus commodo
-                                        turpis, vitae orci aonsectetur. Interdum et malesuada fames ac ante ipsum primis in
-                                        faucibus.</p>
+                                    <%-- Translated Placeholder --%>
+                                    <p>Welcome to our premium room. This space is designed for your comfort and relaxation. 
+                                       Enjoy top-tier amenities, a beautiful view, and our 24/7 room service. 
+                                       We hope you have a wonderful stay with us at 36 Hotel.</p>
                                 </div>
                             </div>
 
+                            <!-- === REVIEW SECTION (MODIFIED) === -->
                             <div class="rd-reviews">
                                 <h4>Reviews</h4>
-                                <div class="review-item">
-                                    <div class="ri-pic">
-                                        <img src="${pageContext.request.contextPath}/img/room/avatar/default-avatar.png" alt="">
-                                    </div>
-                                    <div class="ri-text">
-                                        <span>27 Aug 2025</span>
-                                        <div class="rating">...</div>
-                                        <h5>Brandon Kelley</h5>
-                                        <p>...</p>
-                                    </div>
+                                <div id="review-list-container">
+                                    <%-- Display existing reviews --%>
+                                    <c:if test="${empty feedbackList}">
+                                        <p id="no-reviews-message">There are no reviews for this room yet. Be the first!</p>
+                                    </c:if>
+                                    
+                                    <c:forEach var="fb" items="${feedbackList}">
+                                        <div class="review-item">
+                                            <div class="ri-pic">
+                                                <c:set var="avatar" value="${not empty fb.userAvatarUrl ? fb.userAvatarUrl : pageContext.request.contextPath.concat('/img/room/avatar/default-avatar.png')}"/>
+                                                <img src="${avatar}" alt="${fb.userFirstName}">
+                                            </div>
+                                            <div class="ri-text">
+                                                <%-- === FIX (Line 406): Use .format() instead of <fmt:formatDate> === --%>
+                                                <span>${fb.createdAt.format(myDateFormatter)}</span>
+                                                <div class="rating">
+                                                    <c:forEach begin="1" end="${fb.rating}">
+                                                        <i class="fa fa-star"></i>
+                                                    </c:forEach>
+                                                    <c:forEach begin="${fb.rating + 1}" end="5">
+                                                        <i class="fa fa-star-o"></i>
+                                                    </c:forEach>
+                                                </div>
+                                                <h5>${fb.userFirstName} ${fb.userLastName}</h5>
+                                                <p>${fb.content}</p>
+                                            </div>
+                                        </div>
+                                    </c:forEach>
                                 </div>
+                                
+                                <%-- "View More" Button (Hidden for future logic) --%>
+                                <!-- 
+                                <div class="text-center" style="margin-top: 20px;">
+                                    <a href="#" class="btn btn-primary btn-sm">View More</a>
+                                </div> 
+                                -->
                             </div>
 
+                            <!-- === ADD REVIEW SECTION (MODIFIED) === -->
                             <div class="review-add">
                                 <h4>Add Review</h4>
-                                <form action="post" class="ra-form">
-                                    <%-- Form thêm review (giữ nguyên như code của bạn) --%>
-                                </form>
+                                
+                                <!-- AJAX Success/Error Message -->
+                                <div id="review-message" style="display: none; margin-bottom: 20px;"></div>
+
+                                <c:choose>
+                                    <%-- 1. Has permission to review --%>
+                                    <c:when test="${canReviewBookingId > 0}">
+                                        <form action="#" id="review-form" class="ra-form">
+                                            <!-- Store bookingId to send via AJAX -->
+                                            <input type="hidden" id="review-booking-id" value="${canReviewBookingId}">
+                                            <div class="star-rating">
+                                                <input type="radio" id="star5" name="rating" value="5" required/><label for="star5" title="5 stars">★</label>
+                                                <input type="radio" id="star4" name="rating" value="4" required/><label for="star4" title="4 stars">★</label>
+                                                <input type="radio" id="star3" name="rating" value="3" required/><label for="star3" title="3 stars">★</label>
+                                                <input type="radio" id="star2" name="rating" value="2" required/><label for="star2" title="2 stars">★</label>
+                                                <input type="radio" id="star1" name="rating" value="1" required/><label for="star1" title="1 star">★</label>
+                                            </div>
+                                            
+                                            <textarea id="review-content" placeholder="Your review" required></textarea>
+                                            <button type="submit" id="submit-review-btn">Submit Review</button>
+                                        </form>
+                                    </c:when>
+                                    
+                                    <%-- 2. Logged in but no permission --%>
+                                    <c:when test="${not empty sessionScope.user && canReviewBookingId == 0}">
+                                        <div class="review-permission-box">
+                                            You can only review this room after completing (checking-out) a booking.
+                                        </div>
+                                    </c:when>
+                                    
+                                    <%-- 3. Not logged in --%>
+                                    <c:otherwise>
+                                        <div class="review-permission-box">
+                                            Please <a href="${pageContext.request.contextPath}/login?redirectUrl=${pageContext.request.contextPath}/room-details?roomId=${room.roomId}">login</a> and complete a booking to review this room.
+                                        </div>
+                                    </c:otherwise>
+                                </c:choose>
+                                
                             </div>
+                            <!-- === END REVIEW SECTION (MODIFIED) === -->
+                            
                         </div>
 
                         <!-- Right Column: Booking Form -->
@@ -470,35 +638,69 @@
                             <div class="room-booking">
                                 <h3>Your Reservation</h3>
                                 
-                                <%-- === PHẦN SỬA ĐỔI QUAN TRỌNG: Cập nhật form === --%>
                                 <c:url value="/booking/add" var="addToBookingUrl"/>
-                                <form action="${addToBookingUrl}" method="POST">
+                                <form action="${addToBookingUrl}" method="POST" id="booking-form">
                                     
                                     <input type="hidden" name="roomId" value="${room.roomId}">
+                                    <input type="hidden" id="base-room-price" value="${room.price}">
                                     
                                     <div class="check-date">
                                         <label for="date-in">Check In:</label>
-                                        <input type="text" class="date-input" id="date-in" name="checkInDate" required>
+                                        <input type="text" class="date-input" id="date-in" name="checkInDate" required autocomplete="off">
                                         <i class="icon_calendar"></i>
                                     </div>
                                     <div class="check-date">
                                         <label for="date-out">Check Out:</label>
-                                        <input type="text" class="date-input" id="date-out" name="checkOutDate" required>
+                                        <input type="text" class="date-input" id="date-out" name="checkOutDate" required autocomplete="off">
                                         <i class="icon_calendar"></i>
                                     </div>
                                     <div class="select-option">
                                         <label for="guest">Guests:</label>
-                                        <select id="guest" name="numGuests"> <%-- Thêm name attribute --%>
+                                        <select id="guest" name="numGuests"> 
                                             <c:forEach begin="1" end="${room.capacity}" var="i">
                                                 <option value="${i}">${i} Adult(s)</option>
                                             </c:forEach>
                                         </select>
                                     </div>
-                                    <%-- Đã xóa bỏ phần <select id="room"> (chọn "1 Room") --%>
                                     
-                                    <button type="submit">Add to Booking</button> <%-- Đổi text nút --%>
+                                    <!-- === NEW SECTION: SERVICES LIST === -->
+                                    <div class="select-option">
+                                        <label>Additional Services:</label>
+                                        <div class="services-list">
+                                            <c:if test="${empty servicesList}">
+                                                <p>No additional services available.</p>
+                                            </c:if>
+                                            <c:forEach var="service" items="${servicesList}">
+                                                <div class="service-item">
+                                                    <input type="checkbox" 
+                                                           name="serviceIds" 
+                                                           id="service-${service.serviceId}" 
+                                                           value="${service.serviceId}"
+                                                           data-price="${service.price}"
+                                                           class="service-checkbox">
+                                                    <label for="service-${service.serviceId}">
+                                                        ${service.name}
+                                                    </label>
+                                                    <span class="service-price">
+                                                        <fmt:formatNumber value="${service.price}" pattern="#,##0"/>
+                                                    </span>
+                                                </div>
+                                            </c:forEach>
+                                        </div>
+                                    </div>
+                                    <!-- === END NEW SECTION === -->
+                                    
+                                    <!-- === NEW SECTION: TOTAL PRICE DISPLAY === -->
+                                    <div class="total-price-display">
+                                        <h4>Total Price:</h4>
+                                        <h3 id="booking-total-price">
+                                            <fmt:formatNumber value="${room.price}" pattern="#,##0"/> VND
+                                        </h3>
+                                    </div>
+                                    <!-- === END NEW SECTION === -->
+                                    
+                                    <button type="submit">Add to Booking</button>
                                 </form>
-                                <%-- === KẾT THÚC PHẦN SỬA ĐỔI === --%>
                             </div>
                         </div>
                     </div>
@@ -541,44 +743,220 @@
     <script src="${pageContext.request.contextPath}/js/owl.carousel.min.js"></script>
     <script src="${pageContext.request.contextPath}/js/main.js"></script>
 
+    <!-- === PRICE CALCULATION & REVIEW SCRIPT === -->
     <script>
         $(document).ready(function () {
-            // Initialize datepicker
+            
+            // ===================================
+            // 1. TOTAL PRICE CALCULATION (BOOKING)
+            // ===================================
+            
+            const baseRoomPrice = parseFloat($('#base-room-price').val());
+            const checkInInput = $('#date-in');
+            const checkOutInput = $('#date-out');
+            // const serviceCheckboxes = $('.service-checkbox'); // <<< This was the bug
+            const totalDisplay = $('#booking-total-price');
+
+            function parseDate(dateStr) {
+                if (!dateStr) return null;
+                var parts = dateStr.split('/');
+                return new Date(parts[2], parts[1] - 1, parts[0]);
+            }
+            
+            function formatCurrency(value) {
+                return new Intl.NumberFormat('en-US').format(value) + ' VND';
+            }
+
+            function calculateTotal() {
+                let checkInDate = parseDate(checkInInput.val());
+                let checkOutDate = parseDate(checkOutInput.val());
+                let numNights = 0;
+
+                if (checkInDate && checkOutDate && checkOutDate > checkInDate) {
+                    const diffTime = Math.abs(checkOutDate.getTime() - checkInDate.getTime());
+                    numNights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                } else if (checkInDate || checkOutDate) {
+                     numNights = 1; // Default to 1 night if only one date is selected
+                } else if (checkInDate && checkOutDate && checkInDate.getTime() === checkOutDate.getTime()) {
+                    numNights = 1; // Check-in and check-out on the same day = 1 night
+                } else {
+                    numNights = 1; // Default (no date selected)
+                }
+                
+                let totalRoomPrice = baseRoomPrice * numNights;
+                let totalServicesPrice = 0;
+                
+                // Use the new selector
+                $('.service-checkbox:checked').each(function() {
+                    totalServicesPrice += parseFloat($(this).data('price'));
+                });
+
+                let grandTotal = totalRoomPrice + totalServicesPrice;
+                totalDisplay.text(formatCurrency(grandTotal));
+            }
+
             $(".date-input").datepicker({
-                dateFormat: 'dd/mm/yy', // Giữ nguyên format này, BookingController sẽ xử lý
-                minDate: 0, // Vẫn giữ minDate
+                dateFormat: 'dd/mm/yy',
+                minDate: 0,
                 onSelect: function(selectedDate) {
-                    var option = this.id == "date-in" ? "minDate" : "maxDate";
                     var instance = $(this).data("datepicker");
-                    var date = $.datepicker.parseDate(instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings);
+                    var date = $.datepicker.parseDate(instance.settings.dateFormat, selectedDate, instance.settings);
                     
-                    // Cập nhật min/max cho datepicker còn lại
                      if (this.id === "date-in") {
-                        // Nếu date-out đã có giá trị, và giá trị đó trước ngày check-in mới, thì xóa date-out
                         var dateOutVal = $("#date-out").val();
                         if (dateOutVal) {
                              var dateOut = $.datepicker.parseDate(instance.settings.dateFormat, dateOutVal, instance.settings);
-                             if (dateOut < date) {
-                                $("#date-out").val("");
+                             if (dateOut <= date) { // Fix: <=
+                                 $("#date-out").val("");
                              }
                         }
-                         $("#date-out").datepicker("option", "minDate", date);
-                    } else if (this.id === "date-out") {
-                         $("#date-in").datepicker("option", "maxDate", date);
-                    }
+                         var nextDay = new Date(date);
+                         nextDay.setDate(nextDay.getDate() + 1);
+                         $("#date-out").datepicker("option", "minDate", nextDay);
+                         
+                     } else if (this.id === "date-out") {
+                         var prevDay = new Date(date);
+                         prevDay.setDate(prevDay.getDate() - 1);
+                         $("#date-in").datepicker("option", "maxDate", prevDay);
+                     }
+                    calculateTotal();
                 }
             });
             
-            // Initialize nice select
-            $('select').niceSelect();
+            // === FIX: Use Event Delegation ===
+            // This listens for changes on 'document', but only acts if the change
+            // happened on an element matching '.service-checkbox'
+            $(document).on('change', '.service-checkbox', calculateTotal);
+            // === END FIX ===
 
-             // Preloader logic (simplified)
+            $('select').niceSelect();
             $(window).on('load', function() {
                 $("#preloder").fadeOut("slow");
                 $("body").removeClass("hidden-overflow");
             });
             $("body").addClass("hidden-overflow");
+             calculateTotal();
+
+            // ===================================
+            // 2. SUBMIT REVIEW LOGIC (AJAX)
+            // ===================================
+            
+            const reviewForm = $('#review-form');
+            const submitBtn = $('#submit-review-btn');
+            const reviewMessage = $('#review-message');
+            const reviewListContainer = $('#review-list-container');
+            const noReviewsMessage = $('#no-reviews-message');
+
+            reviewForm.on('submit', function(e) {
+                e.preventDefault(); // Prevent traditional form submission
+                
+                // Get data
+                const bookingId = parseInt($('#review-booking-id').val());
+                const ratingInput = $('input[name="rating"]:checked'); // Get the input
+                const content = $('#review-content').val().trim();
+                const addReviewUrl = '${pageContext.request.contextPath}/user/add-review';
+                
+                // Validate rating
+                if (ratingInput.length === 0) {
+                    reviewMessage.removeClass('alert-success').addClass('alert-danger').text('Error: Please select a star rating.').show();
+                    return;
+                }
+                const rating = parseInt(ratingInput.val());
+
+                // Disable button
+                submitBtn.prop('disabled', true).text('Submitting...');
+                reviewMessage.hide().removeClass('alert-danger alert-success');
+
+                // Data to send
+                const data = {
+                    bookingId: bookingId,
+                    rating: rating,
+                    content: content
+                };
+
+                // Send AJAX
+                fetch(addReviewUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        // If server returns an error (401, 400, 500)
+                        return response.json().then(err => { throw new Error(err.error || 'Unknown error occurred'); });
+                    }
+                    return response.json(); // Return JSON of the new review
+                })
+                .then(newReview => {
+                    // SUCCESS!
+                    // 1. Show success message
+                    reviewMessage.addClass('alert-success').text('Review submitted successfully!').show();
+                    // 2. Hide form
+                    reviewForm.hide();
+                    // 3. Prepend new review to the list
+                    prependNewReview(newReview);
+                    // 4. Remove "No reviews" message (if present)
+                    if(noReviewsMessage) noReviewsMessage.hide();
+                })
+                .catch(error => {
+                    // FAILURE!
+                    reviewMessage.addClass('alert-danger').text('Error: ' + error.message).show();
+                    submitBtn.prop('disabled', false).text('Submit Review');
+                });
+            });
+            
+            // Helper function to create new review HTML
+            function prependNewReview(fb) {
+                // Create stars
+                let starsHtml = '';
+                for (let i = 0; i < fb.rating; i++) {
+                    starsHtml += '<i class="fa fa-star"></i>';
+                }
+                for (let i = fb.rating; i < 5; i++) {
+                    starsHtml += '<i class="fa fa-star-o"></i>';
+                }
+                
+                // Format date (simple)
+                // Note: fb.createdAt is an ISO string (e.g., "2025-11-11T14:30:00")
+                const date = new Date(fb.createdAt); 
+                const formattedDate = date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+                // Get avatar (fallback)
+                const avatar = fb.userAvatarUrl ? fb.userAvatarUrl : '${pageContext.request.contextPath}/img/room/avatar/default-avatar.png';
+                
+                // Create HTML
+                const reviewHtml = `
+                    <div class="review-item new-review">
+                        <div class="ri-pic">
+                            <img src="${avatar}" alt="${fb.userFirstName}">
+                        </div>
+                        <div class="ri-text">
+                            <span>${formattedDate}</span>
+                            <div class="rating">${starsHtml}</div>
+                            <h5>${fb.userFirstName} ${fb.userLastName}</h5>
+                            <p>${fb.content}</p>
+                        </div>
+                    </div>
+                `;
+                
+                // Prepend to list
+                reviewListContainer.prepend(reviewHtml);
+                
+                // Trigger animation (fade in)
+                // Use setTimeout to ensure DOM has rendered before changing class
+                setTimeout(() => {
+                    // Find the exact new review that was added
+                    reviewListContainer.find('.review-item.new-review').css({
+                        'opacity': '1',
+                        'transform': 'scale(1)'
+                    });
+                }, 100);
+            }
         });
     </script>
+
 </body>
 </html>

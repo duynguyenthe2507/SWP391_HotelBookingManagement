@@ -75,12 +75,6 @@ public class PaymentCreationController extends HttpServlet {
         cld.add(Calendar.MINUTE, 15);
         String vnp_ExpireDate = formatter.format(cld.getTime());
         vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
-
-        // ✅ QUAN TRỌNG: KHÔNG THÊM vnp_IpnUrl vào đây
-        // Vì VNPay Sandbox không hỗ trợ IPN URL trong request
-        // Phải cấu hình trong Dashboard
-
-        // Sort params
         List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
         Collections.sort(fieldNames);
         
@@ -93,12 +87,9 @@ public class PaymentCreationController extends HttpServlet {
             String fieldValue = vnp_Params.get(fieldName);
             
             if ((fieldValue != null) && (fieldValue.length() > 0)) {
-                // Build query URL
                 query.append(URLEncoder.encode(fieldName, StandardCharsets.UTF_8.toString()));
                 query.append('=');
                 query.append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()));
-                
-                // Build hashData
                 hashData.append(fieldName); 
                 hashData.append('=');
                 hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString())); 

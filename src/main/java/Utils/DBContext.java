@@ -11,8 +11,6 @@ public class DBContext {
     private static final Logger LOGGER = Logger.getLogger(DBContext.class.getName());
     public Connection connection;
     private boolean isConnectionManagedExternally = false;
-
-    // Constructor mặc định: Tạo kết nối mới
     public DBContext() {
         try (InputStream input = getClass().getClassLoader().getResourceAsStream("config.properties")) {
             Properties props = new Properties();
@@ -34,7 +32,6 @@ public class DBContext {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
             connection = DriverManager.getConnection(url, user, pass);
             isConnectionManagedExternally = false;
-            // LOGGER.log(Level.INFO, "New database connection established successfully from config.properties.");
 
         } catch (ClassNotFoundException ex) {
              LOGGER.log(Level.SEVERE, "!!! CRITICAL: SQL Server JDBC Driver not found. Ensure the driver JAR is in the classpath. !!!", ex);

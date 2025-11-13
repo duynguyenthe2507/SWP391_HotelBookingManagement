@@ -25,7 +25,6 @@ public class RoomFeeDetailController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        // Check if user is logged in and is a receptionist
         HttpSession session = request.getSession();
         Users loggedInUser = (Users) session.getAttribute("loggedInUser");
         

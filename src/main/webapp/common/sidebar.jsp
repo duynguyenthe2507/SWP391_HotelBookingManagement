@@ -150,6 +150,10 @@
            class="${currentPath == '/rules' ? 'active' : ''}">
             <i class="fa fa-book"></i> Rules
         </a>
+        <a href="${contextPath}/receptionist/requests"
+           class="${currentPath == '/receptionist/requests' ? 'active' : ''}">
+            <i class="fa fa-envelope"></i> Guest Requests
+        </a>
     </div>
 
     <div class="sidebar-user-controls">
