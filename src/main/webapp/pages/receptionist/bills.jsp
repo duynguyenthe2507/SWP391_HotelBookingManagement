@@ -46,7 +46,7 @@
             <!-- Search and Filter Section -->
             <div class="search-section">
                 <form action="${pageContext.request.contextPath}/receptionist/bills" method="get" class="search-form">
-                    <input type="hidden" name="action" value="search">
+                    <input type="hidden" name="action" value="searchBill">
                     <input type="text" name="search" class="search-input"
                            placeholder="Search by invoice ID, booking ID, customer name or phone..."
                            value="${searchTerm}">
@@ -146,10 +146,6 @@
                                                    class="action-link view">
                                                     <i class="fa fa-eye"></i> View
                                                 </a>
-                                                <a href="${pageContext.request.contextPath}/receptionist/bills?action=editBill&id=${bill.invoiceId}"
-                                                   class="action-link edit">
-                                                    <i class="fa fa-edit"></i> Edit
-                                                </a>
                                                 <a href="${pageContext.request.contextPath}/receptionist/bills/export-pdf?id=${bill.invoiceId}"
                                                    class="action-link print" target="_blank">
                                                     <i class="fa fa-file-pdf-o"></i> Export PDF
@@ -185,24 +181,27 @@
 
                 <!-- Pagination Controls -->
                 <c:if test="${totalPages > 1}">
+                    <c:set var="paginationAction" value="${not empty searchTerm ? 'searchBill' : 'listBill'}" />
+                    <c:set var="searchParam" value="${not empty searchTerm ? '&search='.concat(searchTerm) : ''}" />
+                    
                     <nav aria-label="Bills pagination" style="padding: 10px 20px 20px 20px;">
                         <ul class="pagination" style="margin:0; display:flex; justify-content:center; flex-wrap: wrap;">
                             <li class="page-item ${page == 1 ? 'disabled' : ''}" style="margin: 2px;">
-                                <a class="page-link" href="${pageContext.request.contextPath}/receptionist/bills?page=${page - 1}&size=${size}" aria-label="Previous"
+                                <a class="page-link" href="${pageContext.request.contextPath}/receptionist/bills?action=${paginationAction}&page=${page - 1}&size=${size}${searchParam}" aria-label="Previous"
                                    style="border-radius: 8px; padding: 8px 12px; border: 1px solid #e5e5e5; color: #19191a; text-decoration: none; display: inline-block;">
                                     <span aria-hidden="true">&laquo;</span>
                                 </a>
                             </li>
                             <c:forEach var="i" begin="1" end="${totalPages}">
                                 <li class="page-item ${i == page ? 'active' : ''}" style="margin: 2px;">
-                                    <a class="page-link" href="${pageContext.request.contextPath}/receptionist/bills?page=${i}&size=${size}"
+                                    <a class="page-link" href="${pageContext.request.contextPath}/receptionist/bills?action=${paginationAction}&page=${i}&size=${size}${searchParam}"
                                        style="border-radius: 8px; padding: 8px 12px; text-decoration: none; display: inline-block;">
                                         ${i}
                                     </a>
                                 </li>
                             </c:forEach>
                             <li class="page-item ${page == totalPages ? 'disabled' : ''}" style="margin: 2px;">
-                                <a class="page-link" href="${pageContext.request.contextPath}/receptionist/bills?page=${page + 1}&size=${size}" aria-label="Next"
+                                <a class="page-link" href="${pageContext.request.contextPath}/receptionist/bills?action=${paginationAction}&page=${page + 1}&size=${size}${searchParam}" aria-label="Next"
                                    style="border-radius: 8px; padding: 8px 12px; border: 1px solid #e5e5e5; color: #19191a; text-decoration: none; display: inline-block;">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
@@ -212,10 +211,10 @@
                             Page ${page} of ${totalPages} • Total ${totalItems} bills
                             <span style="margin-left:10px;">|</span>
                             <span style="margin-left:10px;">Per page:</span>
-                            <a href="${pageContext.request.contextPath}/receptionist/bills?page=1&size=5" style="margin-left:6px;">5</a>
-                            <a href="${pageContext.request.contextPath}/receptionist/bills?page=1&size=10" style="margin-left:6px;">10</a>
-                            <a href="${pageContext.request.contextPath}/receptionist/bills?page=1&size=20" style="margin-left:6px;">20</a>
-                            <a href="${pageContext.request.contextPath}/receptionist/bills?page=1&size=50" style="margin-left:6px;">50</a>
+                            <a href="${pageContext.request.contextPath}/receptionist/bills?action=${paginationAction}&page=1&size=5${searchParam}" style="margin-left:6px;">5</a>
+                            <a href="${pageContext.request.contextPath}/receptionist/bills?action=${paginationAction}&page=1&size=10${searchParam}" style="margin-left:6px;">10</a>
+                            <a href="${pageContext.request.contextPath}/receptionist/bills?action=${paginationAction}&page=1&size=20${searchParam}" style="margin-left:6px;">20</a>
+                            <a href="${pageContext.request.contextPath}/receptionist/bills?action=${paginationAction}&page=1&size=50${searchParam}" style="margin-left:6px;">50</a>
                         </div>
                     </nav>
                 </c:if>

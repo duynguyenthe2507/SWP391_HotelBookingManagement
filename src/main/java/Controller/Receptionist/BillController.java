@@ -122,7 +122,14 @@ public class BillController extends HttpServlet {
         if (page > totalPages) page = totalPages;
         int offset = (page - 1) * size;
 
+        System.out.println("=== BILLS PAGINATION DEBUG ===");
+        System.out.println("Page: " + page + ", Size: " + size);
+        System.out.println("Total Items: " + totalItems + ", Total Pages: " + totalPages);
+        System.out.println("Offset: " + offset);
+
         List<Map<String, Object>> bills = invoiceDao.getBillsWithDetailsPaged(offset, size);
+        System.out.println("Bills retrieved: " + (bills != null ? bills.size() : 0));
+        
         request.setAttribute("bills", bills);
         request.setAttribute("page", page);
         request.setAttribute("size", size);
