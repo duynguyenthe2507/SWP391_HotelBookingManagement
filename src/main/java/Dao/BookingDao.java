@@ -123,7 +123,7 @@ public class BookingDao extends DBContext implements AutoCloseable { // <<< SỬ
             params.add("%" + keyword + "%");
             params.add("%" + keyword + "%");
         }
-        sql.append("ORDER BY b.checkinTime DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+        sql.append("ORDER BY b.createdAt DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
         params.add((pageNumber - 1) * pageSize);
         params.add(pageSize);
         try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {

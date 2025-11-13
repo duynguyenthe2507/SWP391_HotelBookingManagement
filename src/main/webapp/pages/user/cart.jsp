@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css" type="text/css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/jquery-ui.min.css" type="text/css">
 
-    <%-- Add CSS --%>
     <style>
         .cart-table table { width: 100%; }
         .quantity-spinner { display: flex; align-items: center; justify-content: start; }
@@ -30,14 +29,21 @@
 <body>
 <div id="preloder"><div class="loader"></div></div>
 
-<%-- Include Header --%>
 <jsp:include page="/common/header.jsp"/>
-
-<%-- Include Breadcrumb --%>
 <jsp:include page="/common/breadcrumb.jsp"/>
 
 <section class="shopping-cart spad">
     <div class="container">
+
+        <%-- Display Messages --%>
+        <c:if test="${not empty sessionScope.cartMessage}">
+            <div class="alert ${sessionScope.cartMessageType == 'ERROR' ? 'alert-danger' : (sessionScope.cartMessageType == 'WARNING' ? 'alert-warning' : 'alert-success')}" role="alert">
+                <c:out value="${sessionScope.cartMessage}"/>
+            </div>
+            <% session.removeAttribute("cartMessage"); %>
+            <% session.removeAttribute("cartMessageType"); %>
+        </c:if>
+
         <c:if test="${empty cartItems}">
             <div class="text-center">
                 <h3>Your cart is empty!</h3>
@@ -46,7 +52,8 @@
         </c:if>
 
         <c:if test="${not empty cartItems}">
-            <form action="${pageContext.request.contextPath}/checkout" method="GET">
+            <%-- FIXED: Change to POST and correct action --%>
+            <form action="${pageContext.request.contextPath}/cart/checkout" method="POST">
                 <div class="row">
                     <div class="col-lg-8">
                         <div class="cart-table">
@@ -58,12 +65,13 @@
                                     <th>Price</th>
                                     <th>Quantity</th>
                                     <th>Total</th>
-                                    <th  style="text-align: center">Remove</th>
+                                    <th style="text-align: center">Remove</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 <c:forEach var="item" items="${cartItems}">
                                     <tr class="cart-item" data-price="${item.price}">
+                                            <%-- IMPORTANT: Use cartId as value --%>
                                         <td><input type="checkbox" class="item-checkbox" name="selectedItems" value="${item.cartId}" checked></td>
                                         <td class="product-name">
                                             <a href="room-details?roomId=${item.roomId}">${item.roomName}</a>
@@ -74,6 +82,7 @@
                                         <td>
                                             <div class="quantity-spinner">
                                                 <button type="button" class="btn-qty btn-dec">-</button>
+                                                    <%-- IMPORTANT: Name format matches controller expectation --%>
                                                 <input type="number" class="quantity-input" name="quantity_${item.cartId}" value="${item.quantity}" min="1">
                                                 <button type="button" class="btn-qty btn-inc">+</button>
                                             </div>
@@ -101,17 +110,17 @@
 
                             <div class="check-date" style="margin-top: 20px;">
                                 <label for="date-in" style="font-weight: 600;">Check In:</label>
-                                <input type="text" class="date-input form-control" name="checkInDate" id="date-in" required>
+                                <input type="text" class="date-input form-control" name="checkInDate" id="date-in" required autocomplete="off">
                                 <i class="icon_calendar" style="position: absolute; right: 20px; top: 40px; color: #dfa974;"></i>
                             </div>
                             <div class="check-date" style="margin-top: 15px;">
                                 <label for="date-out" style="font-weight: 600;">Check Out:</label>
-                                <input type="text" class="date-input form-control" name="checkOutDate" id="date-out" required>
+                                <input type="text" class="date-input form-control" name="checkOutDate" id="date-out" required autocomplete="off">
                                 <i class="icon_calendar" style="position: absolute; right: 20px; top: 40px; color: #dfa974;"></i>
                             </div>
                             <button type="submit" class="proceed-btn" style="width: 100%; border: none; padding: 15px;
-                            text-transform: uppercase; font-weight: 700; background-color: #dfa974; color: #ffffff;">
-                                SUBMIT PAYMENT
+                            text-transform: uppercase; font-weight: 700; background-color: #dfa974; color: #ffffff; margin-top: 20px;">
+                                PROCEED TO CHECKOUT
                             </button>
                         </div>
                     </div>
@@ -121,7 +130,6 @@
     </div>
 </section>
 
-<%-- Include Footer --%>
 <jsp:include page="/common/footer.jsp"/>
 
 <script src="${pageContext.request.contextPath}/js/jquery-3.3.1.min.js"></script>
@@ -164,7 +172,6 @@
             const row = target.closest('.cart-item');
             const checkbox = row.querySelector('.item-checkbox');
 
-            // Auto checkbox
             if (!checkbox.checked) {
                 checkbox.checked = true;
             }

@@ -43,19 +43,6 @@
     <!-- Main Content Section -->
     <section class="main-content">
         <div class="container-fluid">
-            <!-- Alert Messages -->
-            <c:if test="${not empty success}">
-                <div class="alert alert-success">
-                    <i class="fa fa-check-circle"></i> ${success}
-                </div>
-            </c:if>
-
-            <c:if test="${not empty error}">
-                <div class="alert alert-error">
-                    <i class="fa fa-exclamation-circle"></i> ${error}
-                </div>
-            </c:if>
-
             <!-- Search and Filter Section -->
             <div class="search-section">
                 <form action="${pageContext.request.contextPath}/receptionist/bills" method="get" class="search-form">
@@ -74,15 +61,22 @@
                 </form>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="action-buttons">
-                <a href="${pageContext.request.contextPath}/receptionist/bills?action=create" class="action-btn">
-                    <i class="fa fa-plus"></i> Create New Bill
-                </a>
-                <a href="${pageContext.request.contextPath}/receptionist/room-fees" class="action-btn secondary">
-                    <i class="fa fa-bed"></i> Room Fees
-                </a>
-            </div>
+            <!-- Alert Messages - Display above table -->
+            <c:if test="${not empty success}">
+                <div class="alert alert-success-pastel" style="background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <i class="fa fa-check-circle" style="margin-right: 10px; font-size: 18px; color: #28a745;"></i>
+                    <span style="flex: 1;">${success}</span>
+                    <button type="button" class="close-alert" onclick="this.parentElement.style.display='none'" style="background: none; border: none; font-size: 20px; color: #155724; cursor: pointer; margin-left: 10px; opacity: 0.5;">&times;</button>
+                </div>
+            </c:if>
+
+            <c:if test="${not empty error}">
+                <div class="alert alert-error" style="background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <i class="fa fa-exclamation-circle" style="margin-right: 10px; font-size: 18px; color: #dc3545;"></i>
+                    <span style="flex: 1;">${error}</span>
+                    <button type="button" class="close-alert" onclick="this.parentElement.style.display='none'" style="background: none; border: none; font-size: 20px; color: #721c24; cursor: pointer; margin-left: 10px; opacity: 0.5;">&times;</button>
+                </div>
+            </c:if>
 
             <!-- Bills Table -->
             <div class="bills-table">
@@ -148,11 +142,11 @@
                                         </td>
                                         <td>
                                             <div class="action-links">
-                                                <a href="${pageContext.request.contextPath}/receptionist/bills?action=detail&id=${bill.invoiceId}"
+                                                <a href="${pageContext.request.contextPath}/receptionist/bills?action=detailBill&id=${bill.invoiceId}"
                                                    class="action-link view">
                                                     <i class="fa fa-eye"></i> View
                                                 </a>
-                                                <a href="${pageContext.request.contextPath}/receptionist/bills?action=edit&id=${bill.invoiceId}"
+                                                <a href="${pageContext.request.contextPath}/receptionist/bills?action=editBill&id=${bill.invoiceId}"
                                                    class="action-link edit">
                                                     <i class="fa fa-edit"></i> Edit
                                                 </a>

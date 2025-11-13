@@ -24,7 +24,7 @@ public class VnPayConfig {
     public static final String VNP_PAY_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
     
     // ✅ URLs (Nhớ update NGROK mỗi lần restart)
-    private static final String NGROK_URL = "https://dudish-unnimble-lenora.ngrok-free.dev";
+    private static final String NGROK_URL = "https://kesha-nonacquiescing-dorinda.ngrok-free.dev";
     private static final String CONTEXT_PATH = "/HotelAManagement";
     public static final String VNP_IPN_URL = NGROK_URL + CONTEXT_PATH + "/ipnHandler";
     public static final String VNP_RETURN_URL = NGROK_URL + CONTEXT_PATH + "/paymentReturn";

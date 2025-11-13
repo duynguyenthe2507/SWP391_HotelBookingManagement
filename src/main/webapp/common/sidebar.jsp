@@ -133,6 +133,11 @@
             <i class="fa fa-file-text-o"></i> Bills
         </a>
 
+        <a href="${contextPath}/receptionist/revenue-report"
+           class="${currentPath == '/receptionist/revenue-report' ? 'active' : ''}">
+            <i class="fa fa-line-chart"></i> Revenue Report
+        </a>
+
         <a href="${contextPath}/receptionist/rooms"
            class="${currentPath == '/receptionist/rooms' ? 'active' : ''}">
             <i class="fa fa-list"></i> Room Edit

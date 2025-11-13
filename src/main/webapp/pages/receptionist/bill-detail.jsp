@@ -317,7 +317,7 @@
                                         <button type="submit" class="action-btn success">
                                             <i class="fa fa-save"></i> Save Changes
                                         </button>
-                                        <a href="${pageContext.request.contextPath}/receptionist/bills?action=detail&id=${billInfo.invoice.invoiceId}"
+                                        <a href="${pageContext.request.contextPath}/receptionist/bills?action=detailBill&id=${billInfo.invoice.invoiceId}"
                                            class="action-btn secondary">
                                             <i class="fa fa-times"></i> Cancel
                                         </a>
@@ -379,7 +379,7 @@
                         <a href="${pageContext.request.contextPath}/receptionist/bills" class="action-btn secondary">
                             <i class="fa fa-arrow-left"></i> Back to Bills
                         </a>
-                        <a href="${pageContext.request.contextPath}/receptionist/bills?action=edit&id=${billInfo.invoice.invoiceId}"
+                        <a href="${pageContext.request.contextPath}/receptionist/bills?action=editBill&id=${billInfo.invoice.invoiceId}"
                            class="action-btn primary">
                             <i class="fa fa-edit"></i> Edit Bill
                         </a>

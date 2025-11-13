@@ -136,9 +136,15 @@
                                     </td>
                                     <td>
                                         <a href="${pageContext.request.contextPath}/receptionist/booking-details?bookingId=${booking.bookingId}"
-                                           class="btn btn-sm btn-info" style="background-color: #dfa974; border-color: #dfa974; color: white;">
+                                           class="btn btn-sm btn-info" style="background-color: #dfa974; border-color: #dfa974; color: white; margin-right: 5px;">
                                             <i class="fa fa-eye"></i> Details
                                         </a>
+                                        <c:if test="${booking.status == 'confirmed' && !bookingsWithInvoice.contains(booking.bookingId)}">
+                                            <a href="${pageContext.request.contextPath}/receptionist/bills?action=createBill&bookingId=${booking.bookingId}"
+                                               class="btn btn-sm btn-success" style="background-color: #28a745; border-color: #28a745; color: white;">
+                                                <i class="fa fa-file-text"></i> Create Bill
+                                            </a>
+                                        </c:if>
                                     </td>
                                 </tr>
                             </c:forEach>
