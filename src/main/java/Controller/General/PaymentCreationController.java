@@ -64,7 +64,24 @@ public class PaymentCreationController extends HttpServlet {
         vnp_Params.put("vnp_OrderInfo", vnp_OrderInfo);
         vnp_Params.put("vnp_OrderType", orderType);
         vnp_Params.put("vnp_Locale", "vn");
-        vnp_Params.put("vnp_ReturnUrl", VnPayConfig.VNP_RETURN_URL);
+        String scheme = req.getScheme(); // http hoặc https
+        String serverName = req.getServerName(); // localhost hoặc ngrok...
+        int serverPort = req.getServerPort(); // 8080 hoặc 80/443
+        String contextPath = req.getContextPath(); // /hmbs
+
+        // Xây dựng URL trả về dựa trên nơi người dùng đang đứng
+        // Ví dụ: http://localhost:8080/hmbs/paymentReturn
+        String currentBaseUrl;
+
+        // Xử lý port (nếu là 80 hoặc 443 thì không cần thêm port vào URL)
+        if ((serverPort == 80) || (serverPort == 443)) {
+            currentBaseUrl = scheme + "://" + serverName + contextPath;
+        } else {
+            currentBaseUrl = scheme + "://" + serverName + ":" + serverPort + contextPath;
+        }
+
+        String returnUrl = currentBaseUrl + "/paymentReturn";
+        vnp_Params.put("vnp_ReturnUrl", returnUrl);
         vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
 
         Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
