@@ -29,102 +29,22 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/receptionist-bills.css" type="text/css">
 
     <style>
-        .room-thumbnail {
-            width: 100px;
-            height: 65px;
-            object-fit: cover;
-            border-radius: 6px;
-            border: 1px solid #eee;
-        }
-        .action-link.delete-btn {
-            background: none;
-            border: none;
-            padding: 0;
-            color: #dc3545;
-            cursor: pointer;
-            font-weight: 500;
-            font-family: "Cabin", sans-serif;
-            font-size: 14px;
-        }
-        .action-link.delete-btn:hover {
-            color: #a71d2a;
-        }
-        .side-panel {
-            position: fixed;
-            top: 0;
-            right: -600px;
-            width: 500px;
-            height: 100%;
-            background-color: #fff;
-            box-shadow: -4px 0 10px rgba(0,0,0,0.15);
-            z-index: 9999;
-            transition: right 0.4s ease;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
-        .side-panel.active {
-            right: 0;
-        }
-        .panel-header {
-            background-color: #dfa974;
-            color: white;
-            padding: 20px 25px;
-            font-size: 18px;
-            font-weight: 700;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-        }
-        .panel-close {
-            cursor: pointer;
-            font-size: 24px;
-            font-weight: 700;
-        }
-        .panel-body {
-            padding: 25px;
-            flex-grow: 1;
-            overflow-y: auto;
-        }
-        .panel-body .form-control {
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
-        .img-preview-tag {
-            max-width: 240px;
-            border-radius: 8px;
-            border: 1px solid #eee;
-        }
-        .panel-footer {
-            display: flex;
-            justify-content: space-between;
-            padding: 20px 25px;
-            border-top: 1px solid #eee;
-            background-color: #f8f8f8;
-            flex-shrink: 0;
-        }
-        .btn-cancel, .btn-save {
-            border: none;
-            border-radius: 6px;
-            padding: 10px 20px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        .btn-cancel {
-            background: #6c757d;
-            color: white;
-        }
-        .btn-cancel:hover {
-            background: #5a6268;
-        }
-        .btn-save {
-            background: #28a745;
-            color: white;
-        }
-        .btn-save:hover {
-            background: #218838;
-        }
+        .room-thumbnail { width: 100px; height: 65px; object-fit: cover; border-radius: 6px; border: 1px solid #eee; }
+        .action-link.delete-btn { background: none; border: none; padding: 0; color: #dc3545; cursor: pointer; font-weight: 500; font-family: "Cabin", sans-serif; font-size: 14px; }
+        .action-link.delete-btn:hover { color: #a71d2a; }
+        .side-panel { position: fixed; top: 0; right: -600px; width: 500px; height: 100%; background-color: #fff; box-shadow: -4px 0 10px rgba(0,0,0,0.15); z-index: 9999; transition: right 0.4s ease; overflow-y: auto; display: flex; flex-direction: column; }
+        .side-panel.active { right: 0; }
+        .panel-header { background-color: #dfa974; color: white; padding: 20px 25px; font-size: 18px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+        .panel-close { cursor: pointer; font-size: 24px; font-weight: 700; }
+        .panel-body { padding: 25px; flex-grow: 1; overflow-y: auto; }
+        .panel-body .form-control { border-radius: 8px; border: 1px solid #ccc; }
+        .img-preview-tag { max-width: 240px; border-radius: 8px; border: 1px solid #eee; }
+        .panel-footer { display: flex; justify-content: space-between; padding: 20px 25px; border-top: 1px solid #eee; background-color: #f8f8f8; flex-shrink: 0; }
+        .btn-cancel, .btn-save { border: none; border-radius: 6px; padding: 10px 20px; font-weight: 600; transition: all 0.3s ease; }
+        .btn-cancel { background: #6c757d; color: white; }
+        .btn-cancel:hover { background: #5a6268; }
+        .btn-save { background: #28a745; color: white; }
+        .btn-save:hover { background: #218838; }
     </style>
 </head>
 
@@ -186,11 +106,13 @@
                         </c:if>
                     </form>
                 </div>
+
                 <div class="action-buttons">
                     <button class="action-btn" onclick="openPanel('add')">
                         <i class="fa fa-plus"></i> Add New Room
                     </button>
                 </div>
+
                 <div class="bills-table">
                     <div class="table-header">
                         <h4><i class="fa fa-list"></i>Rooms List</h4>
@@ -225,7 +147,14 @@
                                         <td><div class="bill-id">${loop.count}</div></td>
                                         <td>
                                             <c:if test="${not empty r.imgUrl}">
-                                                <img src="${r.imgUrl}" alt="${r.name}" class="room-thumbnail">
+                                                <c:choose>
+                                                    <c:when test="${fn:startsWith(r.imgUrl, 'http://') || fn:startsWith(r.imgUrl, 'https://')}">
+                                                        <img src="${r.imgUrl}" alt="${r.name}" class="room-thumbnail">
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <img src="${pageContext.request.contextPath}/${r.imgUrl}" alt="${r.name}" class="room-thumbnail">
+                                                    </c:otherwise>
+                                                </c:choose>
                                             </c:if>
                                             <c:if test="${empty r.imgUrl}">
                                                 (No image)
@@ -313,7 +242,6 @@
                         </div>
                     </nav>
                 </c:if>
-
             </div>
         </section>
 
@@ -413,7 +341,6 @@
         form.reset();
         imgPreview.style.display = 'none';
         imgTag.src = "";
-
         if (mode === 'add') {
             panelTitle.innerText = "Add New Room";
             form.action = "${pageContext.request.contextPath}/receptionist/room/new";
@@ -436,21 +363,16 @@
             f_status.value = data.status;
             f_description.value = data.description;
             if (data.imgUrl && data.imgUrl !== "null" && data.imgUrl !== "") {
-                imgTag.src = data.imgUrl;
+                if (data.imgUrl.startsWith('http://') || data.imgUrl.startsWith('https://')) {
+                    imgTag.src = data.imgUrl;
+                } else {
+                    imgTag.src = '${pageContext.request.contextPath}/' + data.imgUrl;
+                }
                 imgPreview.style.display = 'block';
             }
         }
         panel.classList.add("active");
     }
-
-    // <div class="search-model">
-    //     <div class="h-100 d-flex align-items-center justify-content-center">
-    //         <div class="search-close-switch"><i class="icon_close"></i></div>
-    //         <form class="search-model-form">
-    //             <input type="text" id="search-input" placeholder="Search here....."/>
-    //         </form>
-    //     </div>
-    // </div>
 
     form.addEventListener('submit', function(e) {
         e.preventDefault();

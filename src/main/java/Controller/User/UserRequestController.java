@@ -20,12 +20,12 @@ import Models.Users;
 public class UserRequestController extends HttpServlet {
 
     private GuestRequestDao dao;
-    private BookingDao bookingDao;  // Thêm BookingDao để kiểm tra
+    private BookingDao bookingDao;
 
     @Override
     public void init() {
         dao = new GuestRequestDao();
-        bookingDao = new BookingDao();  // Khởi tạo BookingDao
+        bookingDao = new BookingDao(); // Khởi tạo DAO
     }
 
     private Integer currentUserId(HttpServletRequest req) {
@@ -47,35 +47,32 @@ public class UserRequestController extends HttpServlet {
         }
     }
 
-    /**
-     * Kiểm tra role và chuyển hướng phù hợp
-     * @return true nếu user có quyền truy cập (là customer), false nếu cần chuyển hướng
-     */
+    // Kiểm tra quyền & Redirect
     private boolean checkRoleAndRedirect(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Object userObj = req.getSession().getAttribute("user");
 
         if (userObj instanceof Users) {
             String role = ((Users) userObj).getRole();
 
-            // Nếu là receptionist -> chuyển sang ReplyGuestRequestController
+            // Nếu là Receptionist -> Chuyển trang quản lý
             if ("receptionist".equalsIgnoreCase(role)) {
                 resp.sendRedirect(req.getContextPath() + "/receptionist/requests");
                 return false;
             }
 
-            // Nếu là admin -> chuyển về trang admin
+            // Nếu là Admin -> Chuyển trang Admin
             if ("admin".equalsIgnoreCase(role)) {
                 resp.sendRedirect(req.getContextPath() + "/viewuser");
                 return false;
             }
 
-            // Nếu là customer -> cho phép truy cập
+            // Nếu là Customer -> OK
             if ("customer".equalsIgnoreCase(role)) {
                 return true;
             }
 
-            // Role không xác định
-            req.getSession().setAttribute("error", "Bạn không có quyền truy cập chức năng này");
+            // Role không hợp lệ
+            req.getSession().setAttribute("error", "You do not have permission to access this feature.");
             resp.sendRedirect(req.getContextPath() + "/");
             return false;
         }
@@ -94,12 +91,12 @@ public class UserRequestController extends HttpServlet {
             String queryString = req.getQueryString();
             String fullUrl = req.getRequestURI() + (queryString != null ? "?" + queryString : "");
             session.setAttribute("redirectUrl", fullUrl);
-            session.setAttribute("loginMessage", "Vui lòng đăng nhập để sử dụng chức năng này");
+            session.setAttribute("loginMessage", "Please login to use this feature.");
             resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
 
-        // Kiểm tra role và chuyển hướng nếu cần
+        // Kiểm tra quyền
         if (!checkRoleAndRedirect(req, resp)) {
             return;
         }
@@ -107,43 +104,42 @@ public class UserRequestController extends HttpServlet {
         try {
             switch (path) {
                 case "/user/requests":
-                    // Danh sách yêu cầu của chính user
+                    // Lấy danh sách request của user
                     List<GuestRequest> items = dao.findByUser(userId);
                     req.setAttribute("items", items);
                     req.getRequestDispatcher("/pages/user/my-requests.jsp").forward(req, resp);
                     break;
 
                 case "/user/requests/create":
-                    // Mở form tạo yêu cầu mới
+                    // Form tạo mới
                     String bookingIdParam = req.getParameter("bookingId");
 
                     if (bookingIdParam != null && !bookingIdParam.trim().isEmpty()) {
                         try {
                             int bookingId = Integer.parseInt(bookingIdParam);
 
-                            // KIỂM TRA QUAN TRỌNG: Booking có thuộc về user này không? =====
+                            // Check booking tồn tại
                             Booking booking = bookingDao.getBookingById(bookingId);
 
                             if (booking == null) {
-                                req.getSession().setAttribute("flash_error",
-                                        "Không tìm thấy booking #" + bookingId);
+                                req.getSession().setAttribute("flash_error", "Booking not found #" + bookingId);
                                 resp.sendRedirect(req.getContextPath() + "/user/requests");
                                 return;
                             }
-                            // Kiểm tra booking có thuộc về user hiện tại không
+                            // Check booking chính chủ
                             if (booking.getUserId() == null || booking.getUserId() != userId) {
                                 req.getSession().setAttribute("flash_error",
-                                        "Bạn không có quyền tạo yêu cầu cho booking #" + bookingId +
-                                                ". Booking này không thuộc về bạn.");
+                                        "You are not authorized to create a request for Booking #" + bookingId +
+                                                ". This booking does not belong to you.");
                                 resp.sendRedirect(req.getContextPath() + "/user/requests");
                                 return;
                             }
-                            // Nếu hợp lệ, set thông tin booking để hiển thị
+
                             req.setAttribute("booking", booking);
                             req.setAttribute("bookingId", bookingId);
 
                         } catch (NumberFormatException e) {
-                            req.setAttribute("error", "Booking ID không hợp lệ");
+                            req.setAttribute("error", "Invalid Booking ID.");
                         }
                     }
 
@@ -162,7 +158,8 @@ public class UserRequestController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String path = req.getServletPath();
         Integer userId = currentUserId(req);
-        // Kiểm tra role và chuyển hướng nếu cần
+
+        // Kiểm tra quyền
         if (!checkRoleAndRedirect(req, resp)) {
             return;
         }
@@ -170,53 +167,51 @@ public class UserRequestController extends HttpServlet {
         try {
             switch (path) {
                 case "/user/requests/create": {
-                    // Parse bookingId an toàn
+                    // Parse dữ liệu
                     String bookingIdStr = req.getParameter("bookingId");
                     int bookingId = parseIntSafe(bookingIdStr, 0);
 
                     String requestType = req.getParameter("requestType");
                     String content = req.getParameter("content");
 
-                    // Validation 1: Booking ID phải hợp lệ
+                    // Validate Booking ID
                     if (bookingId <= 0) {
-                        req.setAttribute("error", "Booking ID không hợp lệ");
+                        req.setAttribute("error", "Invalid Booking ID.");
                         req.setAttribute("bookingId", bookingIdStr);
                         req.getRequestDispatcher("/pages/user/request-create.jsp").forward(req, resp);
                         return;
                     }
 
-                    // KIỂM TRA QUAN TRỌNG NHẤT: Booking có thuộc về user này không?
+                    // Check booking tồn tại & chính chủ
                     Booking booking = bookingDao.getBookingById(bookingId);
 
                     if (booking == null) {
-                        req.getSession().setAttribute("flash_error",
-                                "Không tìm thấy booking #" + bookingId);
+                        req.getSession().setAttribute("flash_error", "Booking not found #" + bookingId);
                         resp.sendRedirect(req.getContextPath() + "/user/requests");
                         return;
                     }
 
-                    // Kiểm tra userId của booking có khớp với userId đang đăng nhập không
                     if (booking.getUserId() == null || !booking.getUserId().equals(userId)) {
                         req.getSession().setAttribute("flash_error",
-                                "⛔ BẠN KHÔNG CÓ QUYỀN tạo yêu cầu cho Booking #" + bookingId +
-                                        "! Booking này thuộc về user #" + booking.getUserId() +
-                                        ", không phải user #" + userId);
+                                "⛔ PERMISSION DENIED for Booking #" + bookingId +
+                                        "! This booking belongs to user #" + booking.getUserId() +
+                                        ", not user #" + userId);
                         resp.sendRedirect(req.getContextPath() + "/user/requests");
                         return;
                     }
 
-                    // Validation 2: Request Type
+                    // Validate Request Type
                     if (requestType == null || requestType.trim().isEmpty()) {
-                        req.setAttribute("error", "Vui lòng chọn loại yêu cầu");
+                        req.setAttribute("error", "Please select a request type.");
                         req.setAttribute("bookingId", bookingId);
                         req.setAttribute("booking", booking);
                         req.getRequestDispatcher("/pages/user/request-create.jsp").forward(req, resp);
                         return;
                     }
 
-                    // Validation 3: Content
+                    // Validate Content
                     if (content == null || content.trim().isEmpty()) {
-                        req.setAttribute("error", "Vui lòng nhập nội dung yêu cầu");
+                        req.setAttribute("error", "Please enter request content.");
                         req.setAttribute("bookingId", bookingId);
                         req.setAttribute("requestType", requestType);
                         req.setAttribute("booking", booking);
@@ -224,7 +219,7 @@ public class UserRequestController extends HttpServlet {
                         return;
                     }
 
-                    // Tạo request mới (ĐÃ ĐƯỢC VALIDATE)
+                    // Tạo request mới
                     GuestRequest gr = new GuestRequest();
                     gr.setBookingId(bookingId);
                     gr.setUserId(userId);
@@ -235,10 +230,10 @@ public class UserRequestController extends HttpServlet {
 
                     if (newId != null) {
                         req.getSession().setAttribute("flash_success",
-                                "✅ Đã gửi yêu cầu #" + newId + " thành công cho Booking #" + bookingId + "!");
+                                "✅ Request #" + newId + " sent successfully for Booking #" + bookingId + "!");
                     } else {
                         req.getSession().setAttribute("flash_success",
-                                "✅ Đã gửi yêu cầu thành công!");
+                                "✅ Request sent successfully!");
                     }
 
                     resp.sendRedirect(req.getContextPath() + "/user/requests");
@@ -250,7 +245,7 @@ public class UserRequestController extends HttpServlet {
                     int requestId = parseIntSafe(requestIdStr, 0);
 
                     if (requestId <= 0) {
-                        req.getSession().setAttribute("flash_error", "Request ID không hợp lệ");
+                        req.getSession().setAttribute("flash_error", "Invalid Request ID.");
                         resp.sendRedirect(req.getContextPath() + "/user/requests");
                         return;
                     }
@@ -258,10 +253,10 @@ public class UserRequestController extends HttpServlet {
                     boolean ok = dao.cancel(requestId, userId);
 
                     if (ok) {
-                        req.getSession().setAttribute("flash_success", "Đã hủy yêu cầu #" + requestId);
+                        req.getSession().setAttribute("flash_success", "Request #" + requestId + " cancelled.");
                     } else {
                         req.getSession().setAttribute("flash_error",
-                                "Không thể hủy (không thuộc bạn hoặc không còn ở trạng thái pending)");
+                                "Cannot cancel (Not yours or not pending).");
                     }
 
                     resp.sendRedirect(req.getContextPath() + "/user/requests");
@@ -273,7 +268,7 @@ public class UserRequestController extends HttpServlet {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            req.getSession().setAttribute("flash_error", "Có lỗi xảy ra: " + e.getMessage());
+            req.getSession().setAttribute("flash_error", "Error occurred: " + e.getMessage());
             resp.sendRedirect(req.getContextPath() + "/user/requests");
         }
     }

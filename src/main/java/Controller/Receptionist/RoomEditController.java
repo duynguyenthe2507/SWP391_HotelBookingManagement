@@ -45,7 +45,7 @@ public class RoomEditController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         final String uri = req.getRequestURI();
 
-        // 1) List view cho /receptionist/rooms
+        // 1) Danh sách phòng
         if (uri.endsWith("/receptionist/rooms")) {
             String search = req.getParameter("search");
             String categoryIdParam = req.getParameter("categoryId");
@@ -53,16 +53,16 @@ public class RoomEditController extends HttpServlet {
             Integer categoryId = null;
             try { if (categoryIdParam != null && !categoryIdParam.isBlank()) categoryId = Integer.parseInt(categoryIdParam); } catch (NumberFormatException ignored) {}
             List<Room> rooms = roomDao.findAllRooms(
-                    search,       // searchKeyword
-                    categoryId,   // categoryId
-                    null,         // minPrice
-                    null,         // maxPrice
-                    null,         // minCapacity
-                    null,         // checkInDate
-                    null,         // checkOutDate
-                    status,       // statusFilter
-                    1,            // pageNumber (trang 1)
-                    999           // pageSize (lấy 999 phòng, vì đây là trang admin)
+                    search,       // Từ khóa tìm kiếm
+                    categoryId,   // ID danh mục
+                    null,         // Giá tối thiểu
+                    null,         // Giá tối đa
+                    null,         // Sức chứa tối thiểu
+                    null,         // Ngày nhận phòng
+                    null,         // Ngày trả phòng
+                    status,       // Trạng thái
+                    1,            // Trang 1
+                    999           // Lấy tất cả (999)
             );
             List<Category> categories = roomDao.getAllCategories();
             boolean receptionist = isReceptionist(req);
@@ -75,7 +75,7 @@ public class RoomEditController extends HttpServlet {
             req.getRequestDispatcher("/pages/receptionist/rooms.jsp").forward(req, resp);
             return;
         }
-        // 2) Edit/New forms (GET fill data)
+        // 2) Form thêm/sửa (GET để điền dữ liệu)
         if (uri.endsWith("/receptionist/room/new") || uri.endsWith("/receptionist/room/edit")) {
             if (!isReceptionist(req)) { resp.sendError(HttpServletResponse.SC_FORBIDDEN); return; }
             List<Category> categories = roomDao.getAllCategories();
@@ -91,7 +91,7 @@ public class RoomEditController extends HttpServlet {
             return;
         }
 
-        // 3) Delete
+        // 3) Xóa phòng
         if (uri.endsWith("/receptionist/room/delete")) {
             if (!isReceptionist(req)) { resp.sendError(HttpServletResponse.SC_FORBIDDEN); return; }
 
@@ -132,7 +132,7 @@ public class RoomEditController extends HttpServlet {
         r.setStatus(status);
         r.setDescription(description);
 
-        // image upload (optional)
+        // Upload ảnh (tùy chọn)
         Part imagePart = null;
         try { imagePart = req.getPart("image"); } catch (Exception ignored) {}
         if (imagePart != null && imagePart.getSize() > 0) {

@@ -25,19 +25,22 @@ import java.util.List;
 public class GuidelineController extends HttpServlet {
     private GuidelineDao guidelineDao;
     private CloudinaryService cloudinaryService;
+
     @Override
     public void init() {
         guidelineDao = new GuidelineDao();
         cloudinaryService = new CloudinaryService();
     }
+
     @Override
     public void destroy() {
-        // Đóng kết nối CSDL khi servlet bị hủy
+        // Đóng kết nối DB
         if (guidelineDao != null) {
             guidelineDao.closeConnection();
         }
         super.destroy();
     }
+
     private boolean isReceptionist(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("loggedInUser") == null) {
@@ -64,37 +67,39 @@ public class GuidelineController extends HttpServlet {
                 HttpSession session = request.getSession();
                 Users user = (Users) session.getAttribute("loggedInUser");
 
-                // Logic phân chia vai trò
+                // Phân quyền
                 if (user != null && "receptionist".equalsIgnoreCase(user.getRole())) {
-                    // === BẮT ĐẦU PHẦN SỬA ĐỔI ===
-                    // Receptionist: Tải trang quản lý VÀ xử lý filter
+                    // Lễ tân: Quản lý & Lọc
 
-                    // 1. Lấy tham số filter từ JSP
+                    // 1. Lấy tham số lọc
                     String search = request.getParameter("search");
-                    String statusParam = request.getParameter("status"); // Sẽ là "Active", "Inactive", hoặc ""
-                    // 2. Chuyển đổi status string ("Active") thành boolean (true) cho DAO
+                    String statusParam = request.getParameter("status");
+
+                    // 2. Chuyển đổi status sang boolean
                     Boolean statusValue = null;
                     if ("Active".equalsIgnoreCase(statusParam)) {
                         statusValue = true;
                     } else if ("Inactive".equalsIgnoreCase(statusParam)) {
                         statusValue = false;
                     }
-                    // 3. Gọi DAO với các tham số lọc
+
+                    // 3. Gọi DAO tìm kiếm
                     List<Guideline> guidelines = guidelineDao.findGuidelines(search, statusValue);
-                    // 4. Gửi danh sách và các giá trị filter về lại JSP
+
+                    // 4. Gửi dữ liệu về JSP
                     request.setAttribute("guidelines", guidelines);
-                    request.setAttribute("search", search);       // Để giữ giá trị trong ô search
-                    request.setAttribute("status", statusParam);  // Để giữ giá trị trong dropdown
+                    request.setAttribute("search", search);
+                    request.setAttribute("status", statusParam);
                     request.getRequestDispatcher("/pages/receptionist/guidelines-edit.jsp").forward(request, response);
-                    // === KẾT THÚC PHẦN SỬA ĐỔI ===
 
                 } else {
-                    // User/Guest: Tải trang xem công khai (chỉ lấy ACTIVE)
+                    // Khách: Xem công khai (Chỉ Active)
                     List<Guideline> activeGuidelines = guidelineDao.getAllActive();
                     request.setAttribute("guidelines", activeGuidelines);
                     request.getRequestDispatcher("/pages/user/guidelines.jsp").forward(request, response);
                 }
                 break;
+
             case "/guidelines/delete":
                 if (!isReceptionist(request)) {
                     response.sendRedirect(contextPath + "/login");
@@ -118,7 +123,7 @@ public class GuidelineController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getServletPath();
-        // Chỉ xử lý /guidelines/save
+        // Chỉ xử lý save
         if (!"/guidelines/save".equals(action)) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
@@ -130,48 +135,53 @@ public class GuidelineController extends HttpServlet {
 
         HttpSession session = request.getSession();
         try {
-            // 1. Lấy các tham số từ form
+            // 1. Lấy tham số form
             String idStr = request.getParameter("guidelineId");
             String serviceIdStr = request.getParameter("serviceId");
             String title = request.getParameter("title");
             String content = request.getParameter("content");
             String statusStr = request.getParameter("status");
             String existingImageUrl = request.getParameter("existingImageUrl");
-            // 2. Xử lý file upload
+
+            // 2. Xử lý upload ảnh
             Part filePart = request.getPart("image");
             String newImageUrl = cloudinaryService.uploadFile(filePart);
-            // 3. Quyết định URL ảnh cuối cùng
-            String finalImageUrl = existingImageUrl; // Mặc định là ảnh cũ
+
+            // 3. Chọn URL ảnh
+            String finalImageUrl = existingImageUrl; // Mặc định ảnh cũ
             if (newImageUrl != null) {
-                // Nếu có ảnh mới được upload, dùng ảnh mới
+                // Dùng ảnh mới nếu có upload
                 finalImageUrl = newImageUrl;
             }
-            // 4. Tạo đối tượng Guideline
+
+            // 4. Tạo Object
             Guideline g = new Guideline();
             g.setTitle(title);
             g.setContent(content);
             g.setStatus("Active".equals(statusStr));
             g.setImageUrl(finalImageUrl);
-            // Xử lý serviceId (có thể là null)
+
+            // Xử lý serviceId
             if (serviceIdStr != null && !serviceIdStr.trim().isEmpty()) {
                 g.setServiceId(Integer.parseInt(serviceIdStr));
             } else {
                 g.setServiceId(null);
             }
-            // 5. Quyết định Thêm mới (Insert) hay Cập nhật (Update)
+
+            // 5. Insert hoặc Update
             if (idStr == null || idStr.trim().isEmpty()) {
-                // === TẠO MỚI ===
+                // Tạo mới
                 guidelineDao.insert(g);
             } else {
-                // === CẬP NHẬT ===
+                // Cập nhật
                 g.setGuidelineId(Integer.parseInt(idStr));
                 guidelineDao.update(g);
             }
             response.sendRedirect(request.getContextPath() + "/guidelines?success=true");
         } catch (Exception e) {
             e.printStackTrace();
-            session.setAttribute("error", "Lưu thất bại: " + e.getMessage());
-            // Tải lại danh sách và chuyển về trang edit
+            session.setAttribute("error", "Save failed: " + e.getMessage());
+            // Reload list và về trang edit
             request.setAttribute("guidelines", guidelineDao.getAll());
             request.getRequestDispatcher("/guidelines-edit.jsp").forward(request, response);
         }
