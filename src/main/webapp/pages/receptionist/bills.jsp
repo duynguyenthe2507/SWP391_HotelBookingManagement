@@ -142,11 +142,11 @@
                                         </td>
                                         <td>
                                             <div class="action-links">
-                                                <a href="${pageContext.request.contextPath}/receptionist/bills?action=detail&id=${bill.invoiceId}"
+                                                <a href="${pageContext.request.contextPath}/receptionist/bills?action=detailBill&id=${bill.invoiceId}"
                                                    class="action-link view">
                                                     <i class="fa fa-eye"></i> View
                                                 </a>
-                                                <a href="${pageContext.request.contextPath}/receptionist/bills?action=edit&id=${bill.invoiceId}"
+                                                <a href="${pageContext.request.contextPath}/receptionist/bills?action=editBill&id=${bill.invoiceId}"
                                                    class="action-link edit">
                                                     <i class="fa fa-edit"></i> Edit
                                                 </a>
